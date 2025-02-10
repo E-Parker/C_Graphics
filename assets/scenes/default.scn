@@ -1,0 +1,17 @@
+// This file is a scene file.
+systm hres is 1280
+systm vres is 720
+
+scene name TestScene
+cam 0 func is noClip
+cam 0 fov 90
+cam 0 speed 500.0
+cam 0 active
+cam 0 position is 0.0, -1.0, 0.0
+cam 0 scale is 1.0, 1.0, 1.0
+cam 0 rotation is 0.0, 0.0, 0.0
+
+tex DEFAULT is from "./assets/defaultAssets/missingTexture.png"
+tex DEFAULT is type RGBA
+tex DEFAULT is 
+tex DEFAULT isnt mip
