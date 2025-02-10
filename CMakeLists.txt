@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.6)
 # Set the project name
 project(OpenGL_Build)
 
-# Specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+# Specify the C standard
+set(CMAKE_C_STANDARD 14)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Add the cmake directory to the module path
@@ -22,14 +22,12 @@ include_directories("${CMAKE_SOURCE_DIR}/inc")
 
 # Gather all cpp and c files from the source directory
 file(GLOB_RECURSE SOURCES 
-	"${CMAKE_SOURCE_DIR}/src/*.cpp"
 	"${CMAKE_SOURCE_DIR}/src/*.c"
 )
 
 # Gather the header files
 file(GLOB_RECURSE HEADERS
  	"${CMAKE_SOURCE_DIR}/inc/*.h"
- 	"${CMAKE_SOURCE_DIR}/src/*.h"
 )
 
 if(WIN32)

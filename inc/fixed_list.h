@@ -1,9 +1,9 @@
 #pragma once
 
-struct FixedList {
+typedef struct FixedList {
     /* Simple fixed capacity container, similar to a linked-list in functionality. */
     
-    //                      Offset  | Allignment
+    //                      Offset  | Alignment
     unsigned int capacity;  //  0   | 4
     unsigned int itemSize;  //  4   | 4
     char* head;             //  8   | 8

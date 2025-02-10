@@ -63,14 +63,13 @@ typedef GLfloat mat4[16];
 typedef GLfloat mat4x2[8];
 typedef GLfloat mat4x3[12];
 
-const mat4 MAT4_IDENTITY = {
-    1.0f, 0.0f, 0.0f, 0.0f, 
-    0.0f, 1.0f, 0.0f, 0.0f, 
-    0.0f, 0.0f, 1.0f, 0.0f, 
-    0.0f, 0.0f, 0.0f, 1.0f, 
-}
+const mat4 MAT4_IDENTITY = {\
+    1.0f, 0.0f, 0.0f, 0.0f,\
+    0.0f, 1.0f, 0.0f, 0.0f,\
+    0.0f, 0.0f, 1.0f, 0.0f,\
+    0.0f, 0.0f, 0.0f, 1.0f,\
+};
 
-/*
 const vec2 V2_RIGHT = {1.0f, 0.0f};
 const vec2 V2_UP = { 0.0f, 1.0f };
 const vec2 V2_ZERO = { 0.0f, 0.0f };
@@ -85,46 +84,44 @@ const vec3 V3_BACKWARD = { 0.0f, 0.0f, -1.0f };
 
 const vec3 V3_ZERO = { 0.0f, 0.0f, 0.0f };
 const vec3 V3_ONE = { 1.0f, 1.0f, 1.0f };
-*/
 
-const GLuint size_from_gl_type(const GLenum type);
-void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data);
+#define vec2_def_Add(a, b) { a[0] + b[0], a[1] + b[1] }
+#define vec3_def_Add(a, b) { a[0] + b[0], a[1] + b[1], a[2] + b[2] }
+#define vec4_def_Add(a, b) { a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3] }
 
-#define vec2Mul(a, b) { a[0] * b[0], a[1] * b[1] }
-#define vec3Mul(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2] }
-#define vec4Mul(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] }
+#define vec2_def_Mul(a, b) { a[0] * b[0], a[1] * b[1] }
+#define vec3_def_Mul(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2] }
+#define vec4_def_Mul(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] }
 
-#define vec2Scale(v, scale) { v[0] * scale, v[1] * scale }
-#define vec3Scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale }
-#define vec4Scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale, v[3] * scale }
+#define vec2_def_Scale(v, scale) { v[0] * scale, v[1] * scale }
+#define vec3_def_Scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale }
+#define vec4_def_Scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale, v[3] * scale }
 
 #define vec2Equal(a, b) (a[0] == b[0] && a[1] == b[1])
 #define vec3Equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2])
 #define vec4Equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
 #define quaternionEqual(a, b) vec4Equal(a, b)
 
+GLuint size_from_gl_type(const GLenum type);
+void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data);
+
+void vec2_Add(vec2 a, vec2 b, vec2 out);
+void vec3_Add(vec3 a, vec3 b, vec3 out);
+void vec4_Add(vec4 a, vec4 b, vec4 out);
+
+void vec2_Sub(vec2 a, vec2 b, vec2 out);
+void vec3_Sub(vec3 a, vec3 b, vec3 out);
+void vec4_Sub(vec4 a, vec4 b, vec4 out);
+
+void vec2_Mul(vec2 a, vec2 b, vec2 out);
+void vec3_Mul(vec3 a, vec3 b, vec3 out);
+void vec4_Mul(vec4 a, vec4 b, vec4 out);
+
 double vec2magnitude(const vec2 v);
 double vec3magnitude(const vec3 v);
 double vec4magnitude(const vec4 v);
 
-#define mat4copy(to, from) do{\
-to[0] = from[0];\
-to[1] = from[1];\
-to[2] = from[2];\
-to[3] = from[3];\
-to[4] = from[4];\
-to[5] = from[5];\
-to[6] = from[6];\
-to[7] = from[7];\
-to[8] = from[8];\
-to[9] = from[9];\
-to[10] = from[10];\
-to[11] = from[11];\
-to[12] = from[12];\
-to[13] = from[13];\
-to[14] = from[14];\
-to[15] = from[15];\
-}while(0)\
+#define mat4copy(from, to) do{ memcpy((void*)from, (void*)to, sizeof(mat4)); }while(0)
 
 void quaternion_mat4(const quaternion q, mat4 out);
 

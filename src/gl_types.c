@@ -72,6 +72,64 @@ void upload_from_gl_type(const GLint location, const GLenum type, const GLint el
     }
 }
 
+
+void vec2_Add(vec2 a, vec2 b, vec2 out) {
+    out[0] = a[0] + b[0];
+    out[1] = a[1] + b[1];
+}
+
+void vec3_Add(vec3 a, vec3 b, vec3 out) {
+    out[0] = a[0] + b[0];
+    out[1] = a[1] + b[1];
+    out[2] = a[2] + b[2];
+}
+
+void vec4_Add(vec4 a, vec4 b, vec4 out) {
+    out[0] = a[0] + b[0];
+    out[1] = a[1] + b[1];
+    out[2] = a[2] + b[2];
+    out[3] = a[3] + b[3];
+}
+
+
+void vec2_Sub(vec2 a, vec2 b, vec2 out) {
+    out[0] = a[0] - b[0];
+    out[1] = a[1] - b[1];
+}
+
+void vec3_Sub(vec3 a, vec3 b, vec3 out) {
+    out[0] = a[0] - b[0];
+    out[1] = a[1] - b[1];
+    out[2] = a[2] - b[2];
+}
+
+void vec4_Sub(vec4 a, vec4 b, vec4 out) {
+    out[0] = a[0] - b[0];
+    out[1] = a[1] - b[1];
+    out[2] = a[2] - b[2];
+    out[3] = a[3] - b[3];
+}
+
+
+void vec2_Mul(vec2 a, vec2 b, vec2 out) {
+    out[0] = a[0] * b[0];
+    out[1] = a[1] * b[1];
+}
+
+void vec3_Mul(vec3 a, vec3 b, vec3 out) {
+    out[0] = a[0] * b[0];
+    out[1] = a[1] * b[1];
+    out[2] = a[2] * b[2];
+}
+
+void vec4_Mul(vec4 a, vec4 b, vec4 out) {
+    out[0] = a[0] * b[0];
+    out[1] = a[1] * b[1];
+    out[2] = a[2] * b[2];
+    out[3] = a[3] * b[3];
+}
+
+
 double vec2magnitude(const vec2 v) {
     double result = v[0] + v[1];
     return (result != 0.0) ? sqrt(result) : result;
@@ -104,7 +162,7 @@ void quaternion_mat4(const quaternion q, mat4 out) {
                     2.0f * (ac + bd), 2.0f * (bc - ad), 1.0f - 2.0f * (a2 + b2), 0.0f,
                     0.0f, 0.0f, 0.0f, 1.0f };
 
-    mat4copy(out, result);
+    mat4copy(result, out);
 }
 
 void mat4mul(const mat4 a, const mat4 b, mat4 out) {
@@ -129,7 +187,7 @@ void mat4mul(const mat4 a, const mat4 b, mat4 out) {
         a[12] * b[3] + a[13] * b[7] + a[14] * b[11] + a[15] * b[15],
     };
 
-    mat4copy(out, result);
+    mat4copy(result, out);
 
 }
 

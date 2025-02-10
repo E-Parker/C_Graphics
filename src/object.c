@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include "asset.h"
+#include "object.h"
 #include "gl_types.h"
 #include "fixed_list.h"
 
@@ -20,12 +20,12 @@ void internal_Object_Initialize(void* ptr, void* parent, const uint8_t type) {
     Object_SetAlias(object, "EmptyObject");
     memcpy(object->Transform, MAT4_IDENTITY, 64);   
     
-    object->Data.Flags = 0;
-    object->Data.Type = type;
+    object->Flags = 0;
+    object->Type = type;
 
     object->Parent = (Object*)parent;
-    object->Children = FixedList_create(Object*, maximumChildren);
-    object->Destory = internal_Object_Destroy; 
+    object->Children = FixedList_create(Object*, 16);
+    object->Destroy = internal_Object_DestroyDefault;
 }
 
 
@@ -40,7 +40,7 @@ void internal_Object_Deinitialize(void* ptr) {
     // For every child of this object, call its destroy function.
     for(uint64_t i = 0; i < FixedList_size(object->Children); i++) {
         Object* childObject = (Object*)FixedList_pop_front(object->Children);
-        childObject->Destory(childObject);
+        childObject->Destroy(childObject);
     }
     
     // Now that all children objects have been destroyed, it is safe to free this object.
@@ -79,9 +79,9 @@ void Object_SetAlias(void* gameObject, const char* string) {
 }
 
 
-Matrix GetGlobalTransform(void* gameObject) {
+void Object_GetGlobalTransform(void* gameObject, mat4 out) {
     /* This function returns the global transform of any asset. */ 
-    mat4 result = *Object_GetTransform(gameObject);
+    mat4* result = Object_GetTransform(gameObject);
     void* parentObject = NULL;
     
     for(uint16_t i = 0; i < 512; i++) {
@@ -91,10 +91,12 @@ Matrix GetGlobalTransform(void* gameObject) {
             return result;
         }
 
-        mat4mul(result, *Object_GetTransform(parentObject), result);
+        mat4mul(result, Object_GetTransform(parentObject), result);
          
     }
-    return result;
+
+    mat4copy(out, result);
+
 }
 
 

@@ -1,14 +1,16 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <stdint.h>
+
+#include "fixed_list.h"
 #include "gl_types.h"
 
 // Standard Buffer Size is the maximum size any alias can be.
-#define STANDARD_BUFFER_SIZE = 20
-#define OBJECT_DEFAULT_MAX_CHILDREN = 512
+#define STANDARD_BUFFER_SIZE 20
 
 #define Object_isType(object, Type) ((*((Object*)object)->Type) == Type)
-#define Object_GetTransform(object) ((Matrix*)(Object*)object->Transform)
+#define Object_GetTransform(object) ((GLfloat*)(((Object*)object)->Transform))
 #define Object_GetParent(object) (((Object*)object)->Parent)
 
 // Define a function signature used to create and destroy objects.
@@ -25,7 +27,7 @@ typedef struct Object {
     // The union is used because by default, the c preprocessor will try to pack things into 4 bytes. 
     //
     //                                  Offset  | Size in bytes    
-    #define OBJECT_BODY()\
+    #define OBJECT_BODY\
     char Alias[STANDARD_BUFFER_SIZE]{'\0'}; /* 0    |   20      <--+-- These will be the same for any object.                       */  \
     FixedList* References;                  /* 20   |   8       <-/ <- Array of other objects that reference this one.              */  \
     union Data {uint8_t Type;               /* 28   |   x           _- Only use the lower 24 bits, the first 8 represent type.      */  \
@@ -36,7 +38,7 @@ typedef struct Object {
     Object_TickFunction Tick;               /* 112  |   8       <----- function to update the object.                               */  \
     Object_DestroyFunction Destroy;         /* 120  |   8       <----- function to destroy the object.                              */  \
 
-    OBJECT_BODY();
+    OBJECT_BODY;
 
 } Object;
 
@@ -46,19 +48,19 @@ const uint8_t Object_TypeSkinnedMesh   = 0x03;
 const uint8_t Object_TypeText          = 0x04;
 const uint8_t Object_TypeCamera        = 0x05;
 
-#define OBJECT_CREATE_BODY(object, parent, type, size) internal_Object_initialize((void*)object, (void*)parent, type, size);
+#define OBJECT_CREATE_BODY(object, parent, type) internal_Object_initialize((void*)object, (void*)parent, type);
 #define OBJECT_DESTROY_BODY(object) internal_Object_deinitialize((Object*)object);
 
-void internal_Object_Initialize(void* ptr, const uint8_t type);
+void internal_Object_Initialize(void* ptr, void* parent, const uint8_t type);
 void internal_Object_Deinitialize(void* ptr);
 
 void internal_Object_DestroyDefault(void* ptr);
-void internal_Object_TickDefaut(void* ptr, const double deltaTime);
+void internal_Object_TickDefault(void* ptr, const double deltaTime);
 
 void Object_SetAlias(void* gameObject, const char* string);
-void Object_GetGlobalTransform(void* gameObject, mat4 outVal); 
+void Object_GetGlobalTransform(void* gameObject, mat4 out); 
 
-void Object_flags_compare(uint32_t data, uint32_t mask);
-void Object_flags_set(uint32_t data, uint32_t mask);
-void Object_flags_unset(uint32_t data, uint32_t mask);
+int Object_flag_compare(uint32_t data, uint32_t mask);
+void Object_flag_set(uint32_t data, uint32_t mask);
+void Object_flag_unset(uint32_t data, uint32_t mask);
 

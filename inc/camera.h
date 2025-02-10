@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "gl_types.h"
 
 // Forward Declarations:
 struct Camera;
@@ -25,6 +26,6 @@ typedef struct Camera {
 
 
 Object_Camera_create(Camera* camera) {
-    OBJECT_CREATE_BODY()
+    OBJECT_CREATE_BODY(camera, NULL, Object_TypeCamera, )
 
 }
