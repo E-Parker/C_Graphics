@@ -1,31 +1,30 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "object.h"
-#include "gl_types.h"
-
-// Forward Declarations:
-struct Camera;
-
-void DefaultCameraInit(Camera* camera);
-void NoClipCameraUpdate(Camera* camera, const double deltaTime, const double aspectRatio);
-
+#include "gl_math.h"
 
 typedef struct Camera {
-    OBJECT_BODY;
-    Quaternion Rotation;
-    Matrix ViewMatrix;
+    OBJECT_BODY();
+    mat4 ViewMatrix;
     
-    float MoveSpeed = 1.0f;
-    float Acceleration = 0.4f;
-    float Fov = 60.0f;
-    float NearClip = 0.001f;
-    float FarClip = 1024.0f;
-    float Sensitivity = 1.0f;
+    float MoveSpeed;
+    float Acceleration;
+    float Fov;
+    float NearClip;
+    float FarClip;
+    float Sensitivity;
 
 } Camera;
 
+void Camera_NoClip_Update(Camera* camera, const double deltaTime);
 
-Object_Camera_create(Camera* camera) {
-    OBJECT_CREATE_BODY(camera, NULL, Object_TypeCamera, )
+Camera* Object_Camera_create();
 
+
+#ifdef __cplusplus
 }
+#endif

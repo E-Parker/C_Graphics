@@ -1,14 +1,18 @@
 #pragma once
 
-#include <stdbool.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "bool.h"
 
 // Forward Declarations:
-struct GLFWwindow;
+typedef struct GLFWwindow;
+typedef struct FixedList;
 
 typedef void (*Function_Void_NoParam)();
 
-
-struct InstanceInformation {
+typedef struct InstanceInformation {
     /* Struct to hold data relevant to the state of the instance. */ 
     
     // Frame delta:
@@ -22,13 +26,13 @@ struct InstanceInformation {
     double aspectRatio;
     
     // Cursor Data:
-    bool captureCursor = false;
-    double xPosDelta = 0.0;
-    double yPosDelta = 0.0;
-    double xPos = 0.0;
-    double yPos = 0.0;
-    double lastxPos = 0.0;
-    double lastyPos = 0.0;
+    bool captureCursor;
+    double xPosDelta;
+    double yPosDelta;
+    double xPos;
+    double yPos;
+    double lastxPos;
+    double lastyPos;
 
     // Graphics Data:
     float AmbientColor[3];
@@ -38,14 +42,14 @@ struct InstanceInformation {
     int* gKeysCurr;
 
     // List of Termination Functions:
-    Function_Void_NoParam* TerminationFunctions;
-};
+    FixedList* TerminationFunctions;
+} InstanceInformation;
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
 GLFWwindow* Initialize(const int width, const int height, const char* tittle);
 
 void glUtilTerminate();
-void glUtilAddTerminationFunction(TerminateFunction function);
+void glUtilAddTerminationFunction(Function_Void_NoParam function);
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void mouse_callback(GLFWwindow* window, double xPos, double yPos);
@@ -67,3 +71,7 @@ int WindowWidth();
 bool IsKeyPressed(int key);
 bool IsKeyDown(int key);
 bool IsKeyUp(int key);
+
+#ifdef __cplusplus
+}
+#endif

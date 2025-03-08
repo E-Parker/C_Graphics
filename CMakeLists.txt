@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.6)
 project(OpenGL_Build)
 
 # Specify the C standard
-set(CMAKE_C_STANDARD 14)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(OpenGL_GL_PREFERENCE GLVND)
 

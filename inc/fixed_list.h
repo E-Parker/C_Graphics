@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct FixedList {
     /* Simple fixed capacity container, similar to a linked-list in functionality. */
     
@@ -28,8 +32,9 @@ void FixedList_deinitialize(FixedList* list);
 #define internal_FixedList_getPrevPtr(List,ptr) ptr = ((char*)ptr == FixedList_start(char, List))? FixedList_end(List) - List->itemSize : (char*)ptr - List->itemSize
 #define internal_FixedList_validate(List) assert(List->head != List->tail)
 
-// Custom for loop iterator. will be a little faster than FixedList_at().
-#define FixedList_iterator(T, list) (T* it = (T*)list->head; (void*)it != (void*)list->tail; internal_FixedList_getprev_ptr(list, (void*)it);) 
+// Creates T* variable, it, which is the current item in the loop. This will be a little faster than using FixedList_at().
+// If you are using function pointers, dereference it before calling.
+#define FixedList_iterator(T, list) (T* it = (T*)list->head; (char*)it != (char*)list->tail; internal_FixedList_getprev_ptr(list, (char*)it)) 
 
 #define FixedList_push_front(List, Data) internal_FixedList_push_front(List, (void*)Data)
 #define FixedList_push_back(List, Data) internal_FixedList_push_back(List, (void*)Data)
@@ -43,3 +48,7 @@ void FixedList_realloc(FixedList* list, const unsigned int Capacity);
 void FixedList_remove_at(FixedList* list, const unsigned int index);
 void* FixedList_at(const FixedList* list, const unsigned int index);
 
+
+#ifdef __cplusplus
+}
+#endif

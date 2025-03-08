@@ -2,10 +2,10 @@
 #include <GLFW/glfw3.h>
 
 #include <assert.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "glUtilities.h"
+#include "fixed_list.h"
+#include "gl_utilities.h"
 
 static InstanceInformation* internalInstanceInfo;
 
@@ -41,8 +41,8 @@ void GetCursorPositionDelta(double* xPos, double* yPos) {
     *yPos = internalInstanceInfo->yPosDelta / (double)internalInstanceInfo->WindowHeight;
 
     // This is not great but I cant think of a better way to make sure the delta get set back to zero once after camera gets updated. 
-    internalInstanceInfo.xPosDelta = 0.0;
-    internalInstanceInfo.yPosDelta = 0.0;
+    internalInstanceInfo->xPosDelta = 0.0;
+    internalInstanceInfo->yPosDelta = 0.0;
 }
 
 void GetCursorPosition(double* xPos, double* yPos) {
@@ -83,35 +83,37 @@ GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     glEnable(GL_DEPTH_TEST);
     glFrontFace(GL_CCW);
 
-
     // Initialize InstanceInfo:
-    internalInstanceInfo = (InstanceInformation*)malloc(sizeof(InstanceInformation));
+    internalInstanceInfo = (InstanceInformation*)calloc(1, sizeof(InstanceInformation));
     assert(internalInstanceInfo);
 
-    internalInstanceInfo->gKeysCurr = (unsinged int*)calloc(GLFW_KEY_LAST,sizeof(unsigned int));
-    internalInstanceInfo->gKeysPrev = (unsinged int*)calloc(GLFW_KEY_LAST,sizeof(unsigned int));
+    internalInstanceInfo->gKeysCurr = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
+    internalInstanceInfo->gKeysPrev = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
     assert(internalInstanceInfo->gKeysCurr);
-    assert(iinternalInstanceInfo->gKeysPrev);
+    assert(internalInstanceInfo->gKeysPrev);
     
+    internalInstanceInfo->WindowHeight = height;
+    internalInstanceInfo->WindowWidth = width;
     
+    internalInstanceInfo->TerminationFunctions = FixedList_create(Function_Void_NoParam, 16);
 
     return window;
 }
 
 void glUtilTerminate() {
     /* This function executes each function in the list of termination functions. */
-    if (internalInstanceInfo.TerminationFunctions.empty()) {
+    if (FixedList_isEmpty(internalInstanceInfo->TerminationFunctions)) {
         return;
     }
 
     // For each termination function added to the list, call it.
-    for (TerminateFunction function : internalInstanceInfo.TerminationFunctions) {
-        function();
+    for FixedList_iterator(Function_Void_NoParam, internalInstanceInfo->TerminationFunctions) {
+        (*it)();
     }
 }
 
-void glUtilAddTerminationFunction(TerminateFunction function) {
-    internalInstanceInfo.TerminationFunctions.push_back(function);
+void glUtilAddTerminationFunction(Function_Void_NoParam function) {
+    FixedList_push_back(internalInstanceInfo->TerminationFunctions, function);
 }
 
 
