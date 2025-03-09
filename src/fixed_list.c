@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "fixed_list.h"
 
@@ -7,7 +9,7 @@ FixedList* internal_FixedList_create(const unsigned int ItemSize, const unsigned
     FixedList* newList = (FixedList*)malloc(sizeof(FixedList));
     assert(newList);
 
-    FixeList_initialize(newList, ItemSize, Capacity);
+    FixedList_initialize(newList, ItemSize, Capacity);
     return newList;
 }
 
@@ -157,8 +159,8 @@ void FixedList_remove_at(FixedList* list, const unsigned int index) {
     void* nextIndex = NULL;
     
     for(unsigned int i = index; i < list->capacity - 1; i++) {
-        nextIndex = FixedList_at(list, i + 1);          // Get the address of the next item.
-        memcpy(currentIndex, nextIndex, list->itemSize);// Using memcpy here since we don't know the type stored, only how many bytes it is. 
+        nextIndex = FixedList_at(list, i + 1);              // Get the address of the next item.
+        memcpy(currentIndex, nextIndex, list->itemSize);    // Using memcpy here since we don't know the type stored, only how many bytes it is. 
         currentIndex = nextIndex;
     }
 }
@@ -171,14 +173,14 @@ void internal_FixedList_push_front(FixedList* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(FixedList_size(list) < list->capacity) {
-        internal_FixedList_GetNextPtr(list, list->head);
+        internal_FixedList_getNextPtr(list, list->head);
         memcpy(list->head, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
-    FixedList_Realloc(list, list->capacity + (list->capacity >> 1));
-    internal_FixedList_GetNextPtr(list, list->head);
+    FixedList_realloc(list, list->capacity + (list->capacity >> 1));
+    internal_FixedList_getNextPtr(list, list->head);
     memcpy(list->head, data, list->itemSize);
 }
 
@@ -190,34 +192,38 @@ void internal_FixedList_push_back(FixedList* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(FixedList_size(list) < list->capacity) { 
-        internal_FixedList_GetPrevPtr(list, list->tail);
+        internal_FixedList_getPrevPtr(list, list->tail);
         memcpy(list->tail, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
-    FixedList_Realloc(list, list->capacity + (list->capacity >> 1));
-    internal_FixedList_GetPrevPtr(list, list->tail);
+    FixedList_realloc(list, list->capacity + (list->capacity >> 1));
+    internal_FixedList_getPrevPtr(list, list->tail);
     memcpy(list->tail, data, list->itemSize);    
 }
 
 
 void* FixedList_pop_front(FixedList* list) {
-    
-    if (list->head == list->tail) return;   // Leave early if there is no data.
+    // Returns next item from the front of the list. 
+    // If this is a pointer type, you must now free it.
+    //
+    if (list->head == list->tail) return NULL;   // Leave early if there is no data.
 
     void* data = (void*)list->head;
-    internal_FixedList_GetPrevPtr(list, list->head);
+    internal_FixedList_getPrevPtr(list, list->head);
     return data;
 }
 
 
 void* FixedList_pop_back(FixedList* list) {
-    
-    if (list->head == list->tail) return;   // Leave early if there is no data.
+    // Returns next item from the back of the list. 
+    // If this is a pointer type, you must now free it.
+    //
+    if (list->head == list->tail) return NULL;   // Leave early if there is no data.
 
     void* data = (void*)list->tail;
-    internal_FixedList_GetNextPtr(list, list->tail);
+    internal_FixedList_getNextPtr(list, list->tail);
     return data;
 }
 

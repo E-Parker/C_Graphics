@@ -22,7 +22,7 @@ extern "C" {
 #define GL_SHADER_SOURCE_SIZE 0xffff 
 #endif
 
-typedef struct ShaderDescriptor {
+typedef struct {
     // Struct to store shader reference, type, and file path. 
     // if path is empty, the shader is null. 
     GLuint shader;
@@ -37,8 +37,8 @@ typedef struct ShaderDescriptor {
 char* internal_ReadShaderSource(const char* path);
 //char* internal_LoadShaderIncludes(const char* path);
 
-void internal_CompileShader(GLuint* shader, GLint type, const char* path);
-GLuint internal_Shader_CompileProgram(ShaderDescriptor* args);
+void internal_CompileShader(GLuint* shader, GLint type, char* path);
+GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args);
 
 
 #ifdef __cplusplus

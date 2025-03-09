@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-typedef struct FixedList {
+typedef struct {
     /* Simple fixed capacity container, similar to a linked-list in functionality. */
     
     //                      Offset  | Alignment
@@ -28,7 +28,7 @@ void FixedList_deinitialize(FixedList* list);
 #define FixedList_isEmpty(List) (List->head == List->tail)
 #define FixedList_start(T, List) ((T*)List->data)
 #define FixedList_end(List) ((FixedList_start(char, List)) + (List->capacity * List->itemSize))
-#define internal_FixedList_getNextPtr(List,ptr) ptr = ((char*)ptr == FixedList_end(List) - List->itemSize)? FixedList_start(List) : (char*)ptr + List->itemSize
+#define internal_FixedList_getNextPtr(List,ptr) ptr = ((char*)ptr == FixedList_end(List) - List->itemSize)? FixedList_start(char, List) : (char*)ptr + List->itemSize
 #define internal_FixedList_getPrevPtr(List,ptr) ptr = ((char*)ptr == FixedList_start(char, List))? FixedList_end(List) - List->itemSize : (char*)ptr - List->itemSize
 #define internal_FixedList_validate(List) assert(List->head != List->tail)
 

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -10,7 +11,7 @@
 
 char* internal_ReadShaderSource(const char* path) {
     
-    FILE* file = fopen(path, 'r');
+    FILE* file = fopen(path, "r");
     
     // Return null if the file could not be found.
     if (!file) {
@@ -43,20 +44,21 @@ char* internal_ReadShaderSource(const char* path) {
     
     // Copy the buffer to a smaller c-string just big enough to fit it.
     uint64_t bufferSize = (uint64_t)(bufferEnd - buffer) + 1; 
-    char* src = (char*)maloc(bufferSize);
+    char* src = (char*)malloc(bufferSize);
     memcpy(buffer, src, bufferSize);
     free(buffer);
     return src;
 }
 
 
-void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
+void internal_CompileShader(GLuint* shader, GLint type, char* path) {
     // Takes an empty shader*, type of shader, and path to source file. 
     // Reads the path to a c-string and compiles the shader for OpenGL.
     // 
     
     char* src = internal_ReadShaderSource(path);
-    
+    const GLchar* gl_src = (GLchar*)src;
+
     if(!src) {
         *shader = GL_NONE;
         return;
@@ -64,7 +66,7 @@ void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
     
     // Compile text as a shader
     *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &src, NULL);
+    glShaderSource(*shader, 1, &gl_src, NULL);
     glCompileShader(*shader);
     free(src);
     // Don't check for errors. Shader_CompileProgram handles displaying errors.
@@ -79,7 +81,7 @@ GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
                                         
     // Iterate until end of args. Compile and attach each shader.
     for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
-        internal_CompileShader(&it->shader, it->type, &it->path);
+        internal_CompileShader((GLuint*)&it->shader, it->type, (char*)&it->path);
         glAttachShader(program, it->shader);
     }
 
@@ -111,7 +113,7 @@ GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
     
     // Debug the individual shaders.
     for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
-        glGetShaderiv(&it->shader, GL_COMPILE_STATUS, &s_success);
+        glGetShaderiv(it->shader, GL_COMPILE_STATUS, &s_success);
         
         // If this shader passed, free it and continue loop early.
         if(s_success) {
@@ -121,7 +123,7 @@ GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
         
         // Otherwise, clear the log, get the log from OpenGL and write it to the output. 
         memset(&log, '\0', GL_ERROR_LOG_SIZE);
-        glGetShaderInfoLog(&it->shader, GL_ERROR_LOG_SIZE, &dummyLength, log);
+        glGetShaderInfoLog(it->shader, GL_ERROR_LOG_SIZE, &dummyLength, log);
         
         // Display the shader type and error log for the shader which failed.
         switch (it->type) {
