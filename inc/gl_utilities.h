@@ -1,18 +1,17 @@
 #pragma once
 
+#include "list.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "bool.h"
 
-// Forward Declarations:
-typedef struct GLFWwindow;
-typedef struct FixedList;
-
+typedef struct List;
 typedef void (*Function_Void_NoParam)();
 
-typedef struct InstanceInformation {
+typedef struct {
     /* Struct to hold data relevant to the state of the instance. */ 
     
     // Frame delta:
@@ -42,11 +41,12 @@ typedef struct InstanceInformation {
     int* gKeysCurr;
 
     // List of Termination Functions:
-    FixedList* TerminationFunctions;
+    List* TerminationFunctions;
+
 } InstanceInformation;
 
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
-GLFWwindow* Initialize(const int width, const int height, const char* tittle);
+struct GLFWwindow* Initialize(const int width, const int height, const char* tittle);
 
 void glUtilTerminate();
 void glUtilAddTerminationFunction(Function_Void_NoParam function);

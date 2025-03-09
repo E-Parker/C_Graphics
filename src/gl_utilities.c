@@ -1,10 +1,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <assert.h>
+#include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
-#include "fixed_list.h"
+#include "list.h"
 #include "gl_utilities.h"
 
 static InstanceInformation* internalInstanceInfo;
@@ -95,25 +96,25 @@ GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     internalInstanceInfo->WindowHeight = height;
     internalInstanceInfo->WindowWidth = width;
     
-    internalInstanceInfo->TerminationFunctions = FixedList_create(Function_Void_NoParam, 16);
+    internalInstanceInfo->TerminationFunctions = List_create(Function_Void_NoParam, 16);
 
     return window;
 }
 
 void glUtilTerminate() {
     /* This function executes each function in the list of termination functions. */
-    if (FixedList_isEmpty(internalInstanceInfo->TerminationFunctions)) {
+    if (List_isEmpty((List*)internalInstanceInfo->TerminationFunctions)) {
         return;
     }
 
     // For each termination function added to the list, call it.
-    for FixedList_iterator(Function_Void_NoParam, internalInstanceInfo->TerminationFunctions) {
+    for List_iterator(Function_Void_NoParam, internalInstanceInfo->TerminationFunctions) {
         (*it)();
     }
 }
 
 void glUtilAddTerminationFunction(Function_Void_NoParam function) {
-    FixedList_push_back(internalInstanceInfo->TerminationFunctions, function);
+    List_push_back(internalInstanceInfo->TerminationFunctions, function);
 }
 
 

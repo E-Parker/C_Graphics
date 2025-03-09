@@ -28,7 +28,7 @@ extern "C" {
 #define vecZ(T, vecAdress) (((T*)vecAdress)[2])
 #define vecW(T, vecAdress) (((T*)vecAdress)[3])
 
-#define USING_MEMCPY
+//#define USING_MEMCPY
 
 #ifdef USING_MEMCPY
 #define mat4_copy(from, to) memcpy((void*)from, (void*)to, sizeof(mat4))
