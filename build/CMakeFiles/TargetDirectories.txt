@@ -1,3 +1,0 @@
-D:/GitHub/C_Graphics/build/CMakeFiles/OpenGL_Build.dir
-D:/GitHub/C_Graphics/build/CMakeFiles/ALL_BUILD.dir
-D:/GitHub/C_Graphics/build/CMakeFiles/ZERO_CHECK.dir
