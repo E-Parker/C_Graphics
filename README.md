@@ -26,9 +26,9 @@ This is so that when you go to type the name of the struct,
 intilisense will also show all the functions that are acociated with it.
 
 ### Example:
-
->StructureName_do_something()
-
+```
+StructureName_do_something()
+```
 when defining a function to set default values of a struct, use the "initialize" postfix. 
 Always define another function to deinitialize as well to keep things consistant.
 Structures with this function defined must always be initialized before use, 
@@ -40,10 +40,10 @@ and can just be freed.
 This rule also applies to systems which have static, global scope variables.
 
 ### Example:
-
->StructureName_initialize()
->StructureName_deinitialize()
-
+```
+StructureName_initialize()
+StructureName_deinitialize()
+```
 when defining a function to alocate or otherwise create a struct which is intended to be 
 stand-alone (not created on the stack), use the postfix "create", and "destroy".
 
