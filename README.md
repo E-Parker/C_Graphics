@@ -76,20 +76,20 @@ the memory in a hex editor to see exactly when a struct has been dealocated.
 #ifdef __cplusplus
 extern "C" {
 #endif
-```
-#### core system includes that are needed for declarations.
-```
+
+// core system includes that are needed for declarations.
+
 #include <glad/glad.h>
 #include <...>
-```
-#### User defined includes. 
-```
+
+// User defined includes. 
+
 #include "list.h"
 #include "object.h"
 #include "..."
-```
-#### End of file:
-```
+
+// End of file:
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -109,16 +109,16 @@ extern "C" {
 ```
 #include <glad/glad.h>
 #include <...>
-```
-#### Other system includes that are needed, in order of importance.
-```
+
+// Other system includes that are needed, in order of importance.
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <...>
-```
-#### User defined includes. 
-```
+
+// User defined includes. 
+
 #include "list.h"
 #include "object.h"
 #include "..."
