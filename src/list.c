@@ -78,12 +78,12 @@ void List_realloc(List* list, const unsigned int Capacity) {
     // if the head is behind the tail, list is split in two:
     if(list->head < list->tail) {
         // Copy first half.
-        unsigned int bytesToCopyFromTail = List_end(char, list) - list->tail;
+        unsigned int bytesToCopyFromTail = internal_List_end(char, list) - list->tail;
         memcpy(list->tail, newData, bytesToCopyFromTail);
 
         // Copy the second half.
-        unsigned int bytesToCopyFromHead = list->head - List_start(char, list);
-        memcpy(List_start(char, list), newData + bytesToCopyFromTail, bytesToCopyFromHead);
+        unsigned int bytesToCopyFromHead = list->head - internal_List_start(char, list);
+        memcpy(internal_List_start(char, list), newData + bytesToCopyFromTail, bytesToCopyFromHead);
     }
     // list is continuous, and so only one memcpy is needed:
     else {
@@ -131,7 +131,7 @@ void* List_at(const List* list, const unsigned int index) {
     // Add the offset to the data pointer,
     dataPointer += index * list->itemSize;
     
-    if(dataPointer < List_end(char, list)) {
+    if(dataPointer < internal_List_end(char, list)) {
         return dataPointer;
     };
 

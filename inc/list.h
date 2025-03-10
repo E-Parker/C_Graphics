@@ -26,10 +26,10 @@ void List_deinitialize(List* list);
 //
 
 #define List_isEmpty(List) (List->head == List->tail)
-#define List_start(T, List) ((T*)List->data)
-#define List_end(T, List) (T*)((List_start(char, List)) + (List->capacity * List->itemSize))
-#define internal_List_getNextPtr(T, List, ptr) ptr = (T*)(((char*)ptr == List_end(char, List) - List->itemSize)? List_start(char, List) : (char*)ptr + List->itemSize)
-#define internal_List_getPrevPtr(T, List, ptr) ptr = (T*)(((char*)ptr == List_start(char, List))? List_end(char, List) - List->itemSize : (char*)ptr - List->itemSize)
+#define internal_List_start(T, List) ((T*)List->data)
+#define internal_List_end(T, List) (T*)((internal_List_start(char, List)) + (List->capacity * List->itemSize))
+#define internal_List_getNextPtr(T, List, ptr) ptr = (T*)(((char*)ptr == internal_List_end(char, List) - List->itemSize)? internal_List_start(char, List) : (char*)ptr + List->itemSize)
+#define internal_List_getPrevPtr(T, List, ptr) ptr = (T*)(((char*)ptr == internal_List_start(char, List))? internal_List_end(char, List) - List->itemSize : (char*)ptr - List->itemSize)
 #define internal_List_validate(List) assert(List->head != List->tail)
 
 // Creates T* variable, it, which is the current item in the loop. This will be a little faster than using List_at().
