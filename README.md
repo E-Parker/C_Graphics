@@ -62,7 +62,15 @@ the memory in a hex editor to see exactly when a struct has been dealocated.
 ### Header Files:
 
 
-#### Start of file:
+- Should be treated as a single monolithic interface between one isolated block of code and the rest of the program.
+    - Acceptions can be made for minimal definitions which only declare structures or other typedefs. 
+- Aoid using header includes as they massivly slow down compile times, and can cause dependancy issues.
+- Multiple Headers can have their definitions in one C file.
+    - Use this as an organisational tool, if two systems linked to eachother.
+
+### Example:
+
+> #### Start of file:
 > \#pragma once
 > 
 > \#ifdef \_\_cplusplus
@@ -72,32 +80,25 @@ the memory in a hex editor to see exactly when a struct has been dealocated.
 > \#include \<glad/glad.h\>
 > \#include \<...\>
 >
-#### Other system includes that are needed, in order of importance.
+> #### Other system includes that are needed, in order of importance.
 > \#include \<stdlib.h\>
 > \#include \<string.h\>
 > \#include \<stdio.h\>
 > \#include \<...\>
 >
-#### User defined includes. 
+> #### User defined includes. 
 > \#include "list.h"
 > \#include "object.h"
 > \#include "..."
 >
 > ...
 >
-#### End of file:
+> #### End of file:
 > \#ifdef \_\_cplusplus
 > extern "C" {
 > \#endif
 >
 >
-
-
-- Should be treated as a single monolithic interface between one isolated block of code and the rest of the program.
-    - Acceptions can be made for minimal definitions which only declare structures or other typedefs. 
-- Aoid using header includes as they massivly slow down compile times, and can cause dependancy issues.
-- Multiple Headers can have their definitions in one C file.
-    - Use this as an organisational tool, if two systems linked to eachother.
 
 ### C Files:
 
