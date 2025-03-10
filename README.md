@@ -76,13 +76,42 @@ the memory in a hex editor to see exactly when a struct has been dealocated.
 #ifdef __cplusplus
 extern "C" {
 #endif
+```
+#### core system includes that are needed for declarations.
+```
+#include <glad/glad.h>
+#include <...>
+```
+#### User defined includes. 
+```
+#include "list.h"
+#include "object.h"
+#include "..."
+```
+#### End of file:
+```
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+
+```
+
+### C Files:
+
+- Can contain the definitions of multiple header files, Use this sparingly.
+- Always give function definitions two blank lines of space.
+- Function definition order should roughly follow the header file.
+- Use "scary bracing".
+
+### Example:
+#### Start of file:
+```
 #include <glad/glad.h>
 #include <...>
 ```
 #### Other system includes that are needed, in order of importance.
 ```
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -90,23 +119,9 @@ extern "C" {
 ```
 #### User defined includes. 
 ```
-
 #include "list.h"
 #include "object.h"
 #include "..."
-
-
 ```
-#### End of file:
-```
-
-\#ifdef \_\_cplusplus
-extern "C" {
-\#endif
-
-
-```
-
-### C Files:
 
 
