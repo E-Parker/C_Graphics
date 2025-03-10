@@ -52,16 +52,13 @@ void List_destroy(List** list) {
 
 void List_realloc(List* list, const unsigned int Capacity) {
     // Reallocates the data section of the list.
-    //
+    // This function cannot shrink a list. 
     //
     
     unsigned int oldSize = List_size(list);
 
     if(Capacity < oldSize) {
-#ifdef DEBUG
         // tried to resize a list to a list that cannot fit the old list.
-        assert(0);
-#endif
         return;
     }
 
@@ -81,7 +78,7 @@ void List_realloc(List* list, const unsigned int Capacity) {
     // if the head is behind the tail, list is split in two:
     if(list->head < list->tail) {
         // Copy first half.
-        unsigned int bytesToCopyFromTail = List_end(list) - list->tail;
+        unsigned int bytesToCopyFromTail = List_end(char, list) - list->tail;
         memcpy(list->tail, newData, bytesToCopyFromTail);
 
         // Copy the second half.
@@ -134,7 +131,7 @@ void* List_at(const List* list, const unsigned int index) {
     // Add the offset to the data pointer,
     dataPointer += index * list->itemSize;
     
-    if(dataPointer < List_end(list)) {
+    if(dataPointer < List_end(char, list)) {
         return dataPointer;
     };
 
@@ -173,14 +170,14 @@ void internal_List_push_front(List* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(List_size(list) < list->capacity) {
-        internal_List_getNextPtr(list, list->head);
+        internal_List_getNextPtr(char, list, list->head);
         memcpy(list->head, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
     List_realloc(list, list->capacity + (list->capacity >> 1));
-    internal_List_getNextPtr(list, list->head);
+    internal_List_getNextPtr(char, list, list->head);
     memcpy(list->head, data, list->itemSize);
 }
 
@@ -192,14 +189,14 @@ void internal_List_push_back(List* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(List_size(list) < list->capacity) { 
-        internal_List_getPrevPtr(list, list->tail);
+        internal_List_getPrevPtr(char, list, list->tail);
         memcpy(list->tail, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
     List_realloc(list, list->capacity + (list->capacity >> 1));
-    internal_List_getPrevPtr(list, list->tail);
+    internal_List_getPrevPtr(char, list, list->tail);
     memcpy(list->tail, data, list->itemSize);    
 }
 
@@ -211,7 +208,7 @@ void* List_pop_front(List* list) {
     if (list->head == list->tail) return NULL;   // Leave early if there is no data.
 
     void* data = (void*)list->head;
-    internal_List_getPrevPtr(list, list->head);
+    internal_List_getPrevPtr(char, list, list->head);
     return data;
 }
 
@@ -223,7 +220,7 @@ void* List_pop_back(List* list) {
     if (list->head == list->tail) return NULL;   // Leave early if there is no data.
 
     void* data = (void*)list->tail;
-    internal_List_getNextPtr(list, list->tail);
+    internal_List_getNextPtr(char, list, list->tail);
     return data;
 }
 

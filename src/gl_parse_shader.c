@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "bool.h"
 #include "gl_parse_shader.h"
 #include "cStringUtilities.h"
 
@@ -72,13 +73,55 @@ void internal_CompileShader(GLuint* shader, GLint type, char* path) {
     // Don't check for errors. Shader_CompileProgram handles displaying errors.
 }
 
+bool Shader_CompileProgramValidate(ShaderDescriptor* args) {
+    // Step through args untill the max descriptors is hit, or untill the end of the list is found.
+    
+    for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
+        if((args[i]).path[0] == '\0') {
+            return true;  
+        }
+    }
+    
+    // Create a log that is big enough to hold the longest possible file path for all descriptors. 
+    char log[(GL_SHADER_MAX_DESCRIPTORS * (GL_SHADER_PATH_SIZE + 1)) + 1];
+    
+    for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
+        strcat(log, (args[i]).path);
+        strcat(log, "\n");
+    }
+    
+    printf("\n======================= START OF LOG =======================\n\
+            Shader compile error: A ShaderDiscriptor list was too large or malformed!\n\
+            The args provided were:\n%s\
+            \n======================== END OF LOG ========================\n\
+            ", log);
+    return false;
+}
+
+
+GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
+    // Expects an array of arguments, adds the null terminator depending on argsCount.
+    
+    // Check that 
+    if(argsCount <= 0) return GL_NONE;
+    if(argsCount > GL_SHADER_MAX_DESCRIPTORS) argsCount = GL_SHADER_MAX_DESCRIPTORS; 
+    
+    ShaderDescriptor* TerminatedArgs = (ShaderDescriptor*)calloc(argsCount + 1, sizeof(ShaderDescriptor));
+    memcpy(args, TerminatedArgs, argsCount);
+
+    return internal_Shader_CompileProgram(TerminatedArgs);
+}
+
 
 GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
-    // Takes array of arguments 
+    // Expects an array of arguments with a null terminated end. 
     
+    // Validate args:
+    if(!Shader_CompileProgramValidate((ShaderDescriptor*)args)) return GL_NONE;
+
     // Set up a new shader program and compile it.
     GLuint program = glCreateProgram(); // Create a new empty program.
-                                        
+
     // Iterate until end of args. Compile and attach each shader.
     for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
         internal_CompileShader((GLuint*)&it->shader, it->type, (char*)&it->path);

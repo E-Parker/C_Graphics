@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -8,48 +9,84 @@
 #include "list.h"
 #include "gl_utilities.h"
 
-static InstanceInformation* internalInstanceInfo;
+
+typedef struct {
+    /* Struct to hold data for relevant to the state of the program. Updated every frame. */ 
+    
+    // Frame delta:
+    double time;
+    double lastTime;
+    double deltaTime;
+
+    // Window Data:
+    int WindowWidth;
+    int WindowHeight;
+    double aspectRatio;
+    
+    // Cursor Data:
+    bool captureCursor;
+    double xPosDelta;
+    double yPosDelta;
+    double xPos;
+    double yPos;
+    double lastxPos;
+    double lastyPos;
+
+    // Graphics Data:
+    float AmbientColor[3];
+    
+    // Internal lists:
+    int* gKeysPrev;
+    int* gKeysCurr;
+
+    // List of Termination Functions:
+    List* TerminationFunctions;
+
+} FrameData;
+
+
+static FrameData* internal_FrameData;
 
 double Time() {
-    return internalInstanceInfo->time;
+    return internal_FrameData->time;
 }
 
 double DeltaTime() {
-    return internalInstanceInfo->deltaTime;
+    return internal_FrameData->deltaTime;
 }
 
 double AspectRatio() {
-    return internalInstanceInfo->aspectRatio;
+    return internal_FrameData->aspectRatio;
 }
 
 int WindowHeight() {
-    return internalInstanceInfo->WindowHeight;
+    return internal_FrameData->WindowHeight;
 }
 
 int WindowWidth() {
-    return internalInstanceInfo->WindowWidth;
+    return internal_FrameData->WindowWidth;
 }
 
 void SetCaptureCursor(const bool captureCursor) {
     // Globally accessible function to tell GKFW what the cursor settings should be.
     // if captureCursor is set, the xPos and yPos from GetCursorPosition will act like a delta.
-    internalInstanceInfo->captureCursor = captureCursor;
+    internal_FrameData->captureCursor = captureCursor;
 }
 
 void GetCursorPositionDelta(double* xPos, double* yPos) {
     // Globally accessible function to get the cursor position.
-    *xPos = internalInstanceInfo->xPosDelta / (double)internalInstanceInfo->WindowHeight;
-    *yPos = internalInstanceInfo->yPosDelta / (double)internalInstanceInfo->WindowHeight;
+    *xPos = internal_FrameData->xPosDelta / (double)internal_FrameData->WindowHeight;
+    *yPos = internal_FrameData->yPosDelta / (double)internal_FrameData->WindowHeight;
 
     // This is not great but I cant think of a better way to make sure the delta get set back to zero once after camera gets updated. 
-    internalInstanceInfo->xPosDelta = 0.0;
-    internalInstanceInfo->yPosDelta = 0.0;
+    internal_FrameData->xPosDelta = 0.0;
+    internal_FrameData->yPosDelta = 0.0;
 }
 
 void GetCursorPosition(double* xPos, double* yPos) {
     // Globally accessible function to get the cursor position.
-    *xPos = internalInstanceInfo->xPos / (double)internalInstanceInfo->WindowHeight;
-    *yPos = internalInstanceInfo->yPos / (double)internalInstanceInfo->WindowHeight;
+    *xPos = internal_FrameData->xPos / (double)internal_FrameData->WindowHeight;
+    *yPos = internal_FrameData->yPos / (double)internal_FrameData->WindowHeight;
 }
 
 GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
@@ -85,57 +122,57 @@ GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     glFrontFace(GL_CCW);
 
     // Initialize InstanceInfo:
-    internalInstanceInfo = (InstanceInformation*)calloc(1, sizeof(InstanceInformation));
-    assert(internalInstanceInfo);
+    internal_FrameData = (FrameData*)calloc(1, sizeof(FrameData));
+    assert(internal_FrameData);
 
-    internalInstanceInfo->gKeysCurr = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
-    internalInstanceInfo->gKeysPrev = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
-    assert(internalInstanceInfo->gKeysCurr);
-    assert(internalInstanceInfo->gKeysPrev);
+    internal_FrameData->gKeysCurr = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
+    internal_FrameData->gKeysPrev = (unsigned int*)calloc(GLFW_KEY_LAST, sizeof(unsigned int));
+    assert(internal_FrameData->gKeysCurr);
+    assert(internal_FrameData->gKeysPrev);
     
-    internalInstanceInfo->WindowHeight = height;
-    internalInstanceInfo->WindowWidth = width;
+    internal_FrameData->WindowHeight = height;
+    internal_FrameData->WindowWidth = width;
     
-    internalInstanceInfo->TerminationFunctions = List_create(Function_Void_NoParam, 16);
+    internal_FrameData->TerminationFunctions = List_create(Function_Void_NoParam, 16);
 
     return window;
 }
 
 void glUtilTerminate() {
     /* This function executes each function in the list of termination functions. */
-    if (List_isEmpty((List*)internalInstanceInfo->TerminationFunctions)) {
+    if (List_isEmpty((List*)internal_FrameData->TerminationFunctions)) {
         return;
     }
 
     // For each termination function added to the list, call it.
-    for List_iterator(Function_Void_NoParam, internalInstanceInfo->TerminationFunctions) {
+    for List_iterator(Function_Void_NoParam, internal_FrameData->TerminationFunctions) {
         (*it)();
     }
 }
 
 void glUtilAddTerminationFunction(Function_Void_NoParam function) {
-    List_push_back(internalInstanceInfo->TerminationFunctions, function);
+    List_push_back(internal_FrameData->TerminationFunctions, function);
 }
 
 
 void glUtilSetAmbientColor(float r, float g, float b) {
-    internalInstanceInfo->AmbientColor[0] = r;
-    internalInstanceInfo->AmbientColor[1] = g;
-    internalInstanceInfo->AmbientColor[2] = b;
+    internal_FrameData->AmbientColor[0] = r;
+    internal_FrameData->AmbientColor[1] = g;
+    internal_FrameData->AmbientColor[2] = b;
 }
 
 void glUtilInitializeFrame(GLFWwindow* window){
     
-    internalInstanceInfo->time = glfwGetTime();
-    internalInstanceInfo->deltaTime = internalInstanceInfo->time - internalInstanceInfo->lastTime;
+    internal_FrameData->time = glfwGetTime();
+    internal_FrameData->deltaTime = internal_FrameData->time - internal_FrameData->lastTime;
 
     // Resize the view to match the window.
-    glfwGetFramebufferSize(window, &(internalInstanceInfo->WindowWidth), &(internalInstanceInfo->WindowHeight));
-    internalInstanceInfo->aspectRatio = (double)internalInstanceInfo->WindowWidth / (double)internalInstanceInfo->WindowHeight;
-    glViewport(0, 0, internalInstanceInfo->WindowWidth, internalInstanceInfo->WindowHeight);
+    glfwGetFramebufferSize(window, &(internal_FrameData->WindowWidth), &(internal_FrameData->WindowHeight));
+    internal_FrameData->aspectRatio = (double)internal_FrameData->WindowWidth / (double)internal_FrameData->WindowHeight;
+    glViewport(0, 0, internal_FrameData->WindowWidth, internal_FrameData->WindowHeight);
     
     // Clear the screen buffer.
-    glClearColor(internalInstanceInfo->AmbientColor[0], internalInstanceInfo->AmbientColor[1], internalInstanceInfo->AmbientColor[2], 1.0f);
+    glClearColor(internal_FrameData->AmbientColor[0], internal_FrameData->AmbientColor[1], internal_FrameData->AmbientColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 }
@@ -144,13 +181,13 @@ static void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
     /* Get the mouse position from the window.*/
 
     // truncate it down to an int to make handling it easier.
-    internalInstanceInfo->xPosDelta = internalInstanceInfo->xPos - xPos;
-    internalInstanceInfo->yPosDelta = internalInstanceInfo->yPos - yPos;
-    internalInstanceInfo->xPos = xPos;
-    internalInstanceInfo->yPos = yPos;
+    internal_FrameData->xPosDelta = internal_FrameData->xPos - xPos;
+    internal_FrameData->yPosDelta = internal_FrameData->yPos - yPos;
+    internal_FrameData->xPos = xPos;
+    internal_FrameData->yPos = yPos;
 
     // If the mouse should be captured, set it as such.
-    if(internalInstanceInfo->captureCursor) {
+    if(internal_FrameData->captureCursor) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     // otherwise set the cursor back to normal.
@@ -173,7 +210,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         return;
     }
     
-    internalInstanceInfo->gKeysCurr[key] = action;
+    internal_FrameData->gKeysCurr[key] = action;
 
 }
 
@@ -181,22 +218,22 @@ void glUtilPollEvents() {
     /* Handle keyboard polling, update the internal timer, and call glfwPollEvents. */
 
     // Copy this frame's key presses into the "Previous" buffer.
-    memcpy(internalInstanceInfo->gKeysPrev, internalInstanceInfo->gKeysCurr, GLFW_KEY_LAST * sizeof(int));
+    memcpy(internal_FrameData->gKeysPrev, internal_FrameData->gKeysCurr, GLFW_KEY_LAST * sizeof(int));
     glfwPollEvents();
     
-    internalInstanceInfo->lastTime = internalInstanceInfo->time;
+    internal_FrameData->lastTime = internal_FrameData->time;
 }
 
 bool IsKeyDown(int key) {
-    return internalInstanceInfo->gKeysCurr[key] == GLFW_PRESS;
+    return internal_FrameData->gKeysCurr[key] == GLFW_PRESS;
 }
 
 bool IsKeyUp(int key) {
-    return internalInstanceInfo->gKeysCurr[key] == GLFW_RELEASE;
+    return internal_FrameData->gKeysCurr[key] == GLFW_RELEASE;
 }
 
 bool IsKeyPressed(int key) {
-    return internalInstanceInfo->gKeysPrev[key] == GLFW_PRESS && internalInstanceInfo->gKeysCurr[key] == GLFW_RELEASE;
+    return internal_FrameData->gKeysPrev[key] == GLFW_PRESS && internal_FrameData->gKeysCurr[key] == GLFW_RELEASE;
 }
 
 // Graphics debug callback

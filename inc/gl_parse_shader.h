@@ -7,18 +7,19 @@ extern "C" {
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#ifdef GL_ERROR_LOG_SIZE
-#else
+#ifndef GL_SHADER_MAX_DESCRIPTORS
+#define GL_SHADER_MAX_DESCRIPTORS 64 
+#endif
+
+#ifndef GL_ERROR_LOG_SIZE
 #define GL_ERROR_LOG_SIZE 512
 #endif
 
-#ifdef GL_SHADER_PATH_SIZE
-#else
+#ifndef GL_SHADER_PATH_SIZE
 #define GL_SHADER_PATH_SIZE 128 
 #endif
 
-#ifdef GL_SHADER_SOURCE_SIZE
-#else
+#ifndef GL_SHADER_SOURCE_SIZE
 #define GL_SHADER_SOURCE_SIZE 0xffff 
 #endif
 
@@ -30,13 +31,13 @@ typedef struct {
     char path[GL_SHADER_PATH_SIZE];
 } ShaderDescriptor;
 
-// Macro to compile and link any number of shaders.
-// stinky smelly do-while false in macro lol.
+// Macro to compile and link any number of shaders. Use this for compile-time constant since this guarentes there is no size miss-match.
 #define Shader_CompileProgram(program, ...) do { ShaderDescriptor args[] = { __VA_ARGS__, {0, 0, ""} }; program = internal_Shader_CompileProgram(&args); } while(0)
 
-char* internal_ReadShaderSource(const char* path);
-//char* internal_LoadShaderIncludes(const char* path);
+// Compile and link any number of shaders Dynamicly. This function can be used at run-time.
+GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount);
 
+char* internal_ReadShaderSource(const char* path);
 void internal_CompileShader(GLuint* shader, GLint type, char* path);
 GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args);
 

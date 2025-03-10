@@ -27,14 +27,14 @@ void List_deinitialize(List* list);
 
 #define List_isEmpty(List) (List->head == List->tail)
 #define List_start(T, List) ((T*)List->data)
-#define List_end(List) ((List_start(char, List)) + (List->capacity * List->itemSize))
-#define internal_List_getNextPtr(List, ptr) (ptr=((char*)ptr == List_end(List) - List->itemSize)? List_start(char, List) : (char*)ptr + List->itemSize)
-#define internal_List_getPrevPtr(List, ptr) (ptr=((char*)ptr == List_start(char, List))? List_end(List) - List->itemSize : (char*)ptr - List->itemSize)
+#define List_end(T, List) (T*)((List_start(char, List)) + (List->capacity * List->itemSize))
+#define internal_List_getNextPtr(T, List, ptr) ptr = (T*)(((char*)ptr == List_end(char, List) - List->itemSize)? List_start(char, List) : (char*)ptr + List->itemSize)
+#define internal_List_getPrevPtr(T, List, ptr) ptr = (T*)(((char*)ptr == List_start(char, List))? List_end(char, List) - List->itemSize : (char*)ptr - List->itemSize)
 #define internal_List_validate(List) assert(List->head != List->tail)
 
 // Creates T* variable, it, which is the current item in the loop. This will be a little faster than using List_at().
 // If you are using function pointers, dereference it before calling.
-#define List_iterator(T, list) (T* it = (T*)list->head; (char*)it != (char*)list->tail; internal_List_getPrevPtr(list, (char*)it)) 
+#define List_iterator(T, list) (T* it = (T*)list->head; (char*)it != list->tail; internal_List_getPrevPtr(T, list, it)) 
 
 #define List_push_front(List, Data) internal_List_push_front(List, (void*)Data)
 #define List_push_back(List, Data) internal_List_push_back(List, (void*)Data)
