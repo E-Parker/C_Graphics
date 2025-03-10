@@ -45,33 +45,41 @@ typedef struct {
 } FrameData;
 
 
+// Internal instance of frameData.
 static FrameData* internal_FrameData;
+
 
 double Time() {
     return internal_FrameData->time;
 }
 
+
 double DeltaTime() {
     return internal_FrameData->deltaTime;
 }
+
 
 double AspectRatio() {
     return internal_FrameData->aspectRatio;
 }
 
+
 int WindowHeight() {
     return internal_FrameData->WindowHeight;
 }
 
+
 int WindowWidth() {
     return internal_FrameData->WindowWidth;
 }
+
 
 void SetCaptureCursor(const bool captureCursor) {
     // Globally accessible function to tell GKFW what the cursor settings should be.
     // if captureCursor is set, the xPos and yPos from GetCursorPosition will act like a delta.
     internal_FrameData->captureCursor = captureCursor;
 }
+
 
 void GetCursorPositionDelta(double* xPos, double* yPos) {
     // Globally accessible function to get the cursor position.
@@ -83,11 +91,13 @@ void GetCursorPositionDelta(double* xPos, double* yPos) {
     internal_FrameData->yPosDelta = 0.0;
 }
 
+
 void GetCursorPosition(double* xPos, double* yPos) {
     // Globally accessible function to get the cursor position.
     *xPos = internal_FrameData->xPos / (double)internal_FrameData->WindowHeight;
     *yPos = internal_FrameData->yPos / (double)internal_FrameData->WindowHeight;
 }
+
 
 GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     /* Initialize a GLFW window. */
@@ -138,6 +148,7 @@ GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     return window;
 }
 
+
 void glUtilTerminate() {
     /* This function executes each function in the list of termination functions. */
     if (List_isEmpty((List*)internal_FrameData->TerminationFunctions)) {
@@ -161,6 +172,7 @@ void glUtilSetAmbientColor(float r, float g, float b) {
     internal_FrameData->AmbientColor[2] = b;
 }
 
+
 void glUtilInitializeFrame(GLFWwindow* window){
     
     internal_FrameData->time = glfwGetTime();
@@ -174,8 +186,8 @@ void glUtilInitializeFrame(GLFWwindow* window){
     // Clear the screen buffer.
     glClearColor(internal_FrameData->AmbientColor[0], internal_FrameData->AmbientColor[1], internal_FrameData->AmbientColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
 }
+
 
 static void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
     /* Get the mouse position from the window.*/
@@ -196,6 +208,7 @@ static void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
     }
 }
 
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     /* Update the keyboard input lists from GLFW. */
 
@@ -214,6 +227,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 }
 
+
 void glUtilPollEvents() {
     /* Handle keyboard polling, update the internal timer, and call glfwPollEvents. */
 
@@ -224,21 +238,25 @@ void glUtilPollEvents() {
     internal_FrameData->lastTime = internal_FrameData->time;
 }
 
+
 bool IsKeyDown(int key) {
     return internal_FrameData->gKeysCurr[key] == GLFW_PRESS;
 }
+
 
 bool IsKeyUp(int key) {
     return internal_FrameData->gKeysCurr[key] == GLFW_RELEASE;
 }
 
+
 bool IsKeyPressed(int key) {
     return internal_FrameData->gKeysPrev[key] == GLFW_PRESS && internal_FrameData->gKeysCurr[key] == GLFW_RELEASE;
 }
 
+
 // Graphics debug callback
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
-{
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
+
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
@@ -278,11 +296,7 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
     case GL_DEBUG_SEVERITY_LOW:          printf("Severity: low");
     case GL_DEBUG_SEVERITY_NOTIFICATION: printf("Severity: notification");
     } 
-
     printf("\n"); 
-
 }
-
-
 
 

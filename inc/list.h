@@ -4,6 +4,11 @@
 extern "C" {
 #endif
 
+
+// Type Definitions:
+// 
+//
+
 typedef struct {
     /* Simple list container, similar to a linked-list in functionality. */
     
@@ -14,6 +19,10 @@ typedef struct {
     char* tail;             //  16  | 8
     char* data;             //  24  | 8
 } List;
+
+// List Functions:
+// 
+//
 
 #define List_create(T, ItemCapacity) internal_List_create(sizeof(T), ItemCapacity)
 List* internal_List_create(const unsigned int ItemSize, const unsigned int Capacity);
@@ -52,3 +61,5 @@ void* List_at(const List* list, const unsigned int index);
 #ifdef __cplusplus
 }
 #endif
+
+

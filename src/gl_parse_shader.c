@@ -10,6 +10,7 @@
 #include "gl_parse_shader.h"
 #include "cStringUtilities.h"
 
+
 char* internal_ReadShaderSource(const char* path) {
     
     FILE* file = fopen(path, "r");
@@ -72,6 +73,7 @@ void internal_CompileShader(GLuint* shader, GLint type, char* path) {
     free(src);
     // Don't check for errors. Shader_CompileProgram handles displaying errors.
 }
+
 
 bool Shader_CompileProgramValidate(ShaderDescriptor* args) {
     // Step through args untill the max descriptors is hit, or untill the end of the list is found.
@@ -182,3 +184,5 @@ GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
     printf("\n======================== END OF LOG ========================\n");
     return GL_NONE;
 }
+
+

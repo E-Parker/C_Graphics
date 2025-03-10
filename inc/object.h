@@ -4,24 +4,23 @@
 extern "C" {
 #endif
 
+
 #include <glad/glad.h>
 #include <stdint.h>
 
 #include "list.h"
 #include "gl_math.h"
 
-
 // Standard Buffer Size is the maximum size any alias can be.
 #define STANDARD_BUFFER_SIZE 20
 
-#define Object_isType(object, Type) ((*((Object*)object)->Type) == Type)
-#define Object_GetTransform(object) ((GLfloat*)(((Object*)object)->Transform))
-#define Object_GetParent(object) (((Object*)object)->Parent)
+// Type Definitions:
+// 
+//
 
 // Define a function signature used to create and destroy objects.
 typedef void (*Object_TickFunction)(void*, const double);
 typedef void (*Object_DestroyFunction)(void*);
-
 
 typedef struct {
     // Holds basic information that all objects in a scene will have. Instead of using inheritance & polymorphism, which has some 
@@ -56,6 +55,10 @@ const uint8_t Object_TypeCamera        = 0x05;
 #define OBJECT_CREATE_BODY(object, parent, type) internal_Object_initialize((void*)object, (void*)parent, type);
 #define OBJECT_DESTROY_BODY(object) internal_Object_deinitialize((Object*)object);
 
+#define Object_isType(object, Type) ((*((Object*)object)->Type) == Type)
+#define Object_GetTransform(object) ((GLfloat*)(((Object*)object)->Transform))
+#define Object_GetParent(object) (((Object*)object)->Parent)
+
 void internal_Object_initialize(void* ptr, void* parent, const uint8_t type);
 void internal_Object_deinitialize(void* ptr);
 
@@ -73,3 +76,5 @@ void Object_flag_unset(uint32_t* data, uint32_t mask);
 #ifdef __cplusplus
 }
 #endif
+
+
