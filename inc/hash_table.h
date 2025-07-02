@@ -12,8 +12,8 @@ extern "C" {
 #define Pow2Ceiling(T, num) ((T)internal_Pow2Ceiling(sizeof(T), num))
 uint64_t internal_Pow2Ceiling(uint64_t size, uint64_t num);
 
-typedef struct HashTableItem {
-    /* An object in a hash table. */
+typedef struct {
+    /* An item in a hash table. */
     char* Key;
     void* Value;
 } HashTableItem;
