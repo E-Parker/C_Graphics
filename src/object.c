@@ -1,8 +1,17 @@
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "gl_math.h"
+#include "list.h"
 #include "object.h"
-#include "gl_types.h"
-#include "fixed_list.h"
+
+
+const uint8_t Object_TypeNone          = 0x01;
+const uint8_t Object_TypeStaticMesh    = 0x02;
+const uint8_t Object_TypeSkinnedMesh   = 0x03;
+const uint8_t Object_TypeText          = 0x04;
+const uint8_t Object_TypeCamera        = 0x05;
 
 
 void internal_Object_Initialize(void* ptr, void* parent, const uint8_t type) {
@@ -20,11 +29,11 @@ void internal_Object_Initialize(void* ptr, void* parent, const uint8_t type) {
     Object_SetAlias(object, "EmptyObject");
     memcpy(object->Transform, MAT4_IDENTITY, 64);   
     
-    object->Flags = 0;
-    object->Type = type;
+    object->Data.Flags = 0;
+    object->Data.Type = type;
 
     object->Parent = (Object*)parent;
-    object->Children = FixedList_create(Object*, 16);
+    object->Children = List_create(Object*, 16);
     object->Destroy = internal_Object_DestroyDefault;
 }
 
@@ -38,8 +47,9 @@ void internal_Object_Deinitialize(void* ptr) {
     Object* object = (Object*)ptr;
     
     // For every child of this object, call its destroy function.
-    for(uint64_t i = 0; i < FixedList_size(object->Children); i++) {
-        Object* childObject = (Object*)FixedList_pop_front(object->Children);
+    for(uint64_t i = 0; i < List_count(object->Children); i++) {
+        Object* childObject;
+        List_pop_front(object->Children, childObject);
         childObject->Destroy(childObject);
     }
     
@@ -80,23 +90,45 @@ void Object_SetAlias(void* gameObject, const char* string) {
 
 
 void Object_GetGlobalTransform(void* gameObject, mat4 out) {
-    /* This function returns the global transform of any asset. */ 
-    mat4* result = Object_GetTransform(gameObject);
-    void* parentObject = NULL;
+    /* This function returns the global transform of any asset. */
+    
+    Object* object = (Object*)gameObject;
+    Object* parentObject = NULL;
+    
+    mat4 result;
+
+    mat4_copy(result, object->Transform);
     
     for(uint16_t i = 0; i < 512; i++) {
-        parentObject = Object_GetParent(gameObject);
+        parentObject = object->Parent;
         
         if(parentObject == NULL) {
-            return result;
+            break; 
         }
-
-        mat4mul(result, Object_GetTransform(parentObject), result);
-         
+    
+        mat4_multiply(result, parentObject->Transform, result);
     }
 
-    mat4copy(out, result);
+    mat4_copy(out, result);
 
+}
+
+
+int Object_flag_compare(uint32_t data, uint32_t mask) {
+    data |= 0xff000000;
+    mask |= 0xff000000;
+    return (data & mask) == mask;
+}
+
+
+void Object_flag_set(uint32_t* data, uint32_t mask) {
+    *data |= mask;
+}
+
+
+void Object_flag_unset(uint32_t* data, uint32_t mask) {
+    mask &= 0x00ffffff;
+    *data &= ~mask;
 }
 
 

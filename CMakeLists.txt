@@ -49,8 +49,8 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
 target_link_libraries(
 	${PROJECT_NAME} 
 	${GLFW3_LIBRARIES}
+    m
 )
-
 # Define output directory
 #set(SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/assets/shaders")
 set(ASSET_OUTPUT_DIR "${CMAKE_BINARY_DIR}/assets")
@@ -71,7 +71,10 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(
 	${PROJECT_NAME} 
 	${GLFW3_LIBRARIES}
+    m
 )
+
+#target_link_options(${PROJECT_NAME} PRIVATE -nostartfiles)
 
 endif()
 

@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "cStringUtilities.h"
-#include "gl_types.h"
+#include "gl_math.h"
 #include "hash_table.h"
 #include "gl_shader_uniform.h"
 

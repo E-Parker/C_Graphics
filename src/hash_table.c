@@ -1,62 +1,15 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+
+#include "cStringUtilities.h"
 #include "hash_table.h"
 
+// Internal Functions
+// 
+//
 
-unsigned long long fnvHash64(const short* buffer, const short* const bufferEnd) {
-    // implementation of the fnv64 hashing function, created by Glenn Fowler, Landon Curt Noll,
-    // and Kiem-Phong Vo. I used fixed-width integers here for maximum portability.
-    // 
-
-    const unsigned long long Prime = 0x00000100000001B3;
-    unsigned long long Hash = 0xCBF29CE484222325;
-
-    short* bufferIter = (short*)buffer;
-
-    // Iterate from the buffer start address to the buffer end address.
-    for (; bufferIter < bufferEnd; bufferIter++) {
-        //XOR the current hash with the current character, then multiply by an arbitrary prime number.
-        Hash = (Hash ^ (*bufferIter)) * Prime;
-    }
-
-    return Hash;
-}
-
-
-int wide_strcmp(const short* left, const short* right) {
-    // Version of strcmp that takes 16bit characters.
-    // Reverse engineered the strcmp method. -Ethan
-    //
-
-    short* itLeft = (short*)left;
-    short* itRight = (short*)right;
-    short cmp;
-
-    for (unsigned short i = 0; i < 0xffff; i++) {
-        cmp = *itLeft - *itRight;
-        if (cmp || *itLeft == 0) break;    // if left != right, or left == right and is null break.
-    }
-
-    return cmp;
-}
-
-
-short* FindBufferEnd(const short* buffer) {
-    // Find the end of a buffer from a given c-string. 
-
-    short* bufferEnd = (short*)buffer;
-
-    // Assume the key is a c_string, iterate through to find the null terminator.
-    for (unsigned short i = 0; i < 0xffff; i++) {
-        if (*bufferEnd == 0) {
-            return bufferEnd;
-        }
-        bufferEnd++;
-    }
-    return NULL;
-}
-
+#define Pow2Ceiling(T, num) ((T)internal_Pow2Ceiling(sizeof(T), num))
 
 unsigned long long internal_Pow2Ceiling(unsigned long long size, unsigned long long num) {
     /* This function returns the next nearest power of 2 from the input number. */
@@ -69,10 +22,13 @@ unsigned long long internal_Pow2Ceiling(unsigned long long size, unsigned long l
     for (int i = 1; i < iterations; i = i << 1) {
         num |= num >> i;
     }
-
+    
     return ++num;
 }
 
+// Public Functions:
+//
+//
 
 HashTable* internal_HashTable_create(unsigned long long itemSize, unsigned long long size) {
 
@@ -113,20 +69,20 @@ void HashTable_destroy(HashTable** table) {
 
 }
 
-void HashTable_insert(HashTable* table, const short* key, void* value) {
+char* HashTable_insert(HashTable* table, const char* key, void* value) {
 
     // if out of space, double the size.
     if(++table->SlotsUsed == table->Size) {
         HashTable_resize(table, table->Size << 1);
     }
 
-    short* keyEnd = FindBufferEnd(key);
+    char* keyEnd = FindBufferEnd(key);
     unsigned long long hash = fnvHash64(key, keyEnd) % table->Size;
     unsigned long long originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 
-        if (wide_strcmp(key, table->Array[hash].Key) == 0) {
+        if (strcmp(key, table->Array[hash].Key) == 0) {
             break;
         }
 
@@ -140,24 +96,26 @@ void HashTable_insert(HashTable* table, const short* key, void* value) {
     }
     
     // Copy the key across
-    table->Array[hash].Key = (short*)malloc((keyEnd - key + 1) * sizeof(short));
+    table->Array[hash].Key = (char*)malloc((keyEnd - key + 1) * sizeof(char));
     assert(table->Array[hash].Key != NULL);
 
-    memcpy(table->Array[hash].Key, key, (keyEnd - key + 1) * sizeof(short));
+    memcpy(table->Array[hash].Key, key, (keyEnd - key + 1) * sizeof(char));
     table->Array[hash].Value = value;
     table->ActiveIndicies[table->SlotsUsed - 1] = hash;
+
+    return table->Array[hash].Key;
 }
 
 
-void HashTable_remove(HashTable* table, const short* key) {
+void HashTable_remove(HashTable* table, const char* key) {
 
-    short* keyEnd = FindBufferEnd(key);
+    char* keyEnd = FindBufferEnd(key);
     unsigned long long hash = fnvHash64(key, keyEnd) % table->Size;
     unsigned long long originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 
-        if (wide_strcmp(key, table->Array[hash].Key) == 0) {
+        if (strcmp(key, table->Array[hash].Key) == 0) {
             free(table->Array[hash].Key);
             free(table->Array[hash].Value);
             table->Array[hash].Key = NULL;
@@ -240,14 +198,14 @@ void HashTable_resize(HashTable* table, const unsigned long long size) {
 }
 
 
-bool internal_HashTable_find(const HashTable* table, const short* key, void** outValue) {
+bool internal_HashTable_find(const HashTable* table, const char* key, void** outValue) {
 
     unsigned long long hash = fnvHash64(key, FindBufferEnd(key)) % table->Size;
     unsigned long long originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 
-        if (wide_strcmp(key, table->Array[hash].Key) == 0) {
+        if (strcmp(key, table->Array[hash].Key) == 0) {
             break;
         }
 

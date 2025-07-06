@@ -1,14 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cstring>
-#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
+#include "bool.h"
+#include "cStringUtilities.h"
 
 #include "camera.h"
 #include "mesh.h"
@@ -17,23 +16,11 @@
 #include "par_shapes.h"
 
 const uint32_t LINE_BUFFER_SIZE = 512;
+const uint32_t MAX_FILESIZE = 0xffff; 
 const uint32_t MAX_ITERATIONS = 0xffff;
 
 
-StaticMesh::StaticMesh(uint32_t materialCount) : MaterialCount(materialCount) {
-    meshRenders = new Mesh[materialCount];
-    materials = new Material*[materialCount];
-    Transform = MatrixIdentity();
-}
-
-StaticMesh::StaticMesh(uint32_t materialCount, Matrix transform) : MaterialCount(materialCount), Transform(transform) {
-    meshRenders = new Mesh[materialCount];
-    materials = new Material*[materialCount];
-}
-
-StaticMesh::~StaticMesh() {
-    // not even going to bother with managing duplicate materials, this sucks enough as it is.
-    // There is currently a memory leak caused by not deleting the materials.
+void StaticMesh_Destory() {
     
     // Free the first mesh the normal way, since it contains the original reference to the vbo, tbo, and nbo.
     FreeMesh(&meshRenders[0]);
@@ -44,15 +31,15 @@ StaticMesh::~StaticMesh() {
     }
     
     delete[] materials;
-    materials = nullptr;
+    materials = NULL;
 
     delete[] meshRenders;
-    meshRenders = nullptr;
+    meshRenders = NULL;
 }
 
 void StaticMesh::SetMaterial(Material* material, uint32_t index) {
 
-    if(this == nullptr || index >= MaterialCount) {
+    if(this == NULL || index >= MaterialCount) {
         return;
     }
 
@@ -64,7 +51,7 @@ void StaticMesh::SetMaterial(Material* material, uint32_t index) {
 void StaticMesh::Draw() const {
     /* function to draw a mesh on screen. */
 
-    if (this == nullptr) {
+    if (this == NULL) {
         return;
     }
 
@@ -172,42 +159,51 @@ int parseFaceIndicies(std::vector<uint32_t>* vi, std::vector<uint32_t>* ti, std:
 StaticMesh* CreateStaticMeshFromWavefront(const char* path) {
     /* Parse an obj file and load a mesh from it. */ 
     
-    // Interpret the file as a giant string
-    std::stringstream stream;
 
-    try {
-        std::ifstream file;
-	    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);    // Set exceptions for try catch.
-        file.open(path);                                                    // Attempt to open the file.
-        stream << file.rdbuf();
-        file.close();
+    FILE* file = fopen(path, "r");
+    
+    // Return null if the file could not be found.
+    if (!file) {
+        printf("Mesh load error: source file \"%s\" not found or inaccessible.", path);
+        return NULL;
     }
-    catch (std::ifstream::failure& e) {
-        printf("Error Loading Wavefront Mesh: \"%s\" Could not find file!", path);
-        return nullptr;
+    
+    // Get the raw file as a c-string to compile
+    char* buffer = (char*)malloc(MAX_FILESIZE);  
+    fgets(buffer, MAX_FILESIZE, file);
+    int errorCode = ferror(file);
+    fclose(file);
+    file = NULL;
+
+    // Return null if read error.
+    if (errorCode) {
+        printf("Mesh load error: Something went wrong reading file, \"%s\". Discarding Mesh.", path);
+        free(buffer);
+        return NULL;
     }
 
-    // Verify that the file extension is obj.
-    const char* ext = strrchr(path, '.');
-    if (strcmp(ext, ".obj") != 0 && strcmp(ext, ".OBJ") != 0) {
-        printf("Error Loading Wavefront Mesh: \"%s\" File extension was not .obj or .OBJ", path);
-        return nullptr;
+    char* bufferEnd = FindBufferEnd(buffer);
+    
+    // Return null if the buffer was not large enough.
+    if(!bufferEnd) {
+        printf("Mesh load error: source file \"%s\" was to big to fit in a buffer. (%u),", path, MAX_FILESIZE);
+        free(buffer);
+        return NULL;
     }
-
+    
     char lineBuffer[LINE_BUFFER_SIZE];
     char identifyer[2] = { '\0', '\0' };
     uint32_t lineCount = 0;
     uint32_t materialCount = 0;
 
-    std::string ObjectName = "None";
-    std::vector<uint32_t> surfaceSplitIndecies;
-	std::vector<uint32_t> vi; 
-	std::vector<uint32_t> ti; 
-	std::vector<uint32_t> ni; 
+    List surfaceSplitIndecies = List_Create(uint32_t, 128);
+	List vi = List_Create(uint32_t, 128); 
+	List ti = List_Create(uint32_t, 128); 
+	List ni = List_Create(uint32_t, 128); 
 	
-	std::vector<Vector3> vertexList;
-	std::vector<Vector3> normalList;
-	std::vector<Vector2> tCoordList;
+	List vertexList = List_Create(vec3, 128);
+	List normalList = List_Create(vec3, 128);
+	List tCoordList = List_Create(vec2, 128);
 
     stream.seekp(0);
     uint32_t iteration = 0;
@@ -377,12 +373,12 @@ StaticMesh* CreateStaticMeshPrimativeSphere(int subdivisions) {
 
 
 StaticMesh* CreateStaticMeshFromGraphicsLibraryTransmissionFormat(const char* Path) {
-    return nullptr; 
+    return NULL; 
 }
 
 
 StaticMesh* CreateStaticMeshFromGraphicsLibraryBinaryTransmissionFormat(const char* Path) {
-    return nullptr;
+    return NULL;
 }
 
 

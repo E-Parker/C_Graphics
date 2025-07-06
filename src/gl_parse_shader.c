@@ -7,8 +7,8 @@
 #include <stdint.h>
 
 #include "bool.h"
-#include "gl_parse_shader.h"
 #include "cStringUtilities.h"
+#include "gl_parse_shader.h"
 
 
 char* internal_ReadShaderSource(const char* path) {

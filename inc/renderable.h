@@ -1,15 +1,16 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <stdint.h>
+
 #include "gl_math.h"
 
-struct Material;
-struct Matrix;
+typedef struct Material Material;
 
 typedef struct Mesh {
     /* This is the core structure of a mesh, it does not have any ability to manage itself at all. */
 
-    size_t indexBytes;
+    uint64_t indexBytes;
 
     // Define GPU buffer objects:
     GLuint VertexAttributeObject;       // Vertices with attributes that might be in different locations in the VBO. bind this to point to this mesh.
@@ -20,8 +21,8 @@ typedef struct Mesh {
 
 } Mesh;
 
-void DrawRenderable(const Mesh* mesh, const Material* material, const Matrix* transform);
+void DrawRenderable(const Mesh* mesh, const Material* material, const mat4 transform);
 void FreeMesh(Mesh* mesh);
 void FreeSubMesh(Mesh* mesh);
-void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  size_t indecies, const size_t vertecies);
+void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  uint64_t indecies, const uint64_t vertecies);
 void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies);

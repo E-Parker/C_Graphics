@@ -8,22 +8,17 @@ extern "C" {
 
 
 //Forward Declarations
-struct HashTable;
-struct Texture;
+typedef struct HashTable HashTable;
+typedef struct Texture Texture;
 
 typedef struct Material {
-
-    uint32_t TexturesUsed;
-    Texture** Textures;
-
     HashTable* Uniforms;
-    
+    Texture** Textures;
+    uint32_t TexturesUsed;
     GLuint Program;
     GLenum CullFunction;
     GLenum DepthFunction;
-
 } Material;
-
 
 
 Material* Material_create(const char* vertexProgramPath, const char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);

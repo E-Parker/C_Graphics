@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Rebuilding project for Linux!"
+echo "Rebuilding project for Linux."
 
 rm -rf build
 mkdir build
@@ -9,9 +9,9 @@ cp -r assets build
 
 cd build
 
-echo "Executing cmake..."
+echo "Executing cmake ... "
 cmake ..
-echo "Building Project..."
+echo "Building Project ... "
 make
-echo "Executing program..."
+echo "Executing Program ... "
 ./OpenGL_Build

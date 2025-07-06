@@ -1,9 +1,11 @@
 #include <glad/glad.h>
 
-#include <cstdint>
+#include <stddef.h>
 
-#include "vectorMath.h"
+#include "gl_math.h"
+#include "hash_table.h"
 #include "material.h"
+#include "texture.h"
 #include "renderable.h"
 
 void FreeMesh(Mesh* mesh) {
@@ -51,14 +53,14 @@ void FreeSubMesh(Mesh* mesh) {
 }
 
 
-void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const size_t indecies, const size_t vertecies) {
+void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const uint64_t indecies, const uint64_t vertecies) {
     /* Uploading mesh to GPU. points and normalBuffer must exist for the upload to work.
     tCoord data and face data is optional. */
 
-    size_t vertexBytes = vertecies * sizeof(vec3);
-    size_t tCoordBytes = vertecies * sizeof(vec2);
-    size_t indexBytes = indecies * sizeof(uint32_t);
-    size_t normalBytes = vertexBytes;
+    uint64_t vertexBytes = vertecies * sizeof(vec3);
+    uint64_t tCoordBytes = vertecies * sizeof(vec2);
+    uint64_t indexBytes = indecies * sizeof(uint32_t);
+    uint64_t normalBytes = vertexBytes;
 
     mesh->indexBytes = indexBytes;
 
@@ -105,7 +107,7 @@ void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertex
 void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies) {
     /* variant of UploadMesh for meshes that share vertices but have a different element buffer. */
 
-    size_t indexBytes = indecies * sizeof(uint32_t);
+    uint64_t indexBytes = indecies * sizeof(uint32_t);
     mesh->indexBytes = indexBytes;
 
     if (mesh->VertexAttributeObject == GL_NONE) {
@@ -139,7 +141,7 @@ void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, cons
 }
 
 
-void DrawRenderable(const Mesh* mesh, const Material* material, const Matrix* transform) {
+void DrawRenderable(const Mesh* mesh, const Material* material, const mat4 transform) {
     // Bind the material's shader program and textures.
 
     BindMaterial(material);
@@ -149,7 +151,7 @@ void DrawRenderable(const Mesh* mesh, const Material* material, const Matrix* tr
 
     // Bind the VAO and draw the elements.
     glBindVertexArray(mesh->VertexAttributeObject);
-    glUniformMatrix4fv(u_mvp, 1, GL_FALSE, ToFloat16(*transform).v);
+    glUniformMatrix4fv(u_mvp, 1, GL_FALSE, transform);
     glDrawElements(GL_TRIANGLES, mesh->indexBytes, GL_UNSIGNED_INT, 0);
 
     // unbind the VAO.

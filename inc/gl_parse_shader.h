@@ -28,11 +28,11 @@ typedef struct {
     // if path is empty, the shader is null. 
     GLuint shader;
     GLint type;
-    char path[GL_SHADER_PATH_SIZE];
+    const char* path;
 } ShaderDescriptor;
 
 // Macro to compile and link any number of shaders. Use this for compile-time constant since this guarentes there is no size miss-match.
-#define Shader_CompileProgram(program, ...) do { ShaderDescriptor args[] = { __VA_ARGS__, {0, 0, ""} }; program = internal_Shader_CompileProgram(&args); } while(0)
+#define Shader_CompileProgram(program, ...) do { ShaderDescriptor args[] = { __VA_ARGS__, {0, 0, ""} }; program = internal_Shader_CompileProgram((const ShaderDescriptor*)&args); } while(0)
 
 // Compile and link any number of shaders Dynamicly. This function can be used at run-time.
 GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount);

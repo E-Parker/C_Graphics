@@ -8,8 +8,8 @@
 
 #include "gl_parse_shader.h"
 #include "hash_table.h"
-#include "material.h"
 #include "texture.h"
+#include "material.h"
 
 
 Material* Material_create(const char* vertexProgramPath, const char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction) {
@@ -24,7 +24,7 @@ Material* Material_create(const char* vertexProgramPath, const char* fragmentPro
     newMaterial->Textures = NULL;
     
     if(numberOfTextures != 0) {
-        newMaterial->Textures = (Texture*)calloc(numberOfTextures, sizeof(Texture));
+        newMaterial->Textures = (Texture**)calloc(numberOfTextures, sizeof(Texture*));
     }
 
     // compile the shader programs

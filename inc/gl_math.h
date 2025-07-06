@@ -13,10 +13,21 @@ extern "C" {
 // 
 //
 
-#define PI 3.14159265358979323846
-#define EPSILON 0.000001
-#define DEG2RAD (PI/180.0)
-#define RAD2DEG (180.0/PI)
+#ifndef PI
+#define PI 3.14159265358979323846f
+#endif
+
+#ifndef EPSILON
+#define EPSILON 0.000001f
+#endif
+
+#ifndef DEG2RAD
+#define DEG2RAD (PI/180.0f)
+#endif
+
+#ifndef RAD2DEG
+#define RAD2DEG (180.0f/PI)
+#endif
 
 
 // GLSL TYPE ANALOGUES:
@@ -88,7 +99,6 @@ extern "C" {
 
 #define quaternion_normalize(q) vec4_normalize(q)
 
-#endif
 
 
 // GLSL TYPE ANALOGUES:
@@ -122,27 +132,19 @@ typedef GLfloat mat4[16];
 typedef GLfloat mat4x2[8];
 typedef GLfloat mat4x3[12];
 
-const mat4 MAT4_IDENTITY = { \
-    1.0f, 0.0f, 0.0f, 0.0f,\
-    0.0f, 1.0f, 0.0f, 0.0f,\
-    0.0f, 0.0f, 1.0f, 0.0f,\
-    0.0f, 0.0f, 0.0f, 1.0f,\
-};
-
-const vec2 V2_RIGHT = { 1.0f, 0.0f };
-const vec2 V2_UP = { 0.0f, 1.0f };
-const vec2 V2_ZERO = { 0.0f, 0.0f };
-const vec2 V2_ONE = { 1.0f, 1.0f };
-
-const vec3 V3_RIGHT = { 1.0f, 0.0f, 0.0f };
-const vec3 V3_UP = { 0.0f, 1.0f, 0.0f };
-const vec3 V3_FORWARD = { 0.0f, 0.0f, 1.0f };
-const vec3 V3_LEFT = { -1.0f, 0.0f, 0.0f };
-const vec3 V3_DOWN = { 0.0f, -1.0f, 0.0f };
-const vec3 V3_BACKWARD = { 0.0f, 0.0f, -1.0f };
-
-const vec3 V3_ZERO = { 0.0f, 0.0f, 0.0f };
-const vec3 V3_ONE = { 1.0f, 1.0f, 1.0f };
+extern const mat4 MAT4_IDENTITY;
+extern const vec2 V2_RIGHT;
+extern const vec2 V2_UP;
+extern const vec2 V2_ZERO;
+extern const vec2 V2_ONE;
+extern const vec3 V3_RIGHT;
+extern const vec3 V3_UP;
+extern const vec3 V3_FORWARD;
+extern const vec3 V3_LEFT;
+extern const vec3 V3_DOWN;
+extern const vec3 V3_BACKWARD;
+extern const vec3 V3_ZERO;
+extern const vec3 V3_ONE;
 
 void vec2_add(vec2 a, vec2 b, vec2 out);
 void vec3_add(vec3 a, vec3 b, vec3 out);
@@ -170,6 +172,17 @@ void quaternion_mat4(const quaternion q, mat4 out); // 4x4 matrix from quaternio
 
 void mat4_multiply(const mat4 left, const mat4 right, mat4 out); // Multiply two 4x4 matrices.
 
+
+// MISC TYPE FUNCTIONS
+//
+//
+
+const GLuint size_from_gl_type(const GLenum type);
+void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data);
+
 #ifdef __cplusplus
 }
 #endif
+#endif
+
+

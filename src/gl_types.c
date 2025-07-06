@@ -1,16 +1,35 @@
-#include <math.h>
-#include <stdint.h>
-
 #include <glad/glad.h>
+#include <stdint.h>
+#include <math.h>
 
 #include "bool.h"
 #include "gl_math.h"
-#include "gl_types.h"
-
 
 // GL TYPES DEFINITIONS:
 //
 //
+
+const mat4 MAT4_IDENTITY = { \
+    1.0f, 0.0f, 0.0f, 0.0f,\
+    0.0f, 1.0f, 0.0f, 0.0f,\
+    0.0f, 0.0f, 1.0f, 0.0f,\
+    0.0f, 0.0f, 0.0f, 1.0f,\
+};
+
+const vec2 V2_RIGHT = { 1.0f, 0.0f };
+const vec2 V2_UP = { 0.0f, 1.0f };
+const vec2 V2_ZERO = { 0.0f, 0.0f };
+const vec2 V2_ONE = { 1.0f, 1.0f };
+
+const vec3 V3_RIGHT = { 1.0f, 0.0f, 0.0f };
+const vec3 V3_UP = { 0.0f, 1.0f, 0.0f };
+const vec3 V3_FORWARD = { 0.0f, 0.0f, 1.0f };
+const vec3 V3_LEFT = { -1.0f, 0.0f, 0.0f };
+const vec3 V3_DOWN = { 0.0f, -1.0f, 0.0f };
+const vec3 V3_BACKWARD = { 0.0f, 0.0f, -1.0f };
+
+const vec3 V3_ZERO = { 0.0f, 0.0f, 0.0f };
+const vec3 V3_ONE = { 1.0f, 1.0f, 1.0f };
 
 
 const GLuint size_from_gl_type(const GLenum type) {
