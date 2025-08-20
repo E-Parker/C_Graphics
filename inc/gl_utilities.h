@@ -1,11 +1,10 @@
 #pragma once
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "bool.h"
+#include "stdbool.h"
 
 // Type Definitions:
 // 
@@ -48,6 +47,9 @@ void SetCaptureCursor(const bool captureCursor);
 void GetCursorPositionDelta(double* xPos, double* yPos);
 void GetCursorPosition(double* xPos, double* yPos);
 
+
 #ifdef __cplusplus
 }
 #endif
+
+

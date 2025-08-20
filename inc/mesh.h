@@ -4,26 +4,28 @@
 extern "C" {
 #endif
 
-
+#include "list.h"
+#include "gl_math.h"
 #include "object.h"
 
 //Forward Definitions:
-struct Material;
-struct Mesh;
+typedef struct Material Material;
+typedef struct Mesh Mesh;
+typedef struct List List;
 
-struct StaticMesh {
+typedef struct StaticMesh {
     /* Data structure to store mesh data. */
     OBJECT_BODY();
     Mesh* meshRenders;
     Material** materials;
     uint32_t MaterialCount;
 
-};
+} StaticMesh;
 
 //StaticMesh* CreateStaticMeshFromRawData(const uint32_t* indeciesArray, const  Vector3* vertexBufferArray, const  Vector3* normalBufferArray, const  Vector2* tCoordArray, const  size_t indecies, const  size_t vertecies);
 //StaticMesh* CreateStaticMeshFromGraphicsLibraryTransmissionFormat(const char* Path);
 //StaticMesh* CreateStaticMeshFromGraphicsLibraryBinaryTransmissionFormat(const char* Path);
-//StaticMesh* CreateStaticMeshFromWavefront(const char* path);
+StaticMesh* CreateStaticMeshFromWavefront(const char* path);
 //
 //// Par-Shapes wrapers:
 //StaticMesh* CreateStaticMeshPrimativeCone(int slices, int stacks);
@@ -33,6 +35,12 @@ struct StaticMesh {
 //StaticMesh* CreateStaticMeshPrimativeSphere(int subdivisions);
 
 // String parsing:
+
+void Vector2FromString(const char* data, vec2 out);
+void Vector3FromString(const char* data, vec3 out);
+
+int parseFaceIndicies(List* vi, List* ti, List* ni, List* segmentList);
+
 //static void parseFace(std::vector<uint32_t>* vi, std::vector<uint32_t>* ti, std::vector<uint32_t>* ni, std::vector<std::string> segmentList);
 //static int parseFaceIndicies(std::vector<uint32_t>* vi, std::vector<uint32_t>* ti, std::vector<uint32_t>* ni, const std::string data);
 //static Vector2 Vector2FromString(const std::string data);

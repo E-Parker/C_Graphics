@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "cStringUtilities.h"
+#include "string_utilities.h"
 #include "hash_table.h"
 
 // Internal Functions

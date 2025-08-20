@@ -1,8 +1,8 @@
 #include <glad/glad.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
 
-#include "bool.h"
 #include "gl_math.h"
 
 // GL TYPES DEFINITIONS:

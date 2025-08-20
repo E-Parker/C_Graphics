@@ -129,6 +129,7 @@ void parseFace(std::vector<uint32_t>* vi, std::vector<uint32_t>* ti, std::vector
     }
 }
 
+
 int parseFaceIndicies(std::vector<uint32_t>* vi, std::vector<uint32_t>* ti, std::vector<uint32_t>* ni, const std::string data) {
 	/* This function parses an incoming wavefront file face data and added the indicies to the corresponding lists. 
 	Faces are stored as f n/n/n n/n/n n/n/n where the subsets are the indicies of the vertex, texture coordinate, and normal. */

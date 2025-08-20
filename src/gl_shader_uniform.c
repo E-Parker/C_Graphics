@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "cStringUtilities.h"
+#include "string_utilities.h"
 #include "gl_math.h"
 #include "hash_table.h"
 #include "gl_shader_uniform.h"
