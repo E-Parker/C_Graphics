@@ -59,3 +59,9 @@ Camera* Object_Camera_create() {
 
     return camera;
 }
+
+
+void Object_Camera_destroy(Camera* camera) {
+    OBJECT_DESTROY_BODY(camera);
+}
+
