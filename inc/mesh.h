@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "list.h"
 #include "gl_math.h"
 #include "object.h"
@@ -21,6 +17,7 @@ typedef struct StaticMesh {
     uint32_t MaterialCount;
 
 } StaticMesh;
+
 
 //StaticMesh* CreateStaticMeshFromRawData(const uint32_t* indeciesArray, const  Vector3* vertexBufferArray, const  Vector3* normalBufferArray, const  Vector2* tCoordArray, const  size_t indecies, const  size_t vertecies);
 //StaticMesh* CreateStaticMeshFromGraphicsLibraryTransmissionFormat(const char* Path);
@@ -46,8 +43,6 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, List* segmentList);
 //static Vector2 Vector2FromString(const std::string data);
 //static Vector3 Vector3FromString(const std::string data);
 
+void Object_StaticMesh_destroy(StaticMesh* mesh);
 
-#ifdef __cplusplus
-}
-#endif
 

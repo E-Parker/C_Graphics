@@ -259,8 +259,57 @@ void mat4_multiply(const mat4 left, const mat4 right, mat4 out) {
         left[2] * right[12] + left[6] * right[13] + left[10] * right[14] + left[14] * right[15],
         left[3] * right[12] + left[7] * right[13] + left[11] * right[14] + left[15] * right[15],
     };
-
     mat4_copy(result, out);
-
 }
+
+
+void mat4_translate(const vec3 translation, mat4 out) {
+    mat4 result = {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        translation[0], translation[1], translation[2], 1.0f
+    };
+    mat4_copy(result, out);
+}
+
+
+void mat4_scale(const vec3 scale, mat4 out) {
+    mat4 result = { 
+        scale[0], 0.0f, 0.0f, 0.0f,
+        0.0f, scale[1], 0.0f, 0.0f,
+        0.0f, 0.0f, scale[2], 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f 
+    };
+    mat4_copy(result, out);
+}
+
+
+void mat4_get_forward(const mat4 m, vec3 out) {
+    out[0] = m[2];
+    out[1] = m[6];
+    out[2] = m[10];
+}
+
+
+void mat4_get_right(const mat4 m, vec3 out) {
+    out[0] = m[0];
+    out[1] = m[4];
+    out[2] = m[8];   
+}
+
+
+void mat4_get_up(const mat4 m, vec3 out) {
+    out[0] = m[1];
+    out[1] = m[5];
+    out[2] = m[9];    
+}
+
+
+void mat4_get_translation(const mat4 m, vec3 out) {
+    out[0] = m[3];
+    out[1] = m[7];
+    out[2] = m[11];
+}
+
 

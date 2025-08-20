@@ -45,3 +45,8 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
 }
 
 
+void Object_StaticMesh_destroy(StaticMesh* mesh) {
+    OBJECT_DESTROY_BODY(mesh);    
+}
+
+

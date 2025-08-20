@@ -1,8 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "object.h"
 #include "gl_math.h"
@@ -25,6 +22,4 @@ void Camera_NoClip_Update(Camera* camera, const double deltaTime);
 Camera* Object_Camera_create();
 void Object_Camera_destroy(Camera* camera);
 
-#ifdef __cplusplus
-}
-#endif
+
