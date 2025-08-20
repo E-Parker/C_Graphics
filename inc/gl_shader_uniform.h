@@ -6,6 +6,9 @@ extern "C" {
 
 #include <glad/glad.h>
 
+// Forward declarations:
+typedef struct HashTable HashTable;
+
 // simple macro to get a pointer to the end of the alias.
 #define Uniform_alias_end(uniform) (uniform->Alias + uniform->AliasLength + 1)
 
