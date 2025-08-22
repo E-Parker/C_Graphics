@@ -63,8 +63,8 @@ int main(void) {
     //TextRender* testText = new TextRender();
     //SetFont(testText, "IBM", defautFont);
 
-    StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
-    StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
+    //StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
+    //StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
     //mesh->SetMaterial(Mat0, 0);
     //lightVis->SetMaterial(Mat1, 0);
 
@@ -129,13 +129,13 @@ int main(void) {
 
         vec3 meshTranslate = { (float)x, (float)y, 0.0f };
 
-        mat4_translate(meshTranslate, &mesh->Transform);
+        //mat4_translate(meshTranslate, &mesh->Transform);
 
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
-        mat4_translate(lightPos, lightVis->Transform);
+        //mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
         
