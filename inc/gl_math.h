@@ -76,13 +76,25 @@ extern "C" {
 #define quaternion_copy(from, to) vec4_copy(from, to)
 #endif
 
+#define vec2_def_copy(from) { from[0], from[1] }
+#define vec3_def_copy(from) { from[0], from[1], from[2] }
+#define vec4_def_copy(from) { from[0], from[1], from[2], from[3] }
+
 #define vec2_def_add(a, b) { a[0] + b[0], a[1] + b[1] }
 #define vec3_def_add(a, b) { a[0] + b[0], a[1] + b[1], a[2] + b[2] }
 #define vec4_def_add(a, b) { a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3] }
 
+#define vec2_def_sub(a, b) { a[0] - b[0], a[1] - b[1] }
+#define vec3_def_sub(a, b) { a[0] - b[0], a[1] - b[1], a[2] - b[2] }
+#define vec4_def_sub(a, b) { a[0] - b[0], a[1] - b[1], a[2] - b[2], a[3] - b[3] }
+
 #define vec2_def_multiply(a, b) { a[0] * b[0], a[1] * b[1] }
 #define vec3_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2] }
 #define vec4_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] }
+
+#define vec2_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]))
+#define vec3_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]))
+#define vec4_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]))
 
 #define vec2_def_scale(v, scale) { v[0] * scale, v[1] * scale }
 #define vec3_def_scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale }
@@ -98,8 +110,6 @@ extern "C" {
 #define vec4_magnitudef(v) (float)vec4_magnitude(v)
 
 #define quaternion_normalize(q) vec4_normalize(q)
-
-
 
 // GLSL TYPE ANALOGUES:
 //
@@ -146,17 +156,19 @@ extern const vec3 V3_BACKWARD;
 extern const vec3 V3_ZERO;
 extern const vec3 V3_ONE;
 
-void vec2_add(vec2 a, vec2 b, vec2 out);
-void vec3_add(vec3 a, vec3 b, vec3 out);
-void vec4_add(vec4 a, vec4 b, vec4 out);
+void vec2_add(const vec2 a, const vec2 b, vec2 out);
+void vec3_add(const vec3 a, const vec3 b, vec3 out);
+void vec4_add(const vec4 a, const vec4 b, vec4 out);
 
-void vec2_sub(vec2 a, vec2 b, vec2 out);
-void vec3_sub(vec3 a, vec3 b, vec3 out);
-void vec4_sub(vec4 a, vec4 b, vec4 out);
+void vec2_sub(const vec2 a, const vec2 b, vec2 out);
+void vec3_sub(const vec3 a, const vec3 b, vec3 out);
+void vec4_sub(const vec4 a, const vec4 b, vec4 out);
 
-void vec2_multiply(vec2 a, vec2 b, vec2 out);
-void vec3_multiply(vec3 a, vec3 b, vec3 out);
-void vec4_multiply(vec4 a, vec4 b, vec4 out);
+void vec2_multiply(const vec2 a, const vec2 b, vec2 out);
+void vec3_multiply(const vec3 a, const vec3 b, vec3 out);
+void vec4_multiply(const vec4 a, const vec4 b, vec4 out);
+
+void vec3_cross(const vec3 a, const vec3 b, vec3 out);
 
 double vec2_magnitude(const vec2 v);
 double vec3_magnitude(const vec3 v);
@@ -171,7 +183,15 @@ void quaternion_multiply(const quaternion left, const quaternion right, quaterni
 void quaternion_mat4(const quaternion q, mat4 out); // 4x4 matrix from quaternion.
 
 void mat4_multiply(const mat4 left, const mat4 right, mat4 out); // Multiply two 4x4 matrices.
+void mat4_translate(const vec3 translation, mat4 out);
+void mat4_scale(const vec3 scale, mat4 out);
 
+void mat4_get_forward(const mat4 m, vec3 out);
+void mat4_get_right(const mat4 m, vec3 out);
+void mat4_get_up(const mat4 m, vec3 out);
+void mat4_get_translation(const mat4 m, vec3 out);
+
+void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
 
 // MISC TYPE FUNCTIONS
 //

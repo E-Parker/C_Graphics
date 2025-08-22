@@ -70,7 +70,6 @@ int main(void) {
     //lightVis->SetMaterial(Mat1, 0);
 
     Camera* mainCamera = Object_Camera_create();
-    *GET_ASSET_TRANSFORM(mainCamera) = Translate(0.0f, -1.0f, -1.0f);
 
     Shader* testShader = Shader_create(Mat0->Program, "TestShader");
 
@@ -87,7 +86,7 @@ int main(void) {
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor { 0.5f, 0.5f, 0.5f };
+    vec3 AmbientColor = { 0.5f, 0.5f, 0.5f };
     
     glUtilSetAmbientColor(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
@@ -129,18 +128,30 @@ int main(void) {
             x--;
         }
 
-        mat4_translate(translation = {(float)x, (float)y, 0.0f}, out = &mesh->Transform);
+        vec3 meshTranslate = { (float)x, (float)y, 0.0f };
+
+        mat4_translate(meshTranslate, &mesh->Transform);
 
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
-        *GET_ASSET_TRANSFORM(lightVis) = Translate(lightPos[0], lightPos[1], lightPos[2]);        
+
+        mat4_translate(lightPos, lightVis->Transform);
+
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
         
         NoClipCameraUpdate(mainCamera, DeltaTime());
         
-        float cameraPos[3] = { mainCamera->Transform.m12, mainCamera->Transform.m13, mainCamera->Transform.m14 };
-        float* cameraDir = ToFloat3(Forward(ToMatrix(mainCamera->Rotation))).v;
+        vec3 cameraPos; 
+        vec3 cameraDir;
+
+        mat4_get_translation(mainCamera->Transform, &cameraPos);
+        mat4_get_forward(mainCamera->Transform, &cameraDir);
+
+        mat4 cameraView;
+
+        mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
+
 
         UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
         void* data = UniformBuffer_get_shared(buffer);
@@ -150,7 +161,7 @@ int main(void) {
         //UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", &cameraView.v);
+        UniformBuffer_set_Global("FrameData", "u_view", &cameraView);
         UniformBuffer_set_Global("FrameData", "u_position", &cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", &cameraDir);
 

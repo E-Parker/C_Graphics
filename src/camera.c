@@ -8,7 +8,7 @@
 #include "gl_math.h"
 #include "camera.h"
 
-void NoClipCameraUpdate(Camera* camera, const double deltaTime, const double ratio) {
+void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double ratio) {
     /* Update function for a camera with no-clip. */
 
     vec3 desiredMovement = {0.0f, 0.0f, 0.0f};

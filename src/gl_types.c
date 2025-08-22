@@ -114,18 +114,18 @@ void upload_from_gl_type(const GLint location, const GLenum type, const GLint el
 //
 
 
-void vec2_add(vec2 a, vec2 b, vec2 out) {
+void vec2_add(const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
 }
 
-void vec3_add(vec3 a, vec3 b, vec3 out) {
+void vec3_add(const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
     out[2] = a[2] + b[2];
 }
 
-void vec4_add(vec4 a, vec4 b, vec4 out) {
+void vec4_add(const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
     out[2] = a[2] + b[2];
@@ -133,18 +133,18 @@ void vec4_add(vec4 a, vec4 b, vec4 out) {
 }
 
 
-void vec2_sub(vec2 a, vec2 b, vec2 out) {
+void vec2_sub(const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
 }
 
-void vec3_sub(vec3 a, vec3 b, vec3 out) {
+void vec3_sub(const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
     out[2] = a[2] - b[2];
 }
 
-void vec4_sub(vec4 a, vec4 b, vec4 out) {
+void vec4_sub(const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
     out[2] = a[2] - b[2];
@@ -152,22 +152,32 @@ void vec4_sub(vec4 a, vec4 b, vec4 out) {
 }
 
 
-void vec2_multiply(vec2 a, vec2 b, vec2 out) {
+void vec2_multiply(const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
 }
 
-void vec3_multiply(vec3 a, vec3 b, vec3 out) {
+void vec3_multiply(const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
     out[2] = a[2] * b[2];
 }
 
-void vec4_multiply(vec4 a, vec4 b, vec4 out) {
+void vec4_multiply(const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
     out[2] = a[2] * b[2];
     out[3] = a[3] * b[3];
+}
+
+
+void vec3_cross(const vec3 a, const vec3 b, vec3 out) {
+    vec3 result = {
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0]
+    };
+    vec3_copy(result, out);
 }
 
 
@@ -312,4 +322,30 @@ void mat4_get_translation(const mat4 m, vec3 out) {
     out[2] = m[11];
 }
 
+void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out) {
 
+    float length = 0.0f;
+    float ilength = 0.0f;
+
+    vec3 relativePosition = vec3_def_sub(viewer, target);
+    vec3 viewZ = vec3_def_copy(relativePosition);
+    vec3_normalize(viewZ);
+
+    vec3 viewX;
+    vec3_cross(up, viewZ, viewX);
+    vec3_normalize(viewX);
+
+    vec3 viewY;
+    vec3_cross(viewZ, viewX, viewY);
+    vec3_normalize(viewY);
+    
+    // Put it together into the final view matrix.
+    mat4 result = {
+        viewX[0], viewX[1], viewX[2], -vec3_dot(viewX, viewer),
+        viewY[0], viewY[1], viewY[2], -vec3_dot(viewY, viewer),
+        viewZ[0], viewZ[1], viewZ[2], -vec3_dot(viewZ, viewer),
+        0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    mat4_copy(result, out);
+}
