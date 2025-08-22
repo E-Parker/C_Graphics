@@ -17,7 +17,7 @@ typedef struct Camera {
 
 } Camera;
 
-void Camera_NoClip_Update(Camera* camera, const double deltaTime);
+void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double aspect);
 
 Camera* Object_Camera_create();
 void Object_Camera_destroy(Camera* camera);

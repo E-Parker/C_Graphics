@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 
 
@@ -29,6 +25,4 @@ void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t 
 void SetTextureFromAlias(const Material* material, const char* alias, uint32_t index);
 void BindMaterial(const Material* material);
 
-#ifdef __cplusplus
-}
-#endif
+

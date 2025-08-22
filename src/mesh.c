@@ -4,6 +4,7 @@
 #include "list.h"
 #include "string_utilities.h"
 
+#include "mesh.h"
 
 int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
     // This function parses a wavefront file face data, adding it to the list of vertex indices, texture indicies, and normal indeicies. 
@@ -46,7 +47,7 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
 
 
 void Object_StaticMesh_destroy(StaticMesh* mesh) {
-    OBJECT_DESTROY_BODY(mesh);    
+    OBJECT_DESTROY_BODY(mesh);
 }
 
 

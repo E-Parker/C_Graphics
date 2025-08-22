@@ -15,7 +15,6 @@
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
-
 int main(void) {
 
     // Initialize the window to the starting size and set the header.
@@ -140,7 +139,7 @@ int main(void) {
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
         
-        NoClipCameraUpdate(mainCamera, DeltaTime());
+        Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
         
         vec3 cameraPos; 
         vec3 cameraDir;
@@ -151,7 +150,6 @@ int main(void) {
         mat4 cameraView;
 
         mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
-
 
         UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
         void* data = UniformBuffer_get_shared(buffer);
