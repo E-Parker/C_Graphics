@@ -12,8 +12,14 @@
 #include "material.h"
 
 
-Material* Material_create(const char* vertexProgramPath, const char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction) {
-    
+// Macro defs:
+#ifndef MATERIAL_BUFFER_SIZE
+#define MATERIAL_BUFFER_SIZE 0xff
+#endif
+
+
+Material* Material_create(char* vertexProgramPath, char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction) {
+
     Material* newMaterial = (Material*)malloc(sizeof(Material));
     assert(newMaterial);
 

@@ -6,9 +6,27 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "string_utilities.h"
 #include "gl_parse_shader.h"
+
+// Macro defs:
+#ifndef GL_SHADER_MAX_DESCRIPTORS
+#define GL_SHADER_MAX_DESCRIPTORS 64 
+#endif
+
+#ifndef GL_ERROR_LOG_SIZE
+#define GL_ERROR_LOG_SIZE 512
+#endif
+
+#ifndef GL_SHADER_PATH_SIZE
+#define GL_SHADER_PATH_SIZE 128 
+#endif
+
+#ifndef GL_SHADER_SOURCE_SIZE
+#define GL_SHADER_SOURCE_SIZE 0xffff 
+#endif
 
 
 char* internal_ReadShaderSource(const char* path) {
@@ -23,6 +41,7 @@ char* internal_ReadShaderSource(const char* path) {
     
     // Get the raw file as a c-string to compile
     char* buffer = (char*)malloc(GL_SHADER_SOURCE_SIZE);  
+    assert(buffer);
     fgets(buffer, GL_SHADER_SOURCE_SIZE, file);
     int errorCode = ferror(file);
     fclose(file);
@@ -53,7 +72,7 @@ char* internal_ReadShaderSource(const char* path) {
 }
 
 
-void internal_CompileShader(GLuint* shader, GLint type, char* path) {
+void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
     // Takes an empty shader*, type of shader, and path to source file. 
     // Reads the path to a c-string and compiles the shader for OpenGL.
     // 
@@ -115,18 +134,18 @@ GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
 }
 
 
-GLuint internal_Shader_CompileProgram(const ShaderDescriptor* args) {
+GLuint internal_Shader_CompileProgram(ShaderDescriptor* args) {
     // Expects an array of arguments with a null terminated end. 
     
     // Validate args:
-    if(!Shader_CompileProgramValidate((ShaderDescriptor*)args)) return GL_NONE;
+    if(!Shader_CompileProgramValidate(args)) return GL_NONE;
 
     // Set up a new shader program and compile it.
     GLuint program = glCreateProgram(); // Create a new empty program.
 
     // Iterate until end of args. Compile and attach each shader.
-    for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
-        internal_CompileShader((GLuint*)&it->shader, it->type, (char*)&it->path);
+    for (ShaderDescriptor* it = args; it->path[0] != '\0'; it++) {
+        internal_CompileShader(&it->shader, it->type, it->path);
         glAttachShader(program, it->shader);
     }
 

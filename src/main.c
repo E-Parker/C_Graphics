@@ -144,8 +144,8 @@ int main(void) {
         vec3 cameraPos; 
         vec3 cameraDir;
 
-        mat4_get_translation(mainCamera->Transform, &cameraPos);
-        mat4_get_forward(mainCamera->Transform, &cameraDir);
+        mat4_get_translation(mainCamera->Transform, cameraPos);
+        mat4_get_forward(mainCamera->Transform, cameraDir);
 
         mat4 cameraView;
 

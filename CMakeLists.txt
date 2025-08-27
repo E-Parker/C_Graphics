@@ -77,4 +77,4 @@ target_link_libraries(
 #target_link_options(${PROJECT_NAME} PRIVATE -nostartfiles)
 
 endif()
-target_compile_options(${PROJECT_NAME} PUBLIC -Wno-incompatible-pointer-types)
+#target_compile_options(${PROJECT_NAME} PUBLIC -Wno-incompatible-pointer-types)
