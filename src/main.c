@@ -59,7 +59,6 @@ int main(void) {
     // Load Font:
     //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
 
-    // There is a known issue with fonts right now. Something is getting deleted when it isn't supposed to. Will run fine on a first pass.  
     //TextRender* testText = new TextRender();
     //SetFont(testText, "IBM", defautFont);
 

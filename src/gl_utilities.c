@@ -140,7 +140,7 @@ GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
     memset(&internal_FrameData, '\0', sizeof(FrameData));
     internal_FrameData.WindowHeight = height;
     internal_FrameData.WindowWidth = width;
-    List_initialize(Function_Void_NoParam, &internal_FrameData.TerminationFunctions, 16);
+    List_initialize(Function_Void_NoParam, &(internal_FrameData.TerminationFunctions), 16);
 
     return window;
 }
@@ -152,18 +152,18 @@ void glUtilTerminate() {
     //
     
     // Return early if the list is empty.
-    if (List_isEmpty(&internal_FrameData.TerminationFunctions)) {
+    if (List_isEmpty(&(internal_FrameData.TerminationFunctions))) {
         return;
     }
 
     // For each termination function added to the list, call it.
-    for List_iterator(Function_Void_NoParam, &internal_FrameData.TerminationFunctions) {
+    for List_iterator(Function_Void_NoParam, &(internal_FrameData.TerminationFunctions)) {
         (*it)();
     }
 }
 
 void glUtilAddTerminationFunction(Function_Void_NoParam function) {
-    List_push_back(&internal_FrameData.TerminationFunctions, function);
+    List_push_back(&(internal_FrameData.TerminationFunctions), function);
 }
 
 

@@ -49,7 +49,8 @@ void internal_List_initialize(List* list, const unsigned int ItemSize, const uns
     //
     //
 
-    list->data = (char*)malloc(ItemSize * Capacity);
+    list->data = (char*)calloc(ItemSize, Capacity);
+    //list->data = (char*)malloc(ItemSize * Capacity);
 
     // Set capacity and size.
     list->capacity = Capacity;
@@ -288,15 +289,15 @@ void internal_List_push_front(List* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(List_count(list) < list->capacity - 1) {
-        internal_list_copy(list->head, data, list->itemSize);
         internal_List_getNextPtr(char, list, list->head);
+        internal_list_copy(list->head, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
     List_realloc(list, list->capacity + (list->capacity >> 1));
-    internal_list_copy(list->head, data, list->itemSize);
     internal_List_getNextPtr(char, list, list->head);
+    internal_list_copy(list->head, data, list->itemSize);
 }
 
 
@@ -307,15 +308,15 @@ void internal_List_push_back(List* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(List_count(list) < list->capacity) { 
-        internal_List_getPrevPtr(char, list, list->tail);
         internal_list_copy(list->tail, data, list->itemSize);
+        internal_List_getPrevPtr(char, list, list->tail);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5.
     List_realloc(list, list->capacity + (list->capacity >> 1));
-    internal_List_getPrevPtr(char, list, list->tail);
     internal_list_copy(list->tail, data, list->itemSize);
+    internal_List_getPrevPtr(char, list, list->tail);
 }
 
 
