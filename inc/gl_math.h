@@ -30,15 +30,6 @@ extern "C" {
 #endif
 
 
-// GLSL TYPE ANALOGUES:
-//
-//
-
-#define vecX(T, vecAdress) (((T*)vecAdress)[0])
-#define vecY(T, vecAdress) (((T*)vecAdress)[1])
-#define vecZ(T, vecAdress) (((T*)vecAdress)[2])
-#define vecW(T, vecAdress) (((T*)vecAdress)[3])
-
 //#define USING_MEMCPY
 
 #ifdef USING_MEMCPY
@@ -76,6 +67,8 @@ extern "C" {
 #define quaternion_copy(from, to) vec4_copy(from, to)
 #endif
 
+// Any macro with "def" in the name means a new object of that type must be initialized by it. for example: vec3 copyOfVector = vec3_def_copy(vector);
+
 #define vec2_def_copy(from) { from[0], from[1] }
 #define vec3_def_copy(from) { from[0], from[1], from[2] }
 #define vec4_def_copy(from) { from[0], from[1], from[2], from[3] }
@@ -92,24 +85,34 @@ extern "C" {
 #define vec3_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2] }
 #define vec4_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] }
 
-#define vec2_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]))
-#define vec3_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]))
-#define vec4_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]))
-
 #define vec2_def_scale(v, scale) { v[0] * scale, v[1] * scale }
 #define vec3_def_scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale }
 #define vec4_def_scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale, v[3] * scale }
+
+#define vec3_def_cross(a, b) { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] }
+
+#define vec2_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]))
+#define vec3_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]))
+#define vec4_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]))
 
 #define vec2_equal(a, b) (a[0] == b[0] && a[1] == b[1])
 #define vec3_equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2])
 #define vec4_equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
 #define quaternion_equal(a, b) vec4_equal(a, b)
 
+// Short-hand casts to float. I figured might as well just use this because all the mathf functions are just float casted doubles anyway.
+
 #define vec2_magnitudef(v) (float)vec2_magnitude(v)
 #define vec3_magnitudef(v) (float)vec3_magnitude(v)
 #define vec4_magnitudef(v) (float)vec4_magnitude(v)
 
+// Normalizing a quaternion is the same as a vec4. this alias is just here to make the code easier to understand.
 #define quaternion_normalize(q) vec4_normalize(q)
+
+#define vecX(T, vecAdress) (((T*)vecAdress)[0])
+#define vecY(T, vecAdress) (((T*)vecAdress)[1])
+#define vecZ(T, vecAdress) (((T*)vecAdress)[2])
+#define vecW(T, vecAdress) (((T*)vecAdress)[3])
 
 // GLSL TYPE ANALOGUES:
 //
@@ -141,6 +144,10 @@ typedef GLfloat mat3x4[9];
 typedef GLfloat mat4[16];
 typedef GLfloat mat4x2[8];
 typedef GLfloat mat4x3[12];
+
+// GLSL TYPE CONSTANTS:
+//
+//
 
 extern const mat4 MAT4_IDENTITY;
 extern const vec2 V2_RIGHT;
@@ -193,11 +200,11 @@ void mat4_get_translation(const mat4 m, vec3 out);
 
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
 
-// MISC TYPE FUNCTIONS
-//
-//
 
+// internal size of lookup.
 const GLuint size_from_gl_type(const GLenum type);
+
+// internal function to upload data to GPU.
 void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data);
 
 #ifdef __cplusplus
