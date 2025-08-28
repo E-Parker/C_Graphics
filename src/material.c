@@ -35,6 +35,8 @@ Material* Material_create(char* vertexProgramPath, char* fragmentProgramPath, co
 
     // compile the shader programs
     Shader_CompileProgram(newMaterial->Program, {0, GL_VERTEX_SHADER, vertexProgramPath}, {0, GL_FRAGMENT_SHADER, fragmentProgramPath} );
+    
+    return newMaterial;
 
 }
 
@@ -82,7 +84,7 @@ void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t 
     }
 
     // If a texture already exists in that slot, try to delete it.
-    if (!material->Textures[index]) {
+    if (material->Textures[index]) {
         DeleteTexture(material->Textures[index]->alias);
     }
 
@@ -107,12 +109,12 @@ void SetTextureFromAlias(const Material* material, const char* alias, uint32_t i
     FindTexture(alias, &texture);
 
     if (!texture) {
-        printf("Error setting Material Texture: \"%c\" At index: %d. The texture could not be found.\n");
+        printf("Error setting Material Texture: \"%s\" At index: %d. The texture could not be found.\n", alias, index);
         return;
     }
 
     // If a texture already exists in that slot, try to delete it.
-    if (!material->Textures[index]) {
+    if (material->Textures[index]) {
         DeleteTexture(material->Textures[index]->alias);
     }
 
@@ -136,7 +138,7 @@ void BindMaterial(const Material* material){
     // Set the active texture for each texture in the material.
     for (uint32_t i = 0; i < material->TexturesUsed; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-        if (!material->Textures[i]) {
+        if (material->Textures[i]) {
             glBindTexture(material->Textures[i]->type, material->Textures[i]->ID);
         }
     }

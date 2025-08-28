@@ -28,6 +28,8 @@
 #define GL_SHADER_SOURCE_SIZE 0xffff 
 #endif
 
+char shaderSourceBuffer[GL_SHADER_SOURCE_SIZE];
+
 
 char* internal_ReadShaderSource(const char* path) {
     
@@ -40,9 +42,7 @@ char* internal_ReadShaderSource(const char* path) {
     }
     
     // Get the raw file as a c-string to compile
-    char* buffer = (char*)malloc(GL_SHADER_SOURCE_SIZE);  
-    assert(buffer);
-    fgets(buffer, GL_SHADER_SOURCE_SIZE, file);
+    fgets(&shaderSourceBuffer, GL_SHADER_SOURCE_SIZE, file);
     int errorCode = ferror(file);
     fclose(file);
     file = NULL;
@@ -50,24 +50,23 @@ char* internal_ReadShaderSource(const char* path) {
     // Return null if read error.
     if (errorCode) {
         printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader.", path);
-        free(buffer);
         return NULL;
     }
 
-    char* bufferEnd = FindBufferEnd(buffer);
+    char* bufferEnd = FindBufferEnd(&shaderSourceBuffer);
     
     // Return null if the buffer was not large enough.
     if(!bufferEnd) {
         printf("Shader load error: source file \"%s\" was to big to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_SIZE);
-        free(buffer);
         return NULL;
     }
     
     // Copy the buffer to a smaller c-string just big enough to fit it.
-    uint64_t bufferSize = (uint64_t)(bufferEnd - buffer) + 1; 
+    uint64_t bufferSize = (uint64_t)(bufferEnd - &shaderSourceBuffer) + 1;
     char* src = (char*)malloc(bufferSize);
-    memcpy(buffer, src, bufferSize);
-    free(buffer);
+    assert(src);
+
+    memcpy(src, &shaderSourceBuffer, bufferSize);
     return src;
 }
 
