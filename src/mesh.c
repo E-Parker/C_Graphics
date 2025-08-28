@@ -1,13 +1,22 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "list.h"
 #include "string_utilities.h"
 
 #include "mesh.h"
 
+StaticMesh* CreateStaticMeshFromWavefront(const char* path) {
+
+    FILE* file = fopen(path, "r");
+
+
+    return NULL;
+}
+
 int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
-    // This function parses a wavefront file face data, adding it to the list of vertex indices, texture indicies, and normal indeicies. 
+    // This function parses a wavefront file face data, adding it to the list of vertex indices, texture indicies, and normal indicies. 
     // Returns the number of vertices added. 
 
     if (line == NULL) return 0;
@@ -25,8 +34,8 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
                 segments[splits].bufferEnd = currentChar - 1;
                 i = 0xff;
                 break;
-            case ' ':           // Seperator is found. Segment start and end must be set before incrementing splits.
-                if (segments[splits].bufferStart)   segments[splits].bufferEnd = currentChar - 1;   // SegmentStart cannot be set on interation 0 so this is fine.
+            case ' ':           // Separator is found. Segment start and end must be set before incrementing splits.
+                if (segments[splits].bufferStart)   segments[splits].bufferEnd = currentChar - 1;   // SegmentStart cannot be set on iteration 0 so this is fine.
                 else                                segments[splits].bufferStart = currentChar + 1;
                 break;
             default: continue; break;

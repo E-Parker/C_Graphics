@@ -30,6 +30,10 @@ file(GLOB_RECURSE HEADERS
  	"${CMAKE_SOURCE_DIR}/inc/*.h"
 )
 
+#
+#	WINDOWS	
+#
+
 if(WIN32)
 
 # Add the shader files to the project on Windows.
@@ -49,7 +53,6 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
 target_link_libraries(
 	${PROJECT_NAME} 
 	${GLFW3_LIBRARIES}
-    m
 )
 # Define output directory
 #set(SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/assets/shaders")
@@ -61,6 +64,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${ASSET_OUTPUT_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" ${ASSET_OUTPUT_DIR}
 )
+
+
+#
+# NON - WINDOWS
+#
 
 else()
 
@@ -74,7 +82,4 @@ target_link_libraries(
     m
 )
 
-#target_link_options(${PROJECT_NAME} PRIVATE -nostartfiles)
-
 endif()
-#target_compile_options(${PROJECT_NAME} PUBLIC -Wno-incompatible-pointer-types)

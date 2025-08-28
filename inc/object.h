@@ -42,7 +42,7 @@ typedef struct Object {
     Object* Parent;                         /* 96   |   8       <----- pointer to the parent node. If NULL, assumed to be a root.   */  \
     List* Children;                         /* 104  |   8       <----- pointer to array of child nodes.                             */  \
     Object_TickFunction Tick;               /* 112  |   8       <----- function to update the object.                               */  \
-    Object_DestroyFunction Destroy;         /* 120  |   8       <----- function to destroy the object.                              */  \
+    Object_DestroyFunction Destroy          /* 120  |   8       <----- function to destroy the object.                              */  \
 
     OBJECT_BODY();
 
