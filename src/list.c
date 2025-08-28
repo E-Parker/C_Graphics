@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <string.h>
+//#include <string.h>
 
 #include "list.h"
 
@@ -14,22 +14,26 @@ List* internal_List_create(const unsigned int ItemSize, const unsigned int Capac
 
 List* List_create_subset(List* list, unsigned int start, unsigned int end) {
     // Creates a new list as a subset of another list.
-    //
+    // Returns NULL if the subset cannot be created.
     //
 
+    // cannot create subset with start "in-front of" end.
     if (start >= end) return NULL;
 
     unsigned int listCount = List_count(list);
     
+    // cannot create subset which is outside of the bounds of the original list.
     if (end > listCount || start >= listCount) return NULL;
 
-    unsigned int capacity = end - start;
-    void* subsetArray = malloc(capacity);
+    unsigned int capacity = end - start;                    // capacity needed to store the number of items in the subset.
+    unsigned int capacityBytes = capacity * list->itemSize; // capacity needed in bytes.
+
+    void* subsetArray = malloc(capacityBytes);
     void* listArray = List_create_array(list);
-    
-    memcpy(subsetArray, listArray, capacity * list->itemSize);
+    internal_list_copy(subsetArray, listArray, capacityBytes);
 
     List* subset = (List*)malloc(sizeof(List));
+
     subset->capacity = capacity;
     subset->itemSize = list->itemSize;
     subset->data = (char*)subsetArray;
@@ -97,17 +101,17 @@ void* List_create_array(List* list) {
     // if the head is behind the tail, list is split in two:
     if (list->head < list->tail) {
         // Copy first half.
-        unsigned int bytesToCopyFromTail = internal_List_end(char, list) - list->tail;
-        memcpy(array, list->tail, bytesToCopyFromTail);
+        unsigned int bytesToCopyFromTail = (unsigned int)(internal_List_end(char, list) - list->tail);
+        internal_list_copy(array, list->tail, bytesToCopyFromTail);
 
         // Copy the second half.
         unsigned int bytesToCopyFromHead = list->head - internal_List_start(char, list);
-        memcpy((char*)array + bytesToCopyFromTail, internal_List_start(char, list), bytesToCopyFromHead);
+        internal_list_copy((char*)array + bytesToCopyFromTail, internal_List_start(char, list), bytesToCopyFromHead);
     }
-    // list is continuous, and so only one memcpy is needed:
+    // list is continuous, and so only one internal_list_copy is needed:
     else {
         unsigned int bytesToCopy = (unsigned int)(list->head - list->tail);
-        memcpy(array, list->head, bytesToCopy);
+        internal_list_copy(array, list->head, bytesToCopy);
     }
 
     return array;
@@ -130,12 +134,12 @@ void List_reorder(List* list) {
 
     // if the list is continuous, and there is enough room at the start of the list's data block to store the whole list:
     if ((list->tail - list->data) >= countBytes && list->head > list->tail) {
-        memcpy(list->data, list->tail, countBytes);
+        internal_list_copy(list->data, list->tail, countBytes);
         return;
     }
 
     void* temp = List_create_array(list);
-    memcpy(list->data, temp, list->itemSize * List_count(list));
+    internal_list_copy(list->data, temp, list->itemSize * List_count(list));
     free(temp);
 }
 
@@ -170,16 +174,16 @@ void List_realloc(List* list, const unsigned int Capacity) {
     if(list->head < list->tail) {
         // Copy first half.
         unsigned int bytesToCopyFromTail = internal_List_end(char, list) - list->tail;
-        memcpy(newData, list->tail, bytesToCopyFromTail);
+        internal_list_copy(newData, list->tail, bytesToCopyFromTail);
 
         // Copy the second half.
         unsigned int bytesToCopyFromHead = list->head - internal_List_start(char, list);
-        memcpy(newData + bytesToCopyFromTail, internal_List_start(char, list), bytesToCopyFromHead);
+        internal_list_copy(newData + bytesToCopyFromTail, internal_List_start(char, list), bytesToCopyFromHead);
     }
-    // list is continuous, and so only one memcpy is needed:
+    // list is continuous, and so only one internal_list_copy is needed:
     else {
         unsigned int bytesToCopy = (unsigned int)(list->head - list->tail);
-        memcpy(newData, list->tail, bytesToCopy);
+        internal_list_copy(newData, list->tail, bytesToCopy);
     }
     
     // Reassign the head and tail to point into the new data section.
@@ -267,7 +271,7 @@ void List_remove_at(List* list, const unsigned int index) {
     
     for(unsigned int i = index; i < list->capacity - 1; i++) {
         nextIndex = List_at(list, i + 1);                   // Get the address of the next item.
-        memcpy(currentIndex, nextIndex, list->itemSize);    // Using memcpy here since we don't know the type stored, only how many bytes it is. 
+        internal_list_copy(currentIndex, nextIndex, list->itemSize);    // Using internal_list_copy here since we don't know the type stored, only how many bytes it is. 
         currentIndex = nextIndex;
     }
 
@@ -284,14 +288,14 @@ void internal_List_push_front(List* list, void* data) {
 
     // Early return if the list can still fit the next item. 
     if(List_count(list) < list->capacity - 1) {
-        memcpy(list->head, data, list->itemSize);
+        internal_list_copy(list->head, data, list->itemSize);
         internal_List_getNextPtr(char, list, list->head);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5
     List_realloc(list, list->capacity + (list->capacity >> 1));
-    memcpy(list->head, data, list->itemSize);
+    internal_list_copy(list->head, data, list->itemSize);
     internal_List_getNextPtr(char, list, list->head);
 }
 
@@ -304,14 +308,14 @@ void internal_List_push_back(List* list, void* data) {
     // Early return if the list can still fit the next item. 
     if(List_count(list) < list->capacity) { 
         internal_List_getPrevPtr(char, list, list->tail);
-        memcpy(list->tail, data, list->itemSize);
+        internal_list_copy(list->tail, data, list->itemSize);
         return;
     }
     
     // Reallocate the array with a doubling factor of 1.5.
     List_realloc(list, list->capacity + (list->capacity >> 1));
     internal_List_getPrevPtr(char, list, list->tail);
-    memcpy(list->tail, data, list->itemSize);
+    internal_list_copy(list->tail, data, list->itemSize);
 }
 
 
@@ -322,7 +326,7 @@ void internal_List_pop_front(List* list, void* outVal) {
     if (list->head == list->tail) return;   // Leave early if there is no data.
 
     internal_List_getPrevPtr(char, list, list->head);
-    memcpy(outVal, list->head, list->itemSize);
+    internal_list_copy(outVal, list->head, list->itemSize);
 }
 
 
@@ -332,7 +336,7 @@ void internal_List_pop_back(List* list, void* outVal) {
     //
     if (list->head == list->tail) return;   // Leave early if there is no data.
 
-    memcpy(outVal, list->tail, list->itemSize);
+    internal_list_copy(outVal, list->tail, list->itemSize);
     internal_List_getNextPtr(char, list, list->tail);
 }
 
@@ -342,13 +346,13 @@ void internal_List_peak_front(List* list, void* outVal) {
 
     char* temp = list->head;
     internal_List_getPrevPtr(char, list, temp);
-    memcpy(outVal, temp, list->itemSize);
+    internal_list_copy(outVal, temp, list->itemSize);
 }
 
 
 void internal_List_peak_back(List* list, void* outVal) {
     if (list->head == list->tail) return;   // Leave early if there is no data.
-    memcpy(outVal, list->tail, list->itemSize);
+    internal_list_copy(outVal, list->tail, list->itemSize);
 }
 
 
@@ -368,7 +372,7 @@ void List_append(List* dst, List* src) {
 
     List_realloc(dst, combinedByteCount);       // realloc only does anything when the new capacity is greater than the existing one.
     List_reorder(dst);                          // reorder skips lists already in order, so if realloc is called this also doesn't waste time.
-    memcpy(dst->head, srcArray, srcByteCount);  // since the list has to be in order, and is big enough, just memcpy the bytes from src.
+    internal_list_copy(dst->head, srcArray, srcByteCount);  // since the list has to be in order, and is big enough, just internal_list_copy the bytes from src.
     dst->head += srcByteCount;
     free(srcArray);
 }

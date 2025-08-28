@@ -4,6 +4,15 @@
 extern "C" {
 #endif
 
+//#define LIST_USE_MEMCPY
+
+#ifdef LIST_USE_MEMCPY
+#define internal_list_copy(dst, src, size) memcpy(dst, src, size)
+#else
+#define internal_list_copy(dst, src, size) for (unsigned int internal_list_copy_iterator = 0; internal_list_copy_iterator < (unsigned int)size; ++internal_list_copy_iterator) { ((char*)(dst))[internal_list_copy_iterator] = ((char*)(src))[internal_list_copy_iterator]; }
+#endif
+
+
 // Type Definitions:
 // 
 //

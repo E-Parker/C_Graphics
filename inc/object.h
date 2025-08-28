@@ -4,15 +4,25 @@
 extern "C" {
 #endif
 
+#ifndef OBJECT_INCLUDED
+#define OBJECT_INCLUDED
+
+// Object function return messages:
+
+#define ERRORCODE_OBJECT_SUCCESS          0x00
+#define ERRORCODE_OBJECT_MISSING_PARENT   0x01
+#define ERRORCODE_OBJECT_SELF_PARENT      0x02
+#define ERRORCODE_OBJECT_NULL_OBJECT      0x03
 
 #include <glad/glad.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "list.h"
 #include "gl_math.h"
 
 // Standard Buffer Size is the maximum size any alias can be.
-#define STANDARD_BUFFER_SIZE 20
+#define OBJECT_ALIAS_SIZE 28
 
 // Type Definitions:
 // 
@@ -34,8 +44,7 @@ typedef struct Object {
     //
     //                                  Offset  | Size in bytes    
     #define OBJECT_BODY() \
-    char Alias[STANDARD_BUFFER_SIZE];       /* 0    |   20      <--+-- These will be the same for any object.                       */  \
-    List* References;                       /* 20   |   8       <-/ <- Array of other objects that reference this one.              */  \
+    char Alias[OBJECT_ALIAS_SIZE];          /* 0    |   28      <----- These will be the same for any object.                       */  \
     union {uint8_t Type;                    /* 28   |   x           _- Only use the lower 24 bits, the first 8 represent type.      */  \
     uint32_t Flags;} Data;                  /* 28   |   4       <--+-- General purpose bit flags. useful for keeping object state.  */  \
     mat4 Transform;                         /* 32   |   64      <----- 4 * 4 matrix, represents the local position.                 */  \
@@ -59,19 +68,22 @@ extern const uint8_t Object_TypeCamera;
 
 #define Object_IsType(object, Type) ((*((Object*)object)->Type) == Type)
 
-void internal_Object_Initialize(void* ptr, void* parent, const uint8_t type);
-void internal_Object_Deinitialize(void* ptr);
+uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8_t type);
+void internal_Object_Deinitialize(void* objectPtr);
+void internal_Object_DestroyDefault(void* objectPtr);
+uint8_t internal_Object_TickDefault(void* objectPtr, const double deltaTime);
 
-void internal_Object_DestroyDefault(void* ptr);
-void internal_Object_TickDefault(void* ptr, const double deltaTime);
+void Object_SetAlias(void* objectPtr, const char* string);
+void Object_GetGlobalTransform(void* objectPtr, mat4 out);
 
-void Object_SetAlias(void* gameObject, const char* string);
-void Object_GetGlobalTransform(void* gameObject, mat4 out); 
+bool Object_IsChildOf(void* objectPtr, void* parentPtr, uint32_t* out);
 
-int Object_flag_compare(uint32_t data, uint32_t mask);
+bool Object_flag_compare(uint32_t data, uint32_t mask);
 void Object_flag_set(uint32_t* data, uint32_t mask);
 void Object_flag_unset(uint32_t* data, uint32_t mask);
 
+void Object_set_parent(void* objectPtr, void* parentPtr);
+#endif
 
 #ifdef __cplusplus
 }
