@@ -1,8 +1,10 @@
 #pragma once
 
+#include "object.h"
 #include "list.h"
 #include "gl_math.h"
-#include "object.h"
+#include "file_reader.h"
+#include "string_utilities.h"
 
 //Forward Definitions:
 typedef struct Material Material;
@@ -32,6 +34,9 @@ StaticMesh* CreateStaticMeshFromWavefront(const char* path);
 //StaticMesh* CreateStaticMeshPrimativeSphere(int subdivisions);
 
 // String parsing:
+
+// Split line into segments by space character. 
+void parseSplits(char* line, uint16_t MaxSegments, String* segments);
 
 //void Vector2FromString(const char* data, vec2 out);
 //void Vector3FromString(const char* data, vec3 out);
