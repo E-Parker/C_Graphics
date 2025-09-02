@@ -42,7 +42,7 @@ char* internal_ReadShaderSource(const char* path) {
     }
     
     // Get the raw file as a c-string to compile
-    fgets(&shaderSourceBuffer, GL_SHADER_SOURCE_SIZE, file);
+    fgets((char*)&shaderSourceBuffer, GL_SHADER_SOURCE_SIZE, file);
     int errorCode = ferror(file);
     fclose(file);
     file = NULL;
@@ -53,7 +53,7 @@ char* internal_ReadShaderSource(const char* path) {
         return NULL;
     }
 
-    char* bufferEnd = FindBufferEnd(&shaderSourceBuffer);
+    char* bufferEnd = FindBufferEnd((char*)&shaderSourceBuffer);
     
     // Return null if the buffer was not large enough.
     if(!bufferEnd) {
@@ -62,7 +62,7 @@ char* internal_ReadShaderSource(const char* path) {
     }
     
     // Copy the buffer to a smaller c-string just big enough to fit it.
-    uint64_t bufferSize = (uint64_t)(bufferEnd - &shaderSourceBuffer) + 1;
+    uint64_t bufferSize = (uint64_t)(bufferEnd - (char*)&shaderSourceBuffer) + 1;
     char* src = (char*)malloc(bufferSize);
     assert(src);
 

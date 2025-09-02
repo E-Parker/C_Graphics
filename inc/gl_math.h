@@ -4,10 +4,10 @@
 extern "C" {
 #endif
 
-#include <glad/glad.h>
-
 #ifndef GL_MATH_INCLUDED
 #define GL_MATH_INCLUDED
+
+#include <glad/glad.h>
 
 // GENERAL MATH CONSTANTS:
 // 

@@ -36,7 +36,7 @@ StaticMesh* CreateStaticMeshFromWavefront(const char* path);
 // String parsing:
 
 // Split line into segments by space character. 
-void parseSplits(char* line, uint16_t MaxSegments, String* segments);
+int parseSplits(char* line, uint16_t MaxSegments, String* segments);
 
 //void Vector2FromString(const char* data, vec2 out);
 //void Vector3FromString(const char* data, vec3 out);

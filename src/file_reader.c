@@ -24,7 +24,7 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 	// if the block containing the character we're after is before the current position, 
 	// we need to reset to the start of the line.
 	if (blockContainingIndex < reader->currentBlock) {
-		fsetpos(reader->fileDesc, reader->fileLinePos);
+		fsetpos(reader->fileDesc, &reader->fileLinePos);
 		reader->currentBlock = 0;
 	}
 
@@ -81,6 +81,6 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 int Reader_NextLine(Reader* reader){
 	fgetpos(reader->fileDesc, &reader->fileLinePos);
 	while (!internal_Reader_FindLineEnd(reader)) {}
-	fsetpos(reader->fileDesc, reader->fileLinePos);
+	fsetpos(reader->fileDesc, &reader->fileLinePos);
 }
 

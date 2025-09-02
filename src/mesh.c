@@ -54,7 +54,7 @@ Vector3 Vector3FromString(const std::string data) {
 }
 */
 
-void parseSplits(char* line, uint16_t MaxSegments, String* segments) {
+int parseSplits(char* line, uint16_t MaxSegments, String* segments) {
     
     uint16_t splits = 0;
     char* currentChar = line;
@@ -65,7 +65,7 @@ void parseSplits(char* line, uint16_t MaxSegments, String* segments) {
         case '\0': return 1;// End of file reached early.
         case '\n':          // End of line reached. 
             segments[splits].bufferEnd = currentChar - 1;
-            i = 0xffff;
+            i = 0xffff;     // Set "i" to max short so for loop exits.
             break;
         case ' ':           // Separator is found. Segment start and end must be set before incrementing splits.
             if (segments[splits].bufferStart)   segments[splits].bufferEnd = currentChar - 1;   // SegmentStart cannot be set on iteration 0 so this is fine.
@@ -84,6 +84,7 @@ void parseSplits(char* line, uint16_t MaxSegments, String* segments) {
             break;
         }
     }
+    return 0;
 }
 
 int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
@@ -94,7 +95,7 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
     
     String segments[0x6];
     
-    parseSplits(line, 0x6, &segments);
+    parseSplits(line, 0x6, (String*)&segments);
 
     for (uint8_t i = 0; i < 0x6; ++i) {
 

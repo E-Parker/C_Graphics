@@ -29,8 +29,8 @@ extern "C" {
 //
 
 // Define a function signature used to create and destroy objects.
-typedef void (*Object_TickFunction)(void*, const double);
-typedef void (*Object_DestroyFunction)(void*);
+typedef uint8_t (*Object_TickFunction)(void*, const double);
+typedef void    (*Object_DestroyFunction)(void*);
 
 typedef struct Object Object;
 
