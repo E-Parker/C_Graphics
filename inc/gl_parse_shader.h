@@ -1,23 +1,14 @@
 #pragma once
 
+#ifndef SHADER_PARSE_INCLUDED
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#ifndef GL_SHADER_MAX_DESCRIPTORS
-#define GL_SHADER_MAX_DESCRIPTORS 64 
-#endif
-
-#ifndef GL_ERROR_LOG_SIZE
-#define GL_ERROR_LOG_SIZE 512
-#endif
-
-#ifndef GL_SHADER_PATH_SIZE
-#define GL_SHADER_PATH_SIZE 128 
-#endif
-
-#ifndef GL_SHADER_SOURCE_SIZE
-#define GL_SHADER_SOURCE_SIZE 0xffff 
-#endif
+#define GL_SHADER_MAX_DESCRIPTORS 0x40 
+#define GL_ERROR_LOG_SIZE 0x200
+#define GL_SHADER_PATH_SIZE 0x80 
+#define GL_SHADER_SOURCE_BUFFER_SIZE 0x1000
 
 typedef struct {
     // Struct to store shader reference, type, and file path. 
@@ -33,8 +24,9 @@ typedef struct {
 // Compile and link any number of shaders Dynamically. This function can be used at run-time.
 GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount);
 
-char* internal_ReadShaderSource(const char* path);
+void internal_ReadShaderSource(const char* path);
 void internal_CompileShader(GLuint* shader, GLint type, const char* path);
 GLuint internal_Shader_CompileProgram(ShaderDescriptor* args);
 
+#endif
 

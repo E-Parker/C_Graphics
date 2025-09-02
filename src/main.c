@@ -84,7 +84,7 @@ int main(void) {
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor = { 0.5f, 0.5f, 0.5f };
+    vec3 AmbientColor = { 0.1f, 0.3f, 0.6f };
     
     glUtilSetAmbientColor(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     

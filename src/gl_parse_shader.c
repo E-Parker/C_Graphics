@@ -2,72 +2,66 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <assert.h>
 
 #include "string_utilities.h"
 #include "gl_parse_shader.h"
 
-// Macro defs:
-#ifndef GL_SHADER_MAX_DESCRIPTORS
-#define GL_SHADER_MAX_DESCRIPTORS 64 
-#endif
+// Shader descriptor buffer for run-time shader compiling.
+ShaderDescriptor descriptorBuffer[GL_SHADER_MAX_DESCRIPTORS]; 
 
-#ifndef GL_ERROR_LOG_SIZE
-#define GL_ERROR_LOG_SIZE 512
-#endif
-
-#ifndef GL_SHADER_PATH_SIZE
-#define GL_SHADER_PATH_SIZE 128 
-#endif
-
-#ifndef GL_SHADER_SOURCE_SIZE
-#define GL_SHADER_SOURCE_SIZE 0xffff 
-#endif
-
-char shaderSourceBuffer[GL_SHADER_SOURCE_SIZE];
+// shader source buffer
+char srcBuffer[GL_SHADER_SOURCE_BUFFER_SIZE];
+bool srcBufferWall = false;
+const GLchar* gl_srcBuffer = (GLchar*)srcBuffer;
 
 
-char* internal_ReadShaderSource(const char* path) {
+void internal_ReadShaderSource(const char* path) {
+   
+    // Check that the last call to this function was handled correctly
+    if (srcBufferWall) {
+        printf("Shader load warning: Last source file was not handled / recived correctly.");
+        srcBufferWall = false;
+    }
     
     FILE* file = fopen(path, "r");
     
-    // Return null if the file could not be found.
+    // Return if the file could not be found.
     if (!file) {
         printf("Shader load error: source file \"%s\" not found or inaccessible.", path);
-        return NULL;
+        srcBufferWall = false;
+        return;
     }
     
-    // Get the raw file as a c-string to compile
-    fgets((char*)&shaderSourceBuffer, GL_SHADER_SOURCE_SIZE, file);
+    // Get the size of the file.
+    fseek(file, 0, SEEK_END);
+    uint64_t bufferSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    
+    // Return early if the buffer isn't big enough to fit the file.
+    if (bufferSize > GL_SHADER_SOURCE_BUFFER_SIZE) {
+        printf("Shader load error: source file \"%s\" was too large to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_BUFFER_SIZE);
+        fclose(file);
+        return;
+    }
+    
+    fread((char*)&srcBuffer, 1, bufferSize, file);
     int errorCode = ferror(file);
     fclose(file);
-    file = NULL;
+    
+    // Force the last index to null so open gl doesnt explode trying to parse it later.
+    srcBuffer[bufferSize] = '\0';
 
-    // Return null if read error.
+    // Return the error if there was an stdio error reading the file.
     if (errorCode) {
-        printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader.", path);
-        return NULL;
-    }
-
-    char* bufferEnd = FindBufferEnd((char*)&shaderSourceBuffer);
-    
-    // Return null if the buffer was not large enough.
-    if(!bufferEnd) {
-        printf("Shader load error: source file \"%s\" was to big to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_SIZE);
-        return NULL;
+        printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader. Error code was, (%d)", path, errorCode);
+        return;
     }
     
-    // Copy the buffer to a smaller c-string just big enough to fit it.
-    uint64_t bufferSize = (uint64_t)(bufferEnd - (char*)&shaderSourceBuffer) + 1;
-    char* src = (char*)malloc(bufferSize);
-    assert(src);
-
-    memcpy(src, &shaderSourceBuffer, bufferSize);
-    return src;
+    // Only give the rest of the program the go-ahead if the shader was loaded correctly.
+    srcBufferWall = true;
 }
 
 
@@ -76,20 +70,21 @@ void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
     // Reads the path to a c-string and compiles the shader for OpenGL.
     // 
     
-    char* src = internal_ReadShaderSource(path);
-    const GLchar* gl_src = (GLchar*)src;
-
-    if(!src) {
-        *shader = GL_NONE;
+    internal_ReadShaderSource(path);
+    
+    // if reading the shader failed, return early.
+    if (!srcBufferWall) {
+        shader = GL_NONE;
         return;
     }
-    
+
     // Compile text as a shader
     *shader = glCreateShader(type);
-    glShaderSource(*shader, 1, &gl_src, NULL);
+    glShaderSource(*shader, 1, &gl_srcBuffer, NULL);
     glCompileShader(*shader);
-    free(src);
-    // Don't check for errors. Shader_CompileProgram handles displaying errors.
+    
+    // File was handled sucessfully so update wall.
+    srcBufferWall = false;
 }
 
 
@@ -126,13 +121,16 @@ GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
     if(argsCount <= 0) return GL_NONE;
     if(argsCount > GL_SHADER_MAX_DESCRIPTORS) argsCount = GL_SHADER_MAX_DESCRIPTORS; 
     
-    ShaderDescriptor* TerminatedArgs = (ShaderDescriptor*)calloc(argsCount + 1, sizeof(ShaderDescriptor));
-    memcpy(args, TerminatedArgs, argsCount);
+    memcpy(args, descriptorBuffer, argsCount);
+    
+    descriptorBuffer[argsCount - 1].shader = 0;
+    descriptorBuffer[argsCount - 1].type = 0;
+    descriptorBuffer[argsCount - 1].path = "";
 
-    return internal_Shader_CompileProgram(TerminatedArgs);
+    return internal_Shader_CompileProgram((ShaderDescriptor*)&descriptorBuffer);
 }
 
-
+// TODO: remove this function. it has literally one caller. See two lines up ^^^ 
 GLuint internal_Shader_CompileProgram(ShaderDescriptor* args) {
     // Expects an array of arguments with a null terminated end. 
     
@@ -183,12 +181,14 @@ GLuint internal_Shader_CompileProgram(ShaderDescriptor* args) {
             glDeleteShader(it->shader);
             continue;
         }
-        
+
         // Otherwise, clear the log, get the log from OpenGL and write it to the output. 
         memset(&log, '\0', GL_ERROR_LOG_SIZE);
         glGetShaderInfoLog(it->shader, GL_ERROR_LOG_SIZE, &dummyLength, log);
         
-        // Display the shader type and error log for the shader which failed.
+        // Display the shader path, type, and error log for the shader which failed.
+        printf("Shader Path:\n%s\n", it->path);
+
         switch (it->type) {
             case GL_VERTEX_SHADER: printf("Failure in Vertex shader:\n%s", log);
             case GL_TESS_CONTROL_SHADER: printf("Failure in Tessellation shader:\n%s", log);
