@@ -13,7 +13,6 @@ typedef struct Reader {
     fpos_t fileLinePos;                 // Internal use only, Position of current line in file.
     uint64_t length;                    // Length of the segment currently in the buffer. May be larger than the size of the buffer.
     FILE* fileDesc;                     // File handler associated with this reader.
-
 } Reader;
 
 // Crude pointer cast to avoid warnings about intentional buffer overrun.

@@ -18,7 +18,7 @@ int Reader_Deinitialize(Reader* reader) {
 
 
 char internal_Reader_at(Reader* reader, uint64_t index) {
-	uint32_t blockContainingIndex = index / 0x100;
+	uint32_t blockContainingIndex = index / READER_BUFFER_SIZE;
 	
     // if the block containing the character we're after is before the current position, 
 	// we need to reset to the start of the line.
@@ -28,11 +28,11 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 	}
 
 	uint32_t blocksToContaining = blockContainingIndex - reader->currentBlock;
-	uint16_t blockIndex = index % 0x100;
+	uint16_t blockIndex = index % READER_BUFFER_SIZE;
 
 	// request blocks until we're in the correct block.
 	for (uint32_t i = 0; i < blocksToContaining; ++i) {
-		fgets(internal_Reader_buffer(reader), 0x101, reader->fileDesc);
+		fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);
 	}
 
 	reader->currentBlock = blockContainingIndex;
@@ -44,7 +44,9 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 bool internal_Reader_FindLineEnd(Reader* reader) {
 	// Set buffer end to max uint32_t so when buffer overrun occurs, we can detect if the line is too big to fit in the buffer.
 	reader->bufferEnd = 0xffffffff;
-	fgets(internal_Reader_buffer(reader), 0x101, reader->fileDesc);	// request size of buffer +1 so that the first byte of bufferEnd is overwriten.
+	
+    // request size of buffer +1 so that the first byte of bufferEnd is overwriten.
+    fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);	
 
 	// return early if end of file reached.
 	if (feof(reader->fileDesc)) {
@@ -55,7 +57,7 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 	// line is less than the length of the buffer:
 	if (reader->bufferEnd == 0xffffffff) {
 		// Find the end of line (first instance of '\0').
-		for (uint16_t i = 0; i < 0x100; ++i) {
+		for (uint16_t i = 0; i < READER_BUFFER_SIZE; ++i) {
 			if (reader->buffer[i] == '\0') {
 				reader->length += i;
 				return true;
@@ -72,7 +74,7 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 	}
 
 	// buffer end was overwritten but there is more characters left.
-	reader->length += 0x100;
+	reader->length += READER_BUFFER_SIZE;
 	return false;
 }
 
