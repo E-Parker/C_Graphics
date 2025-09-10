@@ -21,6 +21,9 @@ typedef struct StaticMesh {
 } StaticMesh;
 
 
+
+StaticMesh* CreateStaticMeshCube();
+
 //StaticMesh* CreateStaticMeshFromRawData(const uint32_t* indeciesArray, const  Vector3* vertexBufferArray, const  Vector3* normalBufferArray, const  Vector2* tCoordArray, const  size_t indecies, const  size_t vertecies);
 //StaticMesh* CreateStaticMeshFromGraphicsLibraryTransmissionFormat(const char* Path);
 //StaticMesh* CreateStaticMeshFromGraphicsLibraryBinaryTransmissionFormat(const char* Path);

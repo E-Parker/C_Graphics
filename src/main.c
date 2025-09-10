@@ -12,6 +12,10 @@
 #include "material.h"
 #include "camera.h"
 #include "mesh.h"
+
+#include "renderable.h"
+
+
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 
@@ -64,6 +68,9 @@ int main(void) {
 
     //StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
     //StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
+    
+    StaticMesh* lightVis = CreateStaticMeshCube();
+    
     //mesh->SetMaterial(Mat0, 0);
     //lightVis->SetMaterial(Mat1, 0);
 
@@ -134,7 +141,7 @@ int main(void) {
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
-        //mat4_translate(lightPos, lightVis->Transform);
+        mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
         
@@ -147,18 +154,23 @@ int main(void) {
         mat4_get_forward(mainCamera->Transform, cameraDir);
 
         mat4 cameraView;
+        mat4 cameraPerspective;
+
+        mat4_copy(MAT4_IDENTITY, cameraPerspective);
 
         mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
+        mat4_perspective(mainCamera->Fov, AspectRatio(), mainCamera->NearClip, mainCamera->FarClip, cameraPerspective);
+        mat4_multiply(cameraView, cameraPerspective, mainCamera->ViewMatrix);
 
         UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
         void* data = UniformBuffer_get_shared(buffer);
-        //UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
 
+        //UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
         //UniformStruct* u_lights;
         //UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", &cameraView);
+        UniformBuffer_set_Global("FrameData", "u_view", &mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", &cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", &cameraDir);
 
@@ -167,8 +179,8 @@ int main(void) {
         //Shader_use(testShader);
 
         //mesh->Draw();
-        //lightVis->Draw();
-       
+        Mesh_Draw(lightVis->meshRenders, Mat0, (GLfloat*)&lightVis->Transform);
+
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
 

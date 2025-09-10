@@ -21,8 +21,8 @@ typedef struct Mesh {
 
 } Mesh;
 
-void DrawRenderable(const Mesh* mesh, const Material* material, const mat4 transform);
-void FreeMesh(Mesh* mesh);
-void FreeSubMesh(Mesh* mesh);
-void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  uint64_t indecies, const uint64_t vertecies);
-void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies);
+void Mesh_Draw(const Mesh* mesh, const Material* material, const mat4 transform);
+void Mesh_Free(Mesh* mesh);
+void Mesh_FreeSubmesh(Mesh* mesh);
+void Mesh_Upload(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  uint64_t indecies, const uint64_t vertecies);
+void Mesh_UploadSubmesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies);

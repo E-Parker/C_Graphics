@@ -188,7 +188,7 @@ void mat4_get_up(const mat4 m, vec3 out);
 void mat4_get_translation(const mat4 m, vec3 out);
 
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
-
+void mat4_perspective(const double fov, const double aspect, const double near, const double far, mat4 out);
 
 // internal size of lookup.
 const GLuint size_from_gl_type(const GLenum type);

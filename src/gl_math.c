@@ -352,3 +352,25 @@ void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out) 
 
     mat4_copy(result, out);
 }
+
+
+void mat4_perspective(const double fov, const double aspect, const double near, const double far, mat4 out) {
+    
+    double top = near * tan(fov * 0.5);
+    double bottom = -top;
+    double right = top * aspect;
+    double left = -right;
+    
+    float rightLeft = (float)(right - left);
+    float topBottom = (float)(top - bottom);
+    float farNear = (float)(far - near);
+
+    out[0] = ((float)near * 2.0f) / rightLeft;
+    out[5] = ((float)near * 2.0f) / topBottom;
+    out[2] = ((float)right + (float)left) / rightLeft;
+    out[6] = ((float)top + (float)bottom) / topBottom;
+    out[10] = -((float)far + (float)near) / farNear;
+    out[14] = -1.0f;
+    out[11] = -((float)far * (float)near * 2.0f) / farNear;
+
+}

@@ -43,20 +43,13 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 
 bool internal_Reader_FindLineEnd(Reader* reader) {
 	// Set buffer end to max uint32_t so when buffer overrun occurs, we can detect if the line is too big to fit in the buffer.
-	reader->bufferEnd = 0xffffffff;
+	reader->bufferEnd = ~0;
 	
     // request size of buffer +1 so that the first byte of bufferEnd is overwriten.
     fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);	
-
-	// return early if end of file reached.
-	if (feof(reader->fileDesc)) {
-		clearerr(reader->fileDesc);
-		return true;
-	}
-
-	// line is less than the length of the buffer:
-	if (reader->bufferEnd == 0xffffffff) {
-		// Find the end of line (first instance of '\0').
+	
+    // line is less than the length of the buffer:
+	if (reader->bufferEnd == ~0) {
 		for (uint16_t i = 0; i < READER_BUFFER_SIZE; ++i) {
 			if (reader->buffer[i] == '\0') {
 				reader->length += i;
@@ -66,14 +59,14 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 		// This shouldn't happen.
 		assert(false);
 	}
-
-	// buffer end was overwritten, so line is exactly 256 characters:
-	if (reader->buffer[0xff] == '\n') {
-		reader->length += 0xff;
+    
+    // line is exactly the length of the buffer:
+	if (reader->buffer[0xff] == '\0') {
+		reader->length += READER_BUFFER_SIZE;
 		return true;
 	}
-
-	// buffer end was overwritten but there is more characters left.
+    
+    // line must be longer than the buffer.
 	reader->length += READER_BUFFER_SIZE;
 	return false;
 }
@@ -86,7 +79,7 @@ int Reader_NextLine(Reader* reader) {
     while (!internal_Reader_FindLineEnd(reader)) {}
 #else
     uint64_t iteration = 0;
-    while (!internal_Reader_FindLineEnd(reader)) { if (iteration >= READER_LIMIT_LINE_END_DEPTH) return EFBIG; }
+    while (!internal_Reader_FindLineEnd(reader)) { if (iteration >= READER_LIMIT_LINE_END_DEPTH) return EFBIG; ++iteration; }
 #endif
     fsetpos(reader->fileDesc, &reader->fileLinePos);
     return ferror(reader->fileDesc);

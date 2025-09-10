@@ -38,7 +38,7 @@ uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8
         return ERRORCODE_OBJECT_NULL_OBJECT;
     }
 
-    Object_SetAlias(object, "EmptyObject");
+    Object_SetAlias(object, "Empty");
     mat4_copy(MAT4_IDENTITY, object->Transform);
     
     object->Data.Flags = 0;

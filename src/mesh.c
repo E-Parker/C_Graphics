@@ -1,9 +1,11 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "list.h"
 #include "string_utilities.h"
 
+#include "renderable.h"
 #include "mesh.h"
 
 
@@ -87,6 +89,7 @@ int parseSplits(char* line, uint16_t MaxSegments, String* segments) {
     return 0;
 }
 
+
 int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
     // This function parses a wavefront file face data, adding it to the list of vertex indices, texture indicies, and normal indicies. 
     // Returns the number of vertices added. 
@@ -104,17 +107,91 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, char* line) {
 
 }
 
+StaticMesh* CreateStaticMeshCube() {
+    GLfloat vertices[] = {
+        0, 0, 0,
+        0, 1, 0,
+        1, 1, 0,
+        1, 0, 0,
+        0, 0, 1,
+        0, 1, 1,
+        1, 1, 1,
+        1, 0, 1,
+    };
+
+    GLfloat tchoord[] = {
+        1, 1,
+        1, 1,
+        1, 1,
+        1, 1,
+        1, 1,
+        1, 1,
+        1, 1,
+        1, 1,
+    };
+
+    uint32_t quads[] = {
+        7,6,5,4, // front
+        0,1,2,3, // back
+        6,7,3,2, // right
+        5,6,2,1, // top
+        4,5,1,0, // left
+        7,4,0,3, // bottom
+    };
+    
+    uint32_t tris[6 * 6] = {0,};
+    
+    uint32_t* tri = (uint32_t*)&tris;
+    uint32_t* quad = (uint32_t*)&quads;
+
+    for (uint32_t i = 0; i < 6; ++i, quad += 4) {
+        *tri++ = quad[0];
+        *tri++ = quad[1];
+        *tri++ = quad[2];
+        *tri++ = quad[2];
+        *tri++ = quad[3];
+        *tri++ = quad[0];
+    }
+
+    
+
+    StaticMesh* staticMesh = (StaticMesh*)malloc(sizeof(StaticMesh));
+    staticMesh->meshRenders = (Mesh*)calloc(1, sizeof(Mesh));
+    
+    Mesh_Upload(staticMesh->meshRenders, (uint32_t*)vertices, (GLfloat*)tris, (GLfloat*)tris, (GLfloat*)tchoord, (sizeof(quads) << 1), 8);
+    return staticMesh;
+}
+
 
 StaticMesh* CreateStaticMeshFromWavefront(const char* path) {
-    return NULL;
+    
+    StaticMesh* staticmesh = (StaticMesh*)malloc(sizeof(StaticMesh));
+    staticmesh->meshRenders = (Mesh*)calloc(1, sizeof(Mesh));
 
+    staticmesh->materials = NULL;
+    staticmesh->MaterialCount = 0;
 
+    uint32_t index[3] = {0, 1, 2};
+    GLfloat verticies[9] = {1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f ,0.0f, 0.0f};
+    GLfloat normals[9] = {1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f,1.0f, 0.0f, 0.0f};
+    GLfloat tchoord[6] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+    
+    Mesh_Upload(staticmesh->meshRenders, (uint32_t*)index, (GLfloat*)verticies, (GLfloat*)normals, (GLfloat*)tchoord, 1, 3);
 
+    return staticmesh;
+    
 }
 
 
 void Object_StaticMesh_destroy(StaticMesh* mesh) {
     OBJECT_DESTROY_BODY(mesh);
+
+
+    Mesh_Free(mesh->meshRenders);
+    
+    free(mesh->meshRenders);
+    free(mesh);
+
 }
 
 
