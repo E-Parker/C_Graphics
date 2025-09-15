@@ -1,0 +1,32 @@
+#pragma once
+
+#ifndef SHADER_PARSE_INCLUDED
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#define GL_SHADER_MAX_DESCRIPTORS 0x40 
+#define GL_ERROR_LOG_SIZE 0x200
+#define GL_SHADER_PATH_SIZE 0x80 
+#define GL_SHADER_SOURCE_BUFFER_SIZE 0x1000
+
+typedef struct {
+    // Struct to store shader reference, type, and file path. 
+    // if path is empty, the shader is null. 
+    GLuint shader;
+    GLint type;
+    const char* path;
+} ShaderDescriptor;
+
+// Macro to compile and link any number of shaders. Use this for compile-time constant since this guarantees there is no size miss-match.
+#define Shader_CompileProgram(program, ...) do { ShaderDescriptor args[] = { __VA_ARGS__, {0, 0, ""} }; program = internal_Shader_CompileProgram(args); } while(0)
+
+// Compile and link any number of shaders Dynamically. This function can be used at run-time.
+GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount);
+
+void internal_ReadShaderSource(const char* path);
+void internal_CompileShader(GLuint* shader, GLint type, const char* path);
+GLuint internal_Shader_CompileProgram(ShaderDescriptor* args);
+
+#endif
+
