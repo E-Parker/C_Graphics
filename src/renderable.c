@@ -2,8 +2,8 @@
 
 #include <stddef.h>
 
-#include "gl_math.h"
-#include "hash_table.h"
+#include "engine_core/hash_table.h"
+#include "engine/math.h"
 #include "material.h"
 #include "texture.h"
 #include "renderable.h"

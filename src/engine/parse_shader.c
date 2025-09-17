@@ -6,8 +6,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "string_utilities.h"
-#include "gl_parse_shader.h"
+#include "engine_core/string.h"
+#include "engine_core/list.h"
+#include "engine/parse_shader.h"
 
 // Shader descriptor buffer for run-time shader compiling.
 ShaderDescriptor descriptorBuffer[GL_SHADER_MAX_DESCRIPTORS]; 

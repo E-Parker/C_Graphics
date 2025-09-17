@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "string_utilities.h"
+#include "engine_core/string.h"
 #include "file_reader.h"
 
 

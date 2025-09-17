@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "gl_math.h"
+#include "engine/math.h"
 
 // GL TYPE CONSTANT DEFINITIONS:
 //

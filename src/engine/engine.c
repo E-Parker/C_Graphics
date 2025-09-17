@@ -5,8 +5,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "list.h"
-#include "gl_utilities.h"
+#include "engine_core/list.h"
+#include "engine/engine.h"
 
 
 typedef struct {

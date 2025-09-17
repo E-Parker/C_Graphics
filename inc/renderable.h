@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <stdint.h>
 
-#include "gl_math.h"
+#include "engine/math.h"
 
 typedef struct Material Material;
 

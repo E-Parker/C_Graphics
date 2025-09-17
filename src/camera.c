@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "gl_utilities.h"
-#include "gl_math.h"
+#include "engine/engine.h"
+#include "engine/math.h"
 #include "camera.h"
 
 void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double ratio) {

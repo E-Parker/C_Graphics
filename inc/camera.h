@@ -1,7 +1,7 @@
 #pragma once
 
 #include "object.h"
-#include "gl_math.h"
+#include "engine/math.h"
 
 typedef struct Camera {
     OBJECT_BODY();

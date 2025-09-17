@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "hash_table.h"
+#include "engine_core/hash_table.h"
 #include "texture.h"
 
 

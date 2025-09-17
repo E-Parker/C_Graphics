@@ -18,8 +18,8 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "list.h"
-#include "gl_math.h"
+#include "engine_core/list.h"
+#include "engine/math.h"
 
 // Standard Buffer Size is the maximum size any alias can be.
 #define OBJECT_ALIAS_SIZE 28

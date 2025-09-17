@@ -4,14 +4,15 @@
 #include <assert.h>
 #include <math.h>
 
-#include "gl_utilities.h"
-#include "gl_math.h"
-#include "gl_shader_uniform.h"
+#include "engine/engine.h"
+#include "engine/math.h"
+#include "engine/shader_uniform.h"
 
 #include "texture.h"
 #include "material.h"
 #include "camera.h"
 #include "mesh.h"
+
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
 

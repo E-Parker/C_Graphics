@@ -1,10 +1,10 @@
 #pragma once
 
+#include "engine_core/string.h"
+#include "engine_core/list.h"
+#include "engine/math.h"
 #include "object.h"
-#include "list.h"
-#include "gl_math.h"
 #include "file_reader.h"
-#include "string_utilities.h"
 
 //Forward Definitions:
 typedef struct Material Material;

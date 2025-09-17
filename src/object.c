@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "gl_math.h"
-#include "list.h"
+#include "engine_core/list.h"
+#include "engine/math.h"
 #include "object.h"
 
 

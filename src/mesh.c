@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "list.h"
-#include "string_utilities.h"
+#include "engine_core/string.h"
+#include "engine_core/list.h"
 
 #include "mesh.h"
 

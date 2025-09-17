@@ -7,10 +7,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "string_utilities.h"
-#include "gl_math.h"
-#include "hash_table.h"
-#include "gl_shader_uniform.h"
+#include "engine_core/string.h"
+#include "engine_core/hash_table.h"
+#include "engine/math.h"
+#include "engine/shader_uniform.h"
 
 #define MAX_ALIAS_SIZE 512
 
