@@ -1,13 +1,6 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifndef GL_MATH_INCLUDED
-#define GL_MATH_INCLUDED
-
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 // GENERAL MATH CONSTANTS:
 // 
@@ -187,7 +180,10 @@ void mat4_get_right(const mat4 m, vec3 out);
 void mat4_get_up(const mat4 m, vec3 out);
 void mat4_get_translation(const mat4 m, vec3 out);
 
+void mat4_transpose(const mat4 m, mat4 out);
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
+void mat4_projection_perspective(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);
+void mat4_projection_orthographic(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);
 
 
 // internal size of lookup.
@@ -195,10 +191,4 @@ const GLuint size_from_gl_type(const GLenum type);
 
 // internal function to upload data to GPU.
 void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data);
-
-#ifdef __cplusplus
-}
-#endif
-#endif
-
 

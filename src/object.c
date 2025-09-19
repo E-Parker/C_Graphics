@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
+#include "stdlib.h"
 
 #include "engine_core/list.h"
 #include "engine/math.h"
@@ -15,30 +13,26 @@ const uint8_t Object_TypeCamera        = 0x05;
 
 
 uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8_t type) {
-    // Set default values of an object.
-    // Should always be called at the start of any custom object factory function.
-    //
-    
-    uint8_t errorCode = ERRORCODE_OBJECT_SUCCESS;
-
 
     // Perform blind cast to object. All object types have the same header alignment so this is safe, assuming an object is passed in here.
     Object* object = (Object*)objectPtr;
     Object* parent = (Object*)parentPtr;
+    uint8_t errorCode = ERRORCODE_OBJECT_SUCCESS;
 
-
-    // Ensure that the parent is not itself to prevent circular references. This is considered non-fatal.
     if (objectPtr == parentPtr) {
-        parent = NULL;
         errorCode = ERRORCODE_OBJECT_SELF_PARENT;
+        goto ObjectInitFail;
     }
 
-    // Something has gone wrong, trying to initialize an object which is null.
     if (!objectPtr) {
-        return ERRORCODE_OBJECT_NULL_OBJECT;
+        errorCode = ERRORCODE_OBJECT_NULL_OBJECT;
+        goto ObjectInitFail;
     }
 
-    Object_SetAlias(object, "EmptyObject");
+    for (uint8_t i = 0; i < OBJECT_ALIAS_SIZE; i++) {
+        object->Alias[i] = '\0';
+    };
+
     mat4_copy(MAT4_IDENTITY, object->Transform);
     
     object->Data.Flags = 0;
@@ -46,109 +40,109 @@ uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8
     object->Parent = parent;
     
     if (parent) {
-        List_push_front(parent->Children, object);
+        List_push_back(&parent->Children, object);
     }
 
-    object->Children = List_create(Object*, 16);
+    List_initialize(Object*, &object->Children, 16);
 
     object->Tick = internal_Object_TickDefault;
     object->Destroy = internal_Object_DestroyDefault;
 
+ObjectInitFail:
     return errorCode;
 }
 
 
 void internal_Object_Deinitialize(void* objectPtr) {
-    // Destroys the chain of child objects attached to this object.
-    //
-    //
-
-    // Get this object as an Object*
     Object* object = (Object*)objectPtr;
     
-    // For every child of this object, call it's destroy function.
-    for(uint64_t i = 0; i < List_count(object->Children); i++) {
+    // TODO: come up with a better solution.
+    // This is okay, but maybe sort of bad because recursion. 
+    // Could potentially blow up the stack.
+    for(uint64_t i = 0; i < List_count(&object->Children); i++) {
         Object* childObject;
-        List_pop_front(object->Children, childObject);
+        List_pop_front(&object->Children, childObject);
         childObject->Destroy(childObject);
     }
-    
-    // Now that all children objects have been destroyed, it is safe to free this object.
 }
+
 
 void internal_Object_DestroyDefault(void* objectPtr) {
-    // Default destroy function for objects.
     Object* object = (Object*)objectPtr;
     internal_Object_Deinitialize(objectPtr);
-    free(objectPtr);;
+    free(objectPtr);
 }
 
+
 uint8_t internal_Object_TickDefault(void* ptr, const double deltaTime) {
-    // Default tick function for objects.
+    OBJECT_TICK_BODY(ptr)
     return ERRORCODE_OBJECT_SUCCESS;
 }
 
-void Object_SetAlias(void* objectPtr, const char* string) {
-    /* copy the string into the gameObject alias buffer. */
-    
+
+void Object_set_alias(void* objectPtr, const char* string) {
     char* gameObjectAlias = (char*)objectPtr;
+    char* currentCharacter = (char*)string;
     
-    // Clear the last alias.
-    memset(gameObjectAlias, '\0', OBJECT_ALIAS_SIZE);
-    
-    // Set the characters in the alias up to the null terminator of the input string.
-    // Will only copy up to STANDARD_BUFFER_SIZE characters.
     for(uint8_t i = 0; i < OBJECT_ALIAS_SIZE; i++) {
-        if(string[i] == '\0') {
-            return;
+        if(currentCharacter == '\0') {
+            gameObjectAlias[i] = '\0';
         }
-        gameObjectAlias[i] = string[i];
+
+        else {
+            gameObjectAlias[i] = string[i];
+            currentCharacter++;
+        }
     }
 }
 
 
-void Object_GetGlobalTransform(void* object, mat4 out) {
-    /* This function returns the global transform of any asset. */
-    
-    Object* gameObject = (Object*)object;
-    Object* parentObject;
-    
+void Object_get_world_space_transform(void* objectPtr, mat4 out) {
+    Object* object = (Object*)objectPtr;
+    Object* currentNode = object;
+
+    List hiarachy;
     mat4 result;
 
-    mat4_copy(result, gameObject->Transform);
-    
-    // accumulatively multiply the transform down the chain to the root node. 
-    for(uint16_t i = 0; i < 512; i++) {
-        parentObject = gameObject->Parent;
-        
-        if(parentObject == NULL) {
-            break; 
-        }
-    
-        mat4_multiply(result, parentObject->Transform, result);
+    List_initialize(GLfloat*, &hiarachy, 128);
+    mat4_copy(MAT4_IDENTITY, result);
+
+    while (currentNode->Parent) {
+        List_push_front(&hiarachy, currentNode->Transform);
     }
-    mat4_copy(out, result);
+
+    for (List_iterator(GLfloat*, &hiarachy)) {
+        mat4_multiply(result, *it, result);
+    }
+
+    mat4_copy(result, out);
 }
 
 
-bool Object_IsChildOf(void* objectPtr, void* parentPtr, uint32_t* out) {
-    // Simple brute-force linear search. This fucking blows, but is probably better than maintaining a second array of references.
+void Object_set_parent(void* objectPtr, void* parentPtr) {
     Object* object = (Object*)objectPtr;
-    Object* parent = (Object*)parentPtr;
+    Object* newParent = (Object*)parentPtr;
+    Object* parent = object->Parent;
 
-    uint32_t indexOf = 0;
-
-    // Iterate through children list, if a match is found copy index to out and return true.
-    for List_iterator(Object*, parent->Children) {
-        if (*it == object) {
-            if (out) *out = indexOf;
-            return true;
-        }
-        ++indexOf;
+    if (object->Parent == newParent) {
+        return;
     }
 
-    if (out) *out = 0;
-    return false;
+    if (parent) {
+        List_remove_at(&parent->Children, object->internal_IndexOf);
+        // TODO: look into maybe changing this to a less brute force method.
+        uint64_t newChildIndex = 0;
+        for (List_iterator(Object*, &parent->Children), newChildIndex++) {
+            (*it)->internal_IndexOf = newChildIndex;
+        }
+    }
+    
+    if (newParent) {
+        object->internal_IndexOf = List_count(&newParent->Children);
+        List_push_back(&newParent->Children, object);
+    }
+
+    object->Parent = newParent;
 }
 
 
@@ -158,36 +152,11 @@ bool Object_flag_compare(uint32_t data, uint32_t mask) {
     return ((data & mask) == mask) & 1;
 }
 
-
 void Object_flag_set(uint32_t* data, uint32_t mask) {
     *data |= mask;
 }
-
 
 void Object_flag_unset(uint32_t* data, uint32_t mask) {
     mask &= 0x00ffffff;
     *data &= ~mask;
 }
-
-
-void Object_set_parent(void* objectPtr, void* parentPtr) {
-    Object* object = (Object*)objectPtr;
-    Object* objectNewParent = (Object*)parentPtr;
-    Object* objectOldParent = object->Parent;
-
-    // object already has a parent, remove from old parent child list.
-    if (objectOldParent) {
-        uint32_t indexOf;
-        if (Object_IsChildOf(object, objectOldParent, &indexOf)) {
-            List_remove_at(objectOldParent->Children, indexOf);
-        }
-    }
-    
-    // if there is a new parent, and the object is not already a child of that parent, append to the list.
-    if (objectNewParent && !Object_IsChildOf(object, objectNewParent, NULL)) {
-        List_push_front(objectNewParent->Children, object);
-    }
-    
-    object->Parent = objectNewParent;
-}
-

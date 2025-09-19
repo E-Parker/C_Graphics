@@ -1,55 +1,67 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "engine_core/engine_common.h"
+#include "engine_core/list.h"
 
-#include <stdbool.h>
+typedef struct GLFWwindow GLFWwindow;
 
-// Type Definitions:
-// 
-//
+typedef struct FrameData {
 
-typedef void (*Function_Void_NoParam)();
+    // Frame
+    double time;
+    double lastTime;
+    double deltaTime;
 
-// GLFW Functions:
-//
-//
+    // Window
+    int WindowWidth;
+    int WindowHeight;
+    double aspectRatio;
+    float AmbientColor[3];
+    bool WindowShouldClose;
 
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
-struct GLFWwindow* Initialize(const int width, const int height, const char* tittle);
+    // Cursor
+    bool captureCursor;
+    double xPosDelta;
+    double yPosDelta;
+    double xPos;
+    double yPos;
+    double lastxPos;
+    double lastyPos;
+    
+    // Keyboard
+    bool KeyPressesPrevious[GLFW_KEY_LAST];
+    bool KeyPressesCurrent[GLFW_KEY_LAST];
+    bool keyPressesRepeat[GLFW_KEY_LAST];
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-static void mouse_callback(GLFWwindow* window, double xPos, double yPos);
+    List TerminationFunctions;
+    GLFWwindow* ActiveWindow;
 
-void glUtilTerminate();
-void glUtilAddTerminationFunction(Function_Void_NoParam function);
-
-void glUtilSetAmbientColor(float r, float g, float b);
-void glUtilInitializeFrame(GLFWwindow* window);
-void glUtilPollEvents();
-
-// Functions bound to static InstanceInfo:
-//
-//
-
-double Time();
-double DeltaTime();
-double AspectRatio();
-int WindowHeight();
-int WindowWidth();
-
-bool IsKeyPressed(int key);
-bool IsKeyDown(int key);
-bool IsKeyUp(int key);
-
-void SetCaptureCursor(const bool captureCursor);
-void GetCursorPositionDelta(double* xPos, double* yPos);
-void GetCursorPosition(double* xPos, double* yPos);
+} FrameData;
 
 
-#ifdef __cplusplus
-}
-#endif
 
+bool    Engine_initialize(const int width, const int height, const char* tittle);
+void    Engine_terminate ();
+void    Engine_add_termination_function (Function_Void_NoParam function);
 
+void    Engine_execute_tick ();
+void    Engine_set_ambient_color (float r, float g, float b);
+
+bool    isActive();
+double  Time ();
+double  DeltaTime ();
+double  AspectRatio ();
+int     WindowHeight ();
+int     WindowWidth ();
+
+bool    IsKeyPressed (int key);
+bool    IsKeyDown (int key);
+bool    IsKeyUp (int key);
+
+void    SetCaptureCursor (const bool captureCursor);
+void    GetCursorPositionDelta (double* xPos, double* yPos);
+void    GetCursorPosition (double* xPos, double* yPos);
+
+void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
+void APIENTRY internal_Engine_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods);
+void APIENTRY internal_Engine_mouse_callback (GLFWwindow* window, double xPos, double yPos);

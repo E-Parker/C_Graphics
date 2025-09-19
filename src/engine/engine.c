@@ -2,267 +2,218 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
-#include <string.h>
-#include <assert.h>
 
 #include "engine_core/list.h"
 #include "engine/engine.h"
 
+#define ENGINE_DEBUG
 
-typedef struct {
-    // Struct to hold data for relevant to the state of the program. Updated every frame. 
-    //
-    //
-    
-    // Frame delta:
-    double time;
-    double lastTime;
-    double deltaTime;
-
-    // Window Data:
-    int WindowWidth;
-    int WindowHeight;
-    double aspectRatio;
-    
-    // Cursor Data:
-    bool captureCursor;
-    double xPosDelta;
-    double yPosDelta;
-    double xPos;
-    double yPos;
-    double lastxPos;
-    double lastyPos;
-
-    // Graphics Data:
-    float AmbientColor[3];
-    
-    // Internal lists:
-    int gKeysPrev[GLFW_KEY_LAST * sizeof(unsigned int)];
-    int gKeysCurr[GLFW_KEY_LAST * sizeof(unsigned int)];
-
-    // List of Termination Functions:
-    List TerminationFunctions;
-
-} FrameData;
-
-// Static FrameData struct instance
-FrameData internal_FrameData;
+FrameData frame;
 
 
-double Time() {
-    return internal_FrameData.time;
+bool isActive() {
+    return !glfwWindowShouldClose(frame.ActiveWindow);
+}
+
+double Time () {
+    return frame.time;
+}
+
+double DeltaTime () {
+    return frame.deltaTime;
+}
+
+double AspectRatio () {
+    return frame.aspectRatio;
+}
+
+int WindowHeight () {
+    return frame.WindowHeight;
+}
+
+int WindowWidth () {
+    return frame.WindowWidth;
 }
 
 
-double DeltaTime() {
-    return internal_FrameData.deltaTime;
+void SetCaptureCursor (const bool captureCursor) {
+    frame.captureCursor = captureCursor;
+}
+
+void Engine_set_ambient_color(float r, float g, float b) {
+    frame.AmbientColor[0] = r;
+    frame.AmbientColor[1] = g;
+    frame.AmbientColor[2] = b;
 }
 
 
-double AspectRatio() {
-    return internal_FrameData.aspectRatio;
+void GetCursorPositionDelta (double* xPos, double* yPos) {
+    *xPos = frame.xPosDelta / (double)frame.WindowHeight;
+    *yPos = frame.yPosDelta / (double)frame.WindowHeight;
+}
+
+void GetCursorPosition (double* xPos, double* yPos) {
+    *xPos = frame.xPos / (double)frame.WindowHeight;
+    *yPos = frame.yPos / (double)frame.WindowHeight;
 }
 
 
-int WindowHeight() {
-    return internal_FrameData.WindowHeight;
-}
-
-
-int WindowWidth() {
-    return internal_FrameData.WindowWidth;
-}
-
-
-void SetCaptureCursor(const bool captureCursor) {
-    // Globally accessible function to tell GKFW what the cursor settings should be.
-    // if captureCursor is set, the xPos and yPos from GetCursorPosition will act like a delta.
-    internal_FrameData.captureCursor = captureCursor;
-}
-
-
-void GetCursorPositionDelta(double* xPos, double* yPos) {
-    // Globally accessible function to get the cursor position.
-    *xPos = internal_FrameData.xPosDelta / (double)internal_FrameData.WindowHeight;
-    *yPos = internal_FrameData.yPosDelta / (double)internal_FrameData.WindowHeight;
-
-    // This is not great but I cant think of a better way to make sure the delta get set back to zero once after camera gets updated. 
-    internal_FrameData.xPosDelta = 0.0;
-    internal_FrameData.yPosDelta = 0.0;
-}
-
-
-void GetCursorPosition(double* xPos, double* yPos) {
-    // Globally accessible function to get the cursor position.
-    *xPos = internal_FrameData.xPos / (double)internal_FrameData.WindowHeight;
-    *yPos = internal_FrameData.yPos / (double)internal_FrameData.WindowHeight;
-}
-
-
-GLFWwindow* Initialize(const int width, const int height, const char* tittle) {
-    // Initialize a GLFW window.
-    //
-    //
-    
-    // TODO: remove assert.
-    assert(glfwInit() == GLFW_TRUE);
+void initializeWindowHints () {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    
-    #ifdef NDEBUG
-    #else
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    #endif
-
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(width, height, tittle, NULL, NULL);
-    glfwMakeContextCurrent(window);
-    
-    // TODO: remove assert.
-    assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress));
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetKeyCallback(window, key_callback);
+}
 
-    #ifdef NDEBUG
-    #else
-        glEnable(GL_DEBUG_OUTPUT);
-        glDebugMessageCallback(glDebugOutput, NULL);
-    #endif
-    
-    glfwSetWindowSize(window, width, height);
+void initializeWindow(const int width, const int height, const char* tittle) {
+    frame.WindowWidth = width;
+    frame.WindowHeight = height;
+    frame.ActiveWindow = glfwCreateWindow(width, height, tittle, NULL, NULL);
+    glfwSetWindowSize(frame.ActiveWindow, width, height);
+    glfwMakeContextCurrent(frame.ActiveWindow);
+}
 
-    // Misc OpenGL settings.
+void initializeCallbacks (GLFWwindow* window) {
+    glfwSetCursorPosCallback(window, internal_Engine_mouse_callback);
+    glfwSetKeyCallback(window, internal_Engine_key_callback);
+#ifdef ENGINE_DEBUG
+    glDebugMessageCallback(internal_Engine_debug_callback, NULL);
+    glEnable(GL_DEBUG_OUTPUT);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+}
+
+bool Engine_initialize(const int width, const int height, const char* tittle) {
+    if (!glfwInit()) {
+        goto InitFail;
+    }
+
+    initializeWindowHints();
+    initializeWindow(width, height, tittle);
+
+    if (!frame.ActiveWindow) {
+        goto InitFail_Terminate;
+    }
+    
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        goto InitFail_DestroyWindowAndTerminate;
+    }
+    
+    initializeCallbacks(frame.ActiveWindow);
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glFrontFace(GL_CCW);
 
-    // Initialize InstanceInfo:
-    memset(&internal_FrameData, '\0', sizeof(FrameData));
-    internal_FrameData.WindowHeight = height;
-    internal_FrameData.WindowWidth = width;
-    List_initialize(Function_Void_NoParam, &(internal_FrameData.TerminationFunctions), 16);
+    List_initialize(Function_Void_NoParam, &(frame.TerminationFunctions), 16);
 
-    return window;
+    return true;
+
+InitFail_DestroyWindowAndTerminate:
+    glfwDestroyWindow(frame.ActiveWindow);
+    
+InitFail_Terminate:
+    glfwTerminate();
+
+InitFail:
+    return false;
 }
 
 
-void glUtilTerminate() {
-    // This function executes each function in the list of termination functions.
-    //
-    //
-    
-    // Return early if the list is empty.
-    if (List_isEmpty(&(internal_FrameData.TerminationFunctions))) {
-        return;
-    }
+void Engine_add_termination_function(Function_Void_NoParam function) {
+    List_push_back(&(frame.TerminationFunctions), function);
+}
 
-    // For each termination function added to the list, call it.
-    for List_iterator(Function_Void_NoParam, &(internal_FrameData.TerminationFunctions)) {
+void Engine_terminate () {
+    for (List_iterator(Function_Void_NoParam, &(frame.TerminationFunctions))) {
         (*it)();
     }
-}
 
-void glUtilAddTerminationFunction(Function_Void_NoParam function) {
-    List_push_back(&(internal_FrameData.TerminationFunctions), function);
-}
-
-
-void glUtilSetAmbientColor(float r, float g, float b) {
-    internal_FrameData.AmbientColor[0] = r;
-    internal_FrameData.AmbientColor[1] = g;
-    internal_FrameData.AmbientColor[2] = b;
+    List_deinitialize(&(frame.TerminationFunctions));
 }
 
 
-void glUtilInitializeFrame(GLFWwindow* window){
+void InitializeFrame () {
+    glfwSwapBuffers(frame.ActiveWindow);
+
+    frame.lastTime = frame.time;
+    frame.time = glfwGetTime();
+    frame.deltaTime = frame.time - frame.lastTime;
+
+    frame.xPosDelta = 0.0;
+    frame.yPosDelta = 0.0;
+
+    glfwGetFramebufferSize(frame.ActiveWindow, &(frame.WindowWidth), &(frame.WindowHeight));
+    frame.aspectRatio = (double)frame.WindowWidth / (double)frame.WindowHeight;
+    glViewport(0, 0, frame.WindowWidth, frame.WindowHeight);
     
-    internal_FrameData.time = glfwGetTime();
-    internal_FrameData.deltaTime = internal_FrameData.time - internal_FrameData.lastTime;
-
-    // Resize the view to match the window.
-    glfwGetFramebufferSize(window, &(internal_FrameData.WindowWidth), &(internal_FrameData.WindowHeight));
-    internal_FrameData.aspectRatio = (double)internal_FrameData.WindowWidth / (double)internal_FrameData.WindowHeight;
-    glViewport(0, 0, internal_FrameData.WindowWidth, internal_FrameData.WindowHeight);
-    
-    // Clear the screen buffer.
-    glClearColor(internal_FrameData.AmbientColor[0], internal_FrameData.AmbientColor[1], internal_FrameData.AmbientColor[2], 1.0f);
+    glClearColor(frame.AmbientColor[0], frame.AmbientColor[1], frame.AmbientColor[2], 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-
-static void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
-    // Get the mouse position from the window.
-    //
-    //
-
-    // truncate it down to an int to make handling it easier.
-    internal_FrameData.xPosDelta = internal_FrameData.xPos - xPos;
-    internal_FrameData.yPosDelta = internal_FrameData.yPos - yPos;
-    internal_FrameData.xPos = xPos;
-    internal_FrameData.yPos = yPos;
-
-    // If the mouse should be captured, set it as such.
-    if(internal_FrameData.captureCursor) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+void PollEvents () {
+    for (int i = 0; i < GLFW_KEY_LAST; ++i) {
+        frame.KeyPressesPrevious[i] = frame.KeyPressesCurrent[i];
     }
-    // otherwise set the cursor back to normal.
-    else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-}
-
-
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    // Update the keyboard input lists from GLFW.
-    //
-    //
-
-    // Leave early if the key is repeated, to "disable" repeat events so that keys are either up or down
-    if (action == GLFW_REPEAT) {
-        return;
-    }
-
-    // Leave early if the exit key is pressed.
-    if (key == GLFW_KEY_ESCAPE) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-        return;
-    }
-    
-    internal_FrameData.gKeysCurr[key] = action;
-
-}
-
-
-void glUtilPollEvents() {
-    // Handle keyboard polling, update the internal timer, and call glfwPollEvents.
-    //
-    //
-
-    // Copy this frame's key presses into the "Previous" buffer.
-    memcpy(internal_FrameData.gKeysPrev, internal_FrameData.gKeysCurr, GLFW_KEY_LAST * sizeof(int));
     glfwPollEvents();
-    
-    internal_FrameData.lastTime = internal_FrameData.time;
+}
+
+void Engine_execute_tick() {
+
+    if (frame.captureCursor) {
+        glfwSetInputMode(frame.ActiveWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
+    else {
+        glfwSetInputMode(frame.ActiveWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    PollEvents();
+    InitializeFrame();
+
+    if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
+        glfwSetWindowShouldClose(frame.ActiveWindow, true);
+    }
+
+    // TODO: implement handling of queued events.
+
 }
 
 
-bool IsKeyDown(int key) {
-    return internal_FrameData.gKeysCurr[key] == GLFW_PRESS;
+bool IsKeyDown (int key) {
+    return frame.KeyPressesCurrent[key] == GLFW_PRESS;
 }
 
 
-bool IsKeyUp(int key) {
-    return internal_FrameData.gKeysCurr[key] == GLFW_RELEASE;
+bool IsKeyUp (int key) {
+    return frame.KeyPressesCurrent[key] == GLFW_RELEASE;
 }
 
 
-bool IsKeyPressed(int key) {
-    return internal_FrameData.gKeysPrev[key] == GLFW_PRESS && internal_FrameData.gKeysCurr[key] == GLFW_RELEASE;
+bool IsKeyPressed (int key) {
+    return frame.KeyPressesPrevious[key] == GLFW_PRESS && frame.KeyPressesCurrent[key] == GLFW_RELEASE;
 }
 
 
-// Graphics debug callback
-void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
+void APIENTRY internal_Engine_mouse_callback(GLFWwindow* window, double xPos, double yPos) {
+    frame.xPosDelta = frame.xPos - xPos;
+    frame.yPosDelta = frame.yPos - yPos;
+    frame.xPos = xPos;
+    frame.yPos = yPos;
+
+}
+
+void APIENTRY internal_Engine_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_REPEAT) {
+        frame.keyPressesRepeat[key] = true;
+    }
+
+    else {
+        frame.keyPressesRepeat[key] = false;
+        frame.KeyPressesCurrent[key] = action;
+    }
+}
+
+void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
 
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
@@ -305,5 +256,3 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
     } 
     printf("\n"); 
 }
-
-

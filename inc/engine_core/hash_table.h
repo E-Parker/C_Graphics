@@ -8,13 +8,10 @@
 // See: fnvHash64, and FindBufferEnd.
 //
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #pragma once
 
-#include <stdbool.h>
+#include "stdbool.h"
+#include "stdint.h"
 
 typedef struct {
     /* An item in a hash table. */
@@ -23,30 +20,25 @@ typedef struct {
 } HashTableItem;
 
 typedef struct HashTable {
-    unsigned long long Size;
-    unsigned long long SlotsUsed;
-    unsigned long long* ActiveIndicies;
+    uint64_t Size;
+    uint64_t SlotsUsed;
+    uint64_t* ActiveIndicies;
     HashTableItem* Array;
 } HashTable;
 
-#define HashTable_create(T, size) internal_HashTable_create(sizeof(T), (unsigned long long)size);
-HashTable* internal_HashTable_create(unsigned long long itemSize, unsigned long long size);
+#define HashTable_create(T, size) internal_HashTable_create(sizeof(T), (uint64_t)size);
+HashTable* internal_HashTable_create(uint64_t itemSize, uint64_t size);
 
 void HashTable_destroy(HashTable** table);
 char* HashTable_insert(HashTable* table, const char* alias, void* value);
 void HashTable_remove(HashTable* table, const char* alias);
-void HashTable_resize(HashTable* table, const unsigned long long size);
+void HashTable_resize(HashTable* table, const uint64_t size);
 
 bool internal_HashTable_find(const HashTable* table, const char* alias, void** outValue);
 #define HashTable_find(table, alias, outValue) (internal_HashTable_find(table, alias, (void**)outValue))
-#define HashTable_array_iterator(table) unsigned long long i = 0; i < table->SlotsUsed; i++
+#define HashTable_array_iterator(table) uint64_t i = 0; i < table->SlotsUsed; i++
 #define HashTable_array_at(T, table, i) ((T*)table->Array[table->ActiveIndicies[i]].Value)
 #define HashTable_array_key_at(T, table, i) ((T*)table->Array[table->ActiveIndicies[i]].Key)
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef HASH_TABLE_IMPLEMENTATION
 
@@ -96,13 +88,12 @@ char* FindBufferEnd(const char* buffer) {
 }
 
 
-unsigned long long internal_Pow2Ceiling(unsigned long long size, unsigned long long num) {
+uint64_t internal_Pow2Ceiling(uint64_t size, uint64_t num) {
     /* This function returns the next nearest power of 2 from the input number. */
 
-    assert(num > 1);
+    num = num > 1 ? num - 1 : 1;
 
-    unsigned long long iterations = size * 8;
-    num--;
+    uint64_t iterations = size * 8;
 
     for (int i = 1; i < iterations; i = i << 1) {
         num |= num >> i;
@@ -112,22 +103,30 @@ unsigned long long internal_Pow2Ceiling(unsigned long long size, unsigned long l
 }
 
 
-HashTable* internal_HashTable_create(unsigned long long itemSize, unsigned long long size) {
-
-    unsigned long long Size = (size < 16) ? 16 : Pow2Ceiling(unsigned long long, size);
+HashTable* internal_HashTable_create(uint64_t itemSize, uint64_t size) {
+    uint64_t Size = (size < 16) ? 16 : Pow2Ceiling(uint64_t, size);
 
     HashTable* table = (HashTable*)malloc(sizeof(HashTable));
-    assert(table != NULL);
-
+    if (!table) goto TableMallocFailure;
+    
     table->Array = (HashTableItem*)calloc(Size, sizeof(HashTableItem));
-    assert(table->Array != NULL);
-
-    table->ActiveIndicies = (unsigned long long*)calloc(Size, sizeof(unsigned long long));
-    assert(table->ActiveIndicies != NULL);
+    if (!table->Array) goto TableArrayMallocFalure;
+    
+    table->ActiveIndicies = (uint64_t*)calloc(Size, sizeof(uint64_t));
+    if (!table->ActiveIndicies) goto TableActiveIndiciesFalure;
 
     table->Size = Size;
     table->SlotsUsed = 0;
     return table;
+
+
+    TableActiveIndiciesFalure:
+    free(table->Array);
+    TableArrayMallocFalure:
+    free(table);
+    TableMallocFailure:
+    return NULL;
+
 }
 
 // Public Functions:
@@ -136,7 +135,7 @@ HashTable* internal_HashTable_create(unsigned long long itemSize, unsigned long 
 
 void HashTable_destroy(HashTable** table) {
 
-    for (unsigned long long i = 0; i < (*table)->Size; i++) {
+    for (uint64_t i = 0; i < (*table)->Size; i++) {
          
         HashTableItem item = (*table)->Array[i];
 
@@ -162,8 +161,8 @@ char* HashTable_insert(HashTable* table, const char* key, void* value) {
     }
 
     char* keyEnd = FindBufferEnd(key);
-    unsigned long long hash = fnvHash64(key, keyEnd) % table->Size;
-    unsigned long long originalHash = hash;
+    uint64_t hash = fnvHash64(key, keyEnd) % table->Size;
+    uint64_t originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 
@@ -195,8 +194,8 @@ char* HashTable_insert(HashTable* table, const char* key, void* value) {
 void HashTable_remove(HashTable* table, const char* key) {
 
     char* keyEnd = FindBufferEnd(key);
-    unsigned long long hash = fnvHash64(key, keyEnd) % table->Size;
-    unsigned long long originalHash = hash;
+    uint64_t hash = fnvHash64(key, keyEnd) % table->Size;
+    uint64_t originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 
@@ -206,12 +205,12 @@ void HashTable_remove(HashTable* table, const char* key) {
             table->Array[hash].Key = NULL;
             table->Array[hash].Value = NULL;
             
-            unsigned long long i = 0;
+            uint64_t i = 0;
             for (; i < table->SlotsUsed; i++) {
                 if (table->ActiveIndicies[i] == hash) break;
             }
 
-            for (unsigned long long k = i + 1; k < table->SlotsUsed; k++) {
+            for (uint64_t k = i + 1; k < table->SlotsUsed; k++) {
                 table->ActiveIndicies[k - 1] = table->ActiveIndicies[k];
             }
 
@@ -229,11 +228,11 @@ void HashTable_remove(HashTable* table, const char* key) {
 }
 
 
-void HashTable_resize(HashTable* table, const unsigned long long size) {
+void HashTable_resize(HashTable* table, const uint64_t size) {
     // Resize a hash table to the nearest power of 2 to the size provided. (values less than 16 will be rounded up to 16).
 
 
-    unsigned long long newSize = (size <= 16) ? 16 : Pow2Ceiling(unsigned long long, size);
+    uint64_t newSize = (size <= 16) ? 16 : Pow2Ceiling(uint64_t, size);
 
     // if the table is already the size provided, skip resizing.
     if (table->Size == newSize) {
@@ -241,11 +240,11 @@ void HashTable_resize(HashTable* table, const unsigned long long size) {
     }
 
     HashTableItem* Temp = (HashTableItem*)calloc(newSize, sizeof(HashTableItem));
-    unsigned long long* TempIndicies = (unsigned long long*)calloc(newSize, sizeof(unsigned long long));
+    uint64_t* TempIndicies = (uint64_t*)calloc(newSize, sizeof(uint64_t));
     assert(Temp != NULL);
     assert(TempIndicies != NULL);
 
-    for (unsigned long long i = 0; i < table->Size; i++) {
+    for (uint64_t i = 0; i < table->Size; i++) {
 
         // if this slot was unused, skip it.
         if (table->Array[i].Key == NULL) {
@@ -253,8 +252,8 @@ void HashTable_resize(HashTable* table, const unsigned long long size) {
         }
 
         // Generate the hash for the item.
-        unsigned long long hash = fnvHash64(table->Array[i].Key, FindBufferEnd(table->Array[i].Key)) % newSize;
-        unsigned long long originalHash = hash;
+        uint64_t hash = fnvHash64(table->Array[i].Key, FindBufferEnd(table->Array[i].Key)) % newSize;
+        uint64_t originalHash = hash;
 
         // Check for collisions, linearly probe for a free slot.
         while (Temp[hash].Key != NULL) {
@@ -285,8 +284,8 @@ void HashTable_resize(HashTable* table, const unsigned long long size) {
 
 bool internal_HashTable_find(const HashTable* table, const char* key, void** outValue) {
 
-    unsigned long long hash = fnvHash64(key, FindBufferEnd(key)) % table->Size;
-    unsigned long long originalHash = hash;
+    uint64_t hash = fnvHash64(key, FindBufferEnd(key)) % table->Size;
+    uint64_t originalHash = hash;
 
     while (table->Array[hash].Key != NULL) {
 

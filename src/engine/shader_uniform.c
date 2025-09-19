@@ -1,11 +1,11 @@
-﻿#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+﻿#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
+#include "assert.h"
+#include "stdlib.h"
+#include "stdio.h"
+#include "stdbool.h"
+#include "string.h"
 
 #include "engine_core/string.h"
 #include "engine_core/hash_table.h"
@@ -26,7 +26,7 @@ void InitShaders() {
 }
 
 void DereferenceShaders() {
-    // Function to dereference all shaders and shader objects. 
+    // Function to de-reference all shaders and shader objects. 
     // After this is called, all functions will fail until InitShaders() is called again.
     //
 

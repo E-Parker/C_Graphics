@@ -13,21 +13,20 @@
 #include "camera.h"
 #include "mesh.h"
 
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 720;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
 
 int main(void) {
 
     // Initialize the window to the starting size and set the header.
-    GLFWwindow* window = Initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render");
+    if (!Engine_initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render"));
     InitShaders();
     InitTextures();
 
     // Add termination functions to be executed at the end of the program.
-    //glUtilAddTerminationFunction(DereferenceFonts);
-    glUtilAddTerminationFunction(DereferenceTextures);
-    glUtilAddTerminationFunction(DereferenceShaders);
-    glUtilAddTerminationFunction(glfwTerminate);
+    //Engine_add_termination_function(DereferenceFonts);
+    Engine_add_termination_function(DereferenceTextures);
+    Engine_add_termination_function(DereferenceShaders);
 
     // Load Missing Textures:
     CreateTexture("./assets/defaultAssets/defaultTexture.png", "defaultTexture", GL_RGBA, false, false, false, GL_LINEAR);
@@ -87,7 +86,7 @@ int main(void) {
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
     vec3 AmbientColor = { 0.1f, 0.3f, 0.6f };
     
-    glUtilSetAmbientColor(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
+    Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
     float lightRadius = 15.0f;
 
@@ -104,12 +103,11 @@ int main(void) {
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
 
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window)) {
+    SetCaptureCursor(true);
+
+    while (isActive()) {
         
-        // FRAME STARTS HERE
-        glUtilInitializeFrame(window);
-        time = (GLfloat)Time();
+        Engine_execute_tick();
 
         if (IsKeyPressed(GLFW_KEY_UP)) {
             y++;
@@ -173,11 +171,6 @@ int main(void) {
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll and process events */
-        glUtilPollEvents();
     }
     
     Object_Camera_destroy(mainCamera);
@@ -189,7 +182,7 @@ int main(void) {
     
     Shader_destroy(&testShader);
     
-    glUtilTerminate();
+    Engine_terminate();
     return 0;
 }
 

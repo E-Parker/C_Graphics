@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
+#include "stdint.h"
 
 // simple string implementation using a buffer start and end method.
 

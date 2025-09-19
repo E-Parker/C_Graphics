@@ -1,7 +1,8 @@
-#include <glad/glad.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <math.h>
+#include "glad/glad.h"
+
+#include "stdbool.h"
+#include "stdint.h"
+#include "math.h"
 
 #include "engine/math.h"
 
@@ -32,7 +33,7 @@ const vec3 V3_ZERO = { 0.0f, 0.0f, 0.0f };
 const vec3 V3_ONE = { 1.0f, 1.0f, 1.0f };
 
 
-const GLuint size_from_gl_type(const GLenum type) {
+const GLuint size_from_gl_type (const GLenum type) {
     // Returns the size of a Open GL type from its GLenum. 
     // 
     // I would like to not have a massive switch case but there isn't really a better way.
@@ -73,7 +74,7 @@ const GLuint size_from_gl_type(const GLenum type) {
 }
 
 
-void upload_from_gl_type(const GLint location, const GLenum type, const GLint elements, const void* data) {
+void upload_from_gl_type (const GLint location, const GLenum type, const GLint elements, const void* data) {
     switch (type) {
     
     case GL_FLOAT: glUniform1f(location, vecX(float, data)); break;
@@ -114,18 +115,18 @@ void upload_from_gl_type(const GLint location, const GLenum type, const GLint el
 //
 
 
-void vec2_add(const vec2 a, const vec2 b, vec2 out) {
+void vec2_add (const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
 }
 
-void vec3_add(const vec3 a, const vec3 b, vec3 out) {
+void vec3_add (const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
     out[2] = a[2] + b[2];
 }
 
-void vec4_add(const vec4 a, const vec4 b, vec4 out) {
+void vec4_add (const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] + b[0];
     out[1] = a[1] + b[1];
     out[2] = a[2] + b[2];
@@ -133,18 +134,18 @@ void vec4_add(const vec4 a, const vec4 b, vec4 out) {
 }
 
 
-void vec2_sub(const vec2 a, const vec2 b, vec2 out) {
+void vec2_sub (const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
 }
 
-void vec3_sub(const vec3 a, const vec3 b, vec3 out) {
+void vec3_sub (const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
     out[2] = a[2] - b[2];
 }
 
-void vec4_sub(const vec4 a, const vec4 b, vec4 out) {
+void vec4_sub (const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
     out[2] = a[2] - b[2];
@@ -152,18 +153,18 @@ void vec4_sub(const vec4 a, const vec4 b, vec4 out) {
 }
 
 
-void vec2_multiply(const vec2 a, const vec2 b, vec2 out) {
+void vec2_multiply (const vec2 a, const vec2 b, vec2 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
 }
 
-void vec3_multiply(const vec3 a, const vec3 b, vec3 out) {
+void vec3_multiply (const vec3 a, const vec3 b, vec3 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
     out[2] = a[2] * b[2];
 }
 
-void vec4_multiply(const vec4 a, const vec4 b, vec4 out) {
+void vec4_multiply (const vec4 a, const vec4 b, vec4 out) {
     out[0] = a[0] * b[0];
     out[1] = a[1] * b[1];
     out[2] = a[2] * b[2];
@@ -171,7 +172,7 @@ void vec4_multiply(const vec4 a, const vec4 b, vec4 out) {
 }
 
 
-void vec3_cross(const vec3 a, const vec3 b, vec3 out) {
+void vec3_cross (const vec3 a, const vec3 b, vec3 out) {
     vec3 result = {
         a[1] * b[2] - a[2] * b[1],
         a[2] * b[0] - a[0] * b[2],
@@ -181,17 +182,17 @@ void vec3_cross(const vec3 a, const vec3 b, vec3 out) {
 }
 
 
-double vec2_magnitude(const vec2 v) {
+double vec2_magnitude (const vec2 v) {
     double result = v[0] + v[1];
     return (result != 0.0) ? sqrt(result) : 1.0;
 }
 
-double vec3_magnitude(const vec3 v){
+double vec3_magnitude (const vec3 v){
     double result = v[0] + v[1] + v[2];
     return (result != 0.0) ? sqrt(result) : 1.0;
 }
 
-double vec4_magnitude(const vec4 v) {
+double vec4_magnitude (const vec4 v) {
     double result = v[0] + v[1] + v[2] + v[3];
     return (result != 0.0) ? sqrt(result) : 1.0;
 }
@@ -199,14 +200,14 @@ double vec4_magnitude(const vec4 v) {
 // Yes, these redefine the same exact math that is in vec_magnitude but it's probably slightly faster than another function call.
 // might be worth actually testing this or something.
 
-void vec2_normalize(vec2 v) {
+void vec2_normalize (vec2 v) {
     float length = v[0] * v[0] + v[1] * v[1];
     length = (length != 0.0f) ? (float)(1.0 / sqrt((double)length)) : 1.0f;
     v[0] *= length;
     v[1] *= length;
 }
 
-void vec3_normalize(vec3 v) {
+void vec3_normalize (vec3 v) {
     float length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
     length = (length != 0.0f) ? (float)(1.0 / sqrt((double)length)) : 1.0f;
     v[0] *= length;
@@ -214,7 +215,7 @@ void vec3_normalize(vec3 v) {
     v[2] *= length;
 }
 
-void vec4_normalize(vec4 v) {
+void vec4_normalize (vec4 v) {
     float length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3];
     length = (length != 0.0f) ? (float)(1.0 / sqrt((double)length)) : 1.0f; 
     v[0] *= length;
@@ -223,7 +224,8 @@ void vec4_normalize(vec4 v) {
     v[3] *= length;
 }
 
-void quaternion_invert(quaternion q) {
+
+void quaternion_invert (quaternion q) {
     float length = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
     length = (length != 0.0f) ? (float)(1.0 / sqrt((double)length)) : 1.0f;
     q[0] *= -length;
@@ -232,7 +234,7 @@ void quaternion_invert(quaternion q) {
     q[3] *= length;
 }
 
-void quaternion_multiply(const quaternion left, const quaternion right, quaternion out) {
+void quaternion_multiply (const quaternion left, const quaternion right, quaternion out) {
     quaternion result = {
         left[0] * right[3] + left[3] * right[0] + left[1] * right[2] - left[2] * right[1],
         left[1] * right[3] + left[3] * right[1] + left[2] * right[0] - left[0] * right[2],
@@ -242,15 +244,13 @@ void quaternion_multiply(const quaternion left, const quaternion right, quaterni
     quaternion_copy(result, out);
 }
 
-void quaternion_mat4(const quaternion q, mat4 out) {
-   
+void quaternion_mat4 (const quaternion q, mat4 out) {
     mat4 result = { 0.0f };
     mat4_copy(result, out);
 }
 
-void mat4_multiply(const mat4 left, const mat4 right, mat4 out) {
-    // multiply two 4x4 matrices.
 
+void mat4_multiply (const mat4 left, const mat4 right, mat4 out) {
     mat4 result = {
         left[0] * right[0] + left[4] * right[1] + left[8] * right[2] + left[12] * right[3],
         left[1] * right[0] + left[5] * right[1] + left[9] * right[2] + left[13] * right[3],
@@ -272,8 +272,7 @@ void mat4_multiply(const mat4 left, const mat4 right, mat4 out) {
     mat4_copy(result, out);
 }
 
-
-void mat4_translate(const vec3 translation, mat4 out) {
+void mat4_translate (const vec3 translation, mat4 out) {
     mat4 result = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
@@ -283,8 +282,7 @@ void mat4_translate(const vec3 translation, mat4 out) {
     mat4_copy(result, out);
 }
 
-
-void mat4_scale(const vec3 scale, mat4 out) {
+void mat4_scale (const vec3 scale, mat4 out) {
     mat4 result = { 
         scale[0], 0.0f, 0.0f, 0.0f,
         0.0f, scale[1], 0.0f, 0.0f,
@@ -294,39 +292,42 @@ void mat4_scale(const vec3 scale, mat4 out) {
     mat4_copy(result, out);
 }
 
-
-void mat4_get_forward(const mat4 m, vec3 out) {
+void mat4_get_forward (const mat4 m, vec3 out) {
     out[0] = m[2];
     out[1] = m[6];
     out[2] = m[10];
 }
 
-
-void mat4_get_right(const mat4 m, vec3 out) {
+void mat4_get_right (const mat4 m, vec3 out) {
     out[0] = m[0];
     out[1] = m[4];
     out[2] = m[8];   
 }
 
-
-void mat4_get_up(const mat4 m, vec3 out) {
+void mat4_get_up (const mat4 m, vec3 out) {
     out[0] = m[1];
     out[1] = m[5];
     out[2] = m[9];    
 }
 
-
-void mat4_get_translation(const mat4 m, vec3 out) {
+void mat4_get_translation (const mat4 m, vec3 out) {
     out[0] = m[3];
     out[1] = m[7];
     out[2] = m[11];
 }
 
-void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out) {
-    // look-at matrix implementation borrowed from connor's code.
-    // Massively simplified using helper functions. 
-    //
+void mat4_transpose (const mat4 m, mat4 out) {
+    mat4 result = {
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
+    };
 
+    mat4_copy(result, out);
+}
+
+void mat4_lookat (const vec3 viewer, const vec3 target, const vec3 up, mat4 out) {
     float length = 0.0f;
     float ilength = 0.0f;
 
@@ -342,12 +343,41 @@ void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out) 
     vec3_cross(viewZ, viewX, viewY);
     vec3_normalize(viewY);
     
-    // Put it together into the final view matrix.
     mat4 result = {
         viewX[0], viewX[1], viewX[2], -vec3_dot(viewX, viewer),
         viewY[0], viewY[1], viewY[2], -vec3_dot(viewY, viewer),
         viewZ[0], viewZ[1], viewZ[2], -vec3_dot(viewZ, viewer),
         0.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    mat4_copy(result, out);
+}
+
+void mat4_projection_perspective (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
+    double RightToLeft = right - left;
+    double TopToBottom = top - bottom;
+    double FarToNear = far - near;
+
+    mat4 result = {
+        (float)(near * 2.0 / RightToLeft), 0.0f, (float)((right + left) / RightToLeft), 0.0f,
+        0.0f, (float)(near * 2.0f / FarToNear), (float)((top + bottom) / TopToBottom), 0.0f,
+        0.0f, 0.0f, (float)((far + near) / FarToNear), (float)(far * near * 2.0 / FarToNear),
+        0.0f, 0.0f, -1.0f, 0.0f
+    };
+    
+    mat4_copy(result, out);
+}
+
+void mat4_projection_orthographic (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {
+    double RightToLeft = right - left;
+    double TopToBottom = top - bottom;
+    double FarToNear = far - near;
+
+    mat4 result = {
+        2.0f / RightToLeft, 0.0f, 0.0f, -(float)((left + right) / RightToLeft),
+        0.0f, 2.0f / TopToBottom, 0.0f, -(float)((top + bottom) / TopToBottom),
+        0.0f, 0.0f, -2.0f / FarToNear,  -(float)((far + near) / FarToNear),
+        0.0f, 0.0f, 0.0f, 1.0f
     };
 
     mat4_copy(result, out);

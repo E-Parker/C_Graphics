@@ -18,8 +18,8 @@ void internal_String_substring(String* source, String* destination, uint64_t sta
 
 
 void internal_String_cloneToBuffer(String* string, char* destination) {    
-    for (char* source = string->bufferStart; source <= string->bufferEnd; ++source, ++destination) {
-        *destination = *source; 
+    for (char* src = string->bufferStart; src <= string->bufferEnd; ++src, ++destination) {
+        *destination = *src;
     }
     *++destination = '\0';
 }
