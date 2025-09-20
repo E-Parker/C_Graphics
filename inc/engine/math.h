@@ -11,6 +11,8 @@
 #define DEG2RAD (PI/180.0f)
 #define RAD2DEG (180.0f/PI)
 
+#define mat4_print(m) printf("%f %f %f %f \n%f %f %f %f \n%f %f %f %f \n%f %f %f %f \n\n", m[0], m[4], m[8], m[12], m[1], m[5], m[9], m[13], m[2], m[6], m[10], m[14], m[3], m[7], m[11], m[15])
+
 // Explicitly use the memcpy function instead of inline version. 
 //#define USING_MEMCPY
 

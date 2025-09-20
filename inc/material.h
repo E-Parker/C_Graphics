@@ -1,11 +1,8 @@
 #pragma once
 
-#include <stdint.h>
+#include "stdint.h"
 
-// Macro defs:
-#ifndef MATERIAL_BUFFER_SIZE
 #define MATERIAL_BUFFER_SIZE 0xff
-#endif
 
 // Forward Declarations
 typedef struct HashTable HashTable;

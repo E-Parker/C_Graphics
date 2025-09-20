@@ -5,7 +5,7 @@
 #include "engine/math.h"
 
 // Standard Buffer Size is the maximum size any alias can be.
-#define OBJECT_ALIAS_SIZE 60
+#define OBJECT_ALIAS_SIZE 116
 
 // Object function return messages:
 #define ERRORCODE_OBJECT_SUCCESS          0x00
@@ -40,15 +40,15 @@ typedef struct Object {
     List Children;                          /* <----- list of child objects.                                        */ \
     uint64_t internal_IndexOf;              /* <----- Index of the object in it's parent's children list.           */ \
     Object* Parent;                         /* <----- pointer to the parent node. If NULL, assumed to be a root.    */ \
-    Object_TickFunction Tick;               /* <----- function to update the object.                                */ \
-    Object_DestroyFunction Destroy          /* <----- function to destroy the object.                               */ \
+    Function_Tick Tick;                     /* <----- function to update the object.                                */ \
+    Function_Void_OneParam Draw;            /* <----- function to draw the object.                                  */ \
+    Function_Void_OneParam Destroy          /* <----- function to destroy the object.                               */ \
 
     OBJECT_BODY();
 
 } Object;
 
-
-#define OBJECT_CREATE_BODY(object, parent, type) internal_Object_Initialize((void*)object, (void*)parent, type);
+#define OBJECT_CREATE_BODY(T, parent, type) T* object = (T*)malloc(sizeof(T)); if(!object) { return NULL; } internal_Object_Initialize((void*)object, (void*)parent, type);
 #define OBJECT_DESTROY_BODY(object) internal_Object_Deinitialize((void*)object);
 #define OBJECT_TICK_BODY(object) 
 

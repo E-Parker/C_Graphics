@@ -8,7 +8,7 @@
 #include "texture.h"
 #include "renderable.h"
 
-void FreeMesh(Mesh* mesh) {
+void FreeMesh(MeshRender* mesh) {
 
     if (mesh->ElementBufferObject != GL_NONE) {
         glDeleteBuffers(1, &(mesh->ElementBufferObject));
@@ -37,7 +37,7 @@ void FreeMesh(Mesh* mesh) {
 }
 
 
-void FreeSubMesh(Mesh* mesh) {
+void FreeSubMesh(MeshRender* mesh) {
     /* Use this to free a mesh that was created by copying from another. */
 
     if (mesh->ElementBufferObject != GL_NONE) {
@@ -53,7 +53,7 @@ void FreeSubMesh(Mesh* mesh) {
 }
 
 
-void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const uint64_t indecies, const uint64_t vertecies) {
+void UploadMesh(MeshRender* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const uint64_t indecies, const uint64_t vertecies) {
     /* Uploading mesh to GPU. points and normalBuffer must exist for the upload to work.
     tCoord data and face data is optional. */
 
@@ -104,7 +104,7 @@ void UploadMesh(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertex
 
 }
 
-void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies) {
+void UploadSubMesh(MeshRender* mesh, MeshRender* source, const uint32_t* indeciesArray, const uint32_t indecies) {
     /* variant of UploadMesh for meshes that share vertices but have a different element buffer. */
 
     uint64_t indexBytes = indecies * sizeof(uint32_t);
@@ -141,7 +141,7 @@ void UploadSubMesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, cons
 }
 
 
-void DrawRenderable(const Mesh* mesh, const Material* material, const mat4 transform) {
+void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform) {
     // Bind the material's shader program and textures.
 
     BindMaterial(material);

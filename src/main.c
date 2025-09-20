@@ -13,11 +13,16 @@
 #include "camera.h"
 #include "mesh.h"
 
+#include "stdio.h"
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+
+
 int main(void) {
 
+    
     // Initialize the window to the starting size and set the header.
     if (!Engine_initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render"));
     InitShaders();
@@ -46,15 +51,16 @@ int main(void) {
     Material* Mat1 = Material_create("./assets/shaders/default.vert", "./assets/shaders/default.frag", 4, GL_BACK, GL_LESS);
 
     // Set Material Textures:
-    SetTextureFromAlias(Mat1, "Specular", 0);
-    SetTextureFromAlias(Mat1, "Specular", 1);
-    SetTextureFromAlias(Mat1, "missingNormal", 2);
-    SetTextureFromAlias(Mat1, "Specular", 3);
 
     SetTextureFromAlias(Mat0, "mushroomBody", 0);
     SetTextureFromAlias(Mat0, "defaultTexture", 1);
     SetTextureFromAlias(Mat0, "missingNormal", 2);
     SetTextureFromAlias(Mat0, "Specular", 3);
+
+    SetTextureFromAlias(Mat1, "Specular", 0);
+    SetTextureFromAlias(Mat1, "Specular", 1);
+    SetTextureFromAlias(Mat1, "missingNormal", 2);
+    SetTextureFromAlias(Mat1, "Specular", 3);
 
     // Load Font:
     //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
@@ -62,14 +68,15 @@ int main(void) {
     //TextRender* testText = new TextRender();
     //SetFont(testText, "IBM", defautFont);
 
-    //StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
-    //StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
-    //mesh->SetMaterial(Mat0, 0);
-    //lightVis->SetMaterial(Mat1, 0);
-
     Camera* mainCamera = Object_Camera_create();
+    StaticMesh* mesh = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
+    
+    Object_StaticMesh_set_Material(mesh, 0, Mat0);
+    Object_StaticMesh_set_Material(lightVis, 0, Mat1);
 
     Shader* testShader = Shader_create(Mat0->Program, "TestShader");
+    ///Shader* testShader2 = Shader_create(Mat1->Program, "TestShader2");
 
     //Uniform* mvpUniform;
     //Uniform_set_data(mvpUniform, transform);
@@ -127,13 +134,13 @@ int main(void) {
 
         vec3 meshTranslate = { (float)x, (float)y, 0.0f };
 
-        //mat4_translate(meshTranslate, &mesh->Transform);
+        mat4_translate(meshTranslate, mesh->Transform);
 
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
-        //mat4_translate(lightPos, lightVis->Transform);
+        mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
         
@@ -146,36 +153,50 @@ int main(void) {
         mat4_get_forward(mainCamera->Transform, cameraDir);
 
         mat4 cameraView;
+        
+        double top = mainCamera->FarClip * tan(DEG2RAD * mainCamera->Fov * 0.5);
+        double bottom = -top;
+        double right = top * AspectRatio();
+        double left = -right;
 
-        mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
+        mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
+        
+
+        //mat4_lookat(cameraPos, V3_ZERO, V3_UP, cameraView);
+        
+        mat4_print(mainCamera->Transform);
+        
+        mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
+        mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
 
         UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
         void* data = UniformBuffer_get_shared(buffer);
-        //UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
+        UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
 
-        //UniformStruct* u_lights;
-        //UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
+        UniformStruct* u_lights;
+        UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", &cameraView);
+        UniformBuffer_set_Global("FrameData", "u_view", &mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", &cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", &cameraDir);
 
         UniformBuffer_update_all();
 
         //Shader_use(testShader);
+        //Object_StaticMesh_Draw(mesh);
 
-        //mesh->Draw();
-        //lightVis->Draw();
+        mesh->Draw(mesh);
+        lightVis->Draw(lightVis);
        
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
 
     }
     
-    Object_Camera_destroy(mainCamera);
-    //Object_Mesh_destroy(mesh);
-    //Object_Mesh_destroy(lightVis);
+    mainCamera->Destroy(mainCamera);
+    mesh->Destroy(mesh);
+    lightVis->Destroy(lightVis);
 
     Material_destroy(&Mat0); 
     Material_destroy(&Mat1); 
