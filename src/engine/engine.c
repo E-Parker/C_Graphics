@@ -133,7 +133,6 @@ void Engine_terminate () {
 
 
 void InitializeFrame () {
-    glfwSwapBuffers(frame.ActiveWindow);
 
     frame.lastTime = frame.time;
     frame.time = glfwGetTime();
@@ -157,7 +156,9 @@ void PollEvents () {
     glfwPollEvents();
 }
 
-void Engine_execute_tick() {
+bool Engine_execute_tick () {
+    glfwSwapBuffers(frame.ActiveWindow);
+    PollEvents();
 
     if (frame.captureCursor) {
         glfwSetInputMode(frame.ActiveWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -167,7 +168,6 @@ void Engine_execute_tick() {
         glfwSetInputMode(frame.ActiveWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
-    PollEvents();
     InitializeFrame();
 
     if (IsKeyPressed(GLFW_KEY_ESCAPE)) {
@@ -176,8 +176,8 @@ void Engine_execute_tick() {
 
     // TODO: implement handling of queued events.
 
+    return isActive();
 }
-
 
 bool IsKeyDown (int key) {
     return frame.KeyPressesCurrent[key] == GLFW_PRESS;

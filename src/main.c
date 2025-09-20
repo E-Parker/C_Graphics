@@ -90,8 +90,8 @@ int main(void) {
 
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
-    vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor = { 0.1f, 0.3f, 0.6f };
+    vec3 lightColor = { 1.0f, 1.0f, 1.0f };
+    vec3 AmbientColor = { 0.1f, 0.1f, 0.1f };
     
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
@@ -112,22 +112,20 @@ int main(void) {
 
     SetCaptureCursor(true);
 
-    while (isActive()) {
-        
-        Engine_execute_tick();
+    while (Engine_execute_tick()) {
 
         if (IsKeyPressed(GLFW_KEY_UP)) {
             y++;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_DOWN)) {
             y--;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_RIGHT)) {
             x++;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_LEFT)) {
             x--;
         }
@@ -143,43 +141,45 @@ int main(void) {
         mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
-        
-        Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
-        
-        vec3 cameraPos; 
-        vec3 cameraDir;
 
-        mat4_get_translation(mainCamera->Transform, cameraPos);
-        mat4_get_forward(mainCamera->Transform, cameraDir);
+        Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
+
+        vec3 cameraPos = { 0.0f, 0.0f, 0.0f };
+        vec3 cameraDir = { 0.0f, 0.0f, 1.0f };
+
+        //mat4_get_translation(mainCamera->Transform, cameraPos);
+        //mat4_get_forward(mainCamera->Transform, cameraDir);
 
         mat4 cameraView;
-        
+
         double top = mainCamera->FarClip * tan(DEG2RAD * mainCamera->Fov * 0.5);
         double bottom = -top;
         double right = top * AspectRatio();
         double left = -right;
 
-        mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
-        
+        //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
 
         //mat4_lookat(cameraPos, V3_ZERO, V3_UP, cameraView);
-        
-        mat4_print(mainCamera->Transform);
-        
-        mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
-        mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
 
-        UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
-        void* data = UniformBuffer_get_shared(buffer);
-        UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
 
-        UniformStruct* u_lights;
-        UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
+        //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
+        //mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
+        //mat4_print(mainCamera->ViewMatrix);
+
+        mat4 test = {
+            1.299038, 0.000000, 0.000000, 0.000000,
+            0.000000, 1.732051, 0.000000, -1.732051,
+            0.000000, 0.000000, -1.000002, 0.998002,
+            0.000000, 0.000000, -1.000000, 1.000000,
+        };
+
+
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", &mainCamera->ViewMatrix);
-        UniformBuffer_set_Global("FrameData", "u_position", &cameraPos);
-        UniformBuffer_set_Global("FrameData", "u_direction", &cameraDir);
+        UniformBuffer_set_Global("FrameData", "u_view", test);
+        UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
+        UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
 
         UniformBuffer_update_all();
 
@@ -191,7 +191,6 @@ int main(void) {
        
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
-
     }
     
     mainCamera->Destroy(mainCamera);
