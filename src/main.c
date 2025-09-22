@@ -117,9 +117,15 @@ int main(void) {
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
 
-    SetCaptureCursor(true);
+    bool captureCursor = true;
+    SetCaptureCursor(captureCursor);
 
     while (Engine_execute_tick()) {
+
+        if (IsKeyPressed(GLFW_KEY_TAB)) {
+            captureCursor = !captureCursor;
+            SetCaptureCursor(captureCursor);
+        }
 
         if (IsKeyPressed(GLFW_KEY_UP)) {
             y++;
@@ -155,14 +161,18 @@ int main(void) {
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
 
-        Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
+
+
+        mainCamera->Tick(mainCamera, DeltaTime());
+
 
         vec3 cameraPos;
-        vec3 cameraDir;
+        vec3 cameraDir = { 0.0f, 0.0f, 1.0f };
 
         mat4_get_translation(mainCamera->Transform, cameraPos);
-        mat4_get_forward(mainCamera->Transform, cameraDir);
+        vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
 
+        vec3_print(cameraDir);
 
         //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
         //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);

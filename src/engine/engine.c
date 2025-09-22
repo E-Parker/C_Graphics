@@ -1,9 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include <stdio.h>
+#include "stdio.h"
 
-#include "engine_core/list.h"
 #include "engine/engine.h"
 
 #define ENGINE_DEBUG
@@ -36,6 +35,10 @@ int WindowWidth () {
 }
 
 
+void SetUseRawInput(const bool useRawInput) {
+    frame.rawInputEnabled = useRawInput;
+}
+
 void SetCaptureCursor (const bool captureCursor) {
     frame.captureCursor = captureCursor;
 }
@@ -64,7 +67,7 @@ void initializeWindowHints () {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
-void initializeWindow(const int width, const int height, const char* tittle) {
+void initializeWindow (const int width, const int height, const char* tittle) {
     frame.WindowWidth = width;
     frame.WindowHeight = height;
     frame.ActiveWindow = glfwCreateWindow(width, height, tittle, NULL, NULL);
@@ -80,6 +83,14 @@ void initializeCallbacks (GLFWwindow* window) {
     glEnable(GL_DEBUG_OUTPUT);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 #endif
+}
+
+void internal_Engine_clear_mouse_data () {
+    glfwPollEvents();
+    frame.xPos = 0.0f;
+    frame.yPos = 0.0f;
+    frame.xPosDelta = 0.0f;
+    frame.yPosDelta = 0.0f;
 }
 
 bool Engine_initialize(const int width, const int height, const char* tittle) {
@@ -105,6 +116,8 @@ bool Engine_initialize(const int width, const int height, const char* tittle) {
     glFrontFace(GL_CCW);
 
     List_initialize(Function_Void_NoParam, &(frame.TerminationFunctions), 16);
+
+    frame.rawInputAvailable = glfwRawMouseMotionSupported();
 
     return true;
 
@@ -138,9 +151,6 @@ void InitializeFrame () {
     frame.time = glfwGetTime();
     frame.deltaTime = frame.time - frame.lastTime;
 
-    frame.xPosDelta = 0.0;
-    frame.yPosDelta = 0.0;
-
     glfwGetFramebufferSize(frame.ActiveWindow, &(frame.WindowWidth), &(frame.WindowHeight));
     frame.aspectRatio = (double)frame.WindowWidth / (double)frame.WindowHeight;
     glViewport(0, 0, frame.WindowWidth, frame.WindowHeight);
@@ -153,12 +163,20 @@ void PollEvents () {
     for (int i = 0; i < GLFW_KEY_LAST; ++i) {
         frame.KeyPressesPrevious[i] = frame.KeyPressesCurrent[i];
     }
+
+    frame.xPosDelta = 0.0;
+    frame.yPosDelta = 0.0;
+
     glfwPollEvents();
 }
 
 bool Engine_execute_tick () {
     glfwSwapBuffers(frame.ActiveWindow);
     PollEvents();
+
+    if (frame.rawInputAvailable && frame.rawInputEnabled) {
+        glfwSetInputMode(frame.ActiveWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
 
     if (frame.captureCursor) {
         glfwSetInputMode(frame.ActiveWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -180,17 +198,19 @@ bool Engine_execute_tick () {
 }
 
 bool IsKeyDown (int key) {
-    return frame.KeyPressesCurrent[key] == GLFW_PRESS;
+    return frame.KeyPressesCurrent[key] ? true : false ;
 }
-
 
 bool IsKeyUp (int key) {
-    return frame.KeyPressesCurrent[key] == GLFW_RELEASE;
+    return !frame.KeyPressesCurrent[key] ? true : false ;
 }
 
-
 bool IsKeyPressed (int key) {
-    return frame.KeyPressesPrevious[key] == GLFW_PRESS && frame.KeyPressesCurrent[key] == GLFW_RELEASE;
+    return frame.KeyPressesPrevious[key] && !frame.KeyPressesCurrent[key] ? true : false ;
+}
+
+bool IsKeyRepeat(int key) {
+    return frame.keyPressesRepeat[key];
 }
 
 
@@ -199,8 +219,13 @@ void APIENTRY internal_Engine_mouse_callback(GLFWwindow* window, double xPos, do
     frame.yPosDelta = frame.yPos - yPos;
     frame.xPos = xPos;
     frame.yPos = yPos;
-
 }
+
+void APIENTRY internal_Engine_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    frame.xScrollOffset = xoffset;
+    frame.yScrollOffset = yoffset;
+}
+
 
 void APIENTRY internal_Engine_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_REPEAT) {
@@ -209,7 +234,7 @@ void APIENTRY internal_Engine_key_callback(GLFWwindow* window, int key, int scan
 
     else {
         frame.keyPressesRepeat[key] = false;
-        frame.KeyPressesCurrent[key] = action;
+        frame.KeyPressesCurrent[key] = action ? true : false;
     }
 }
 

@@ -2,6 +2,8 @@
 
 #include "glad/glad.h"
 
+#include "stdarg.h"
+
 // GENERAL MATH CONSTANTS:
 // 
 //
@@ -90,13 +92,20 @@
 #define vec2_equal(a, b) (a[0] == b[0] && a[1] == b[1])
 #define vec3_equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2])
 #define vec4_equal(a, b) (a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3])
+
 #define quaternion_equal(a, b) vec4_equal(a, b)
+
+#define quaternion_def_from_axis(axis, angle) { axis[0] * sinf(angle), axis[1] * sinf(angle), axis[2] * sinf(angle), cosf(angle) }
 
 // Short-hand casts to float. I figured might as well just use this because all the mathf functions are just float casted doubles anyway.
 
 #define vec2_magnitudef(v) (float)vec2_magnitude(v)
 #define vec3_magnitudef(v) (float)vec3_magnitude(v)
 #define vec4_magnitudef(v) (float)vec4_magnitude(v)
+
+#define vec2_sqr_magnitude(v) (v[0] + v[1])
+#define vec3_sqr_magnitude(v) (v[0] + v[1] + v[2])
+#define vec4_sqr_magnitude(v) (v[0] + v[1] + v[2] + v[3])
 
 // Normalizing a quaternion is the same as a vec4. this alias is just here to make the code easier to understand.
 #define quaternion_normalize(q) vec4_normalize(q)
@@ -155,6 +164,9 @@ extern const vec3 V3_BACKWARD;
 extern const vec3 V3_ZERO;
 extern const vec3 V3_ONE;
 
+extern const vec4 V4_IDENTIY;
+extern const vec4 V4_ONE;
+
 void vec2_add(const vec2 a, const vec2 b, vec2 out);
 void vec3_add(const vec3 a, const vec3 b, vec3 out);
 void vec4_add(const vec4 a, const vec4 b, vec4 out);
@@ -177,12 +189,17 @@ void vec2_normalize(vec2 v); // normalize vector in-place.
 void vec3_normalize(vec3 v); // normalize vector in-place.
 void vec4_normalize(vec4 v); // normalize vector in-place.
 
+// Honestly, just use a quaternion instead. it's faster.
 void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out);
+void vec3_rotate(const vec3 v, const quaternion q, vec3 out);
 
+// Create a quaternion from an axis and an angle. Performs checks and normalizations the def version cannot not.
+void quaternion_from_axis(const vec3 axis, const double angle, quaternion out);
 void quaternion_invert(quaternion q);
 void quaternion_multiply(const quaternion left, const quaternion right, quaternion out);
-void quaternion_mat4(const quaternion q, mat4 out); // 4x4 matrix from quaternion.
+void mat4_from_quaternion(const quaternion q, mat4 out); // 4x4 matrix from quaternion.
 
+void mat4_multi_multiply (uint64_t count, ... );
 void mat4_multiply(const mat4 left, const mat4 right, mat4 out); // Multiply two 4x4 matrices.
 void mat4_translate(const vec3 translation, mat4 out);
 void mat4_scale(const vec3 scale, mat4 out);

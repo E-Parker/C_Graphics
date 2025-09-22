@@ -6,17 +6,23 @@
 typedef struct Camera {
     OBJECT_BODY();
     mat4 ViewMatrix;
-    
-    float MoveSpeed;
-    float Acceleration;
-    float Fov;
-    float NearClip;
-    float FarClip;
-    float Sensitivity;
+    quaternion Rotation;
+    vec3 Velocity;
+
+    double DragCoefficient;
+    double MoveSpeed;
+    double Fov;
+    double NearClip;
+    double FarClip;
+    double Sensitivity;
 
 } Camera;
 
-void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double aspect);
+void Object_Camera_update_noclip(void* object, const double deltaTime);
+
+
+void Object_Camera_recalulate_view(Camera* camera);
+
 
 Camera* Object_Camera_create();
 void Object_Camera_destroy(void* camera);

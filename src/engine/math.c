@@ -32,6 +32,8 @@ const vec3 V3_BACKWARD = { 0.0f, 0.0f, -1.0f };
 const vec3 V3_ZERO = { 0.0f, 0.0f, 0.0f };
 const vec3 V3_ONE = { 1.0f, 1.0f, 1.0f };
 
+const vec4 V4_IDENTIY = { 0.0f, 0.0f, 0.0f, 1.0f };
+const vec4 V4_ONE = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 const GLuint size_from_gl_type (const GLenum type) {
     // Returns the size of a Open GL type from its GLenum. 
@@ -197,6 +199,7 @@ double vec4_magnitude (const vec4 v) {
     return (result != 0.0) ? sqrt(result) : 1.0;
 }
 
+
 // Yes, these redefine the same exact math that is in vec_magnitude but it's probably slightly faster than another function call.
 // might be worth actually testing this or something.
 
@@ -224,7 +227,6 @@ void vec4_normalize (vec4 v) {
     v[3] *= length;
 }
 
-
 void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out) {
     vec3 axisNormaized = vec3_def_copy(axis);
     vec3_normalize(axisNormaized);
@@ -244,6 +246,26 @@ void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out) {
     return result;
 }
 
+void vec3_rotate(const vec3 v, const quaternion q, vec3 out) {
+    vec3 result = {
+        v[0] * (q[0] * q[0] + q[3] * q[3] - q[1] * q[1] - q[2] * q[2]) + v[1] * (2 * q[0] * q[1] - 2 * q[3] * q[2]) + v[2] * (2 * q[0] * q[2] + 2 * q[3] * q[1]),
+        v[0] * (2 * q[3] * q[2] + 2 * q[0] * q[1]) + v[1] * (q[3] * q[3] - q[0] * q[0] + q[1] * q[1] - q[2] * q[2]) + v[2] * (-2 * q[3] * q[0] + 2 * q[1] * q[2]),
+        v[0] * (-2 * q[3] * q[1] + 2 * q[0] * q[2]) + v[1] * (2 * q[3] * q[0] + 2 * q[1] * q[2]) + v[2] * (q[3] * q[3] - q[0] * q[0] - q[1] * q[1] + q[2] * q[2]),
+    };
+    vec3_copy(result, out);
+}
+
+void quaternion_from_axis(const vec3 axis, const  double angle, quaternion out) {
+    vec3 axisNormalized = vec3_def_copy(axis);
+    vec3_normalize(axisNormalized);
+
+    double sinAngle = sin(angle);
+    double cosAngle = cos(angle);
+    
+    quaternion result = { axisNormalized[0] * sinAngle, axisNormalized[1] * sinAngle, axisNormalized[2] * sinAngle, cosAngle };
+    
+    quaternion_copy(result, out);
+}
 
 void quaternion_invert (quaternion q) {
     float length = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
@@ -264,8 +286,42 @@ void quaternion_multiply (const quaternion left, const quaternion right, quatern
     quaternion_copy(result, out);
 }
 
-void quaternion_mat4 (const quaternion q, mat4 out) {
-    mat4 result = { 0.0f };
+void mat4_from_quaternion (const quaternion q, mat4 out) {
+    float a2 = q[0] * q[0];
+    float b2 = q[1] * q[1];
+    float c2 = q[2] * q[2];
+    float ac = q[0] * q[2];
+    float ab = q[0] * q[1];
+    float bc = q[1] * q[2];
+    float ad = q[3] * q[0];
+    float bd = q[3] * q[1];
+    float cd = q[3] * q[2];
+
+    mat4 result = {
+        1.0f - (2.0f * (b2 + c2)),  2.0f * (ab + cd),           2.0f * (ac - bd),           0.0f,
+        2.0f * (ab - cd),           1.0f - 2.0f * (a2 + c2),    2.0f * (bc + ad),           0.0f,
+        2.0f * (ac + bd),           2.0f * (bc - ad),           1.0f - (2.0f * (a2 + b2)),  0.0f,
+        0.0f,                       0.0f,                       0.0f,                       1.0f,
+    }; 
+
+    mat4_copy(result, out);
+}
+
+
+void mat4_multi_multiply (uint64_t count, ... ) {
+    va_list args;
+    va_start(args, count);
+
+    mat4 result;
+    GLfloat* arg = va_arg(args, GLfloat*);
+    mat4_copy(arg, result);
+
+    for (uint64_t i = 1; i < count - 1; ++i) {
+        arg = va_arg(args, GLfloat*);
+        mat4_multiply(result, arg, result);
+    }
+
+    GLfloat* out = va_arg(args, GLfloat*);
     mat4_copy(result, out);
 }
 
