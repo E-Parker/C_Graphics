@@ -11,6 +11,10 @@
 #define DEG2RAD (PI/180.0f)
 #define RAD2DEG (180.0f/PI)
 
+
+#define vec2_print(v) printf("%f, %f, \n", v[0], v[1], v[2])
+#define vec3_print(v) printf("%f, %f, %f \n", v[0], v[1], v[2])
+#define vec4_print(v) printf("%f, %f, %f, %f \n", v[0], v[1], v[2], v[3])
 #define mat4_print(m) printf("%f %f %f %f \n%f %f %f %f \n%f %f %f %f \n%f %f %f %f \n\n", m[0], m[4], m[8], m[12], m[1], m[5], m[9], m[13], m[2], m[6], m[10], m[14], m[3], m[7], m[11], m[15])
 
 // Explicitly use the memcpy function instead of inline version. 
@@ -188,6 +192,7 @@ void mat4_get_right(const mat4 m, vec3 out);
 void mat4_get_up(const mat4 m, vec3 out);
 void mat4_get_translation(const mat4 m, vec3 out);
 
+void mat4_inverse(const mat4 m, mat4 out);
 void mat4_transpose(const mat4 m, mat4 out);
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
 void mat4_projection_perspective(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);

@@ -52,7 +52,7 @@ int main(void) {
 
     // Set Material Textures:
 
-    SetTextureFromAlias(Mat0, "mushroomBody", 0);
+    SetTextureFromAlias(Mat0, "Specular", 0);
     SetTextureFromAlias(Mat0, "defaultTexture", 1);
     SetTextureFromAlias(Mat0, "missingNormal", 2);
     SetTextureFromAlias(Mat0, "Specular", 3);
@@ -93,7 +93,7 @@ int main(void) {
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 1.0f, 1.0f, 1.0f };
-    vec3 AmbientColor = { 0.1f, 0.1f, 0.1f };
+    vec3 AmbientColor = { 0.8f, 0.8f, 0.8f };
     
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
@@ -140,7 +140,10 @@ int main(void) {
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
-        mat4_translate(lightPos, lightVis->Transform);
+        mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
+        mat4_inverse(lightVis->Transform, lightVis->Transform);
+
+        //mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
 
@@ -152,20 +155,18 @@ int main(void) {
         mat4_get_translation(mainCamera->Transform, cameraPos);
         mat4_get_forward(mainCamera->Transform, cameraDir);
 
-        double top = mainCamera->FarClip * tan(DEG2RAD * mainCamera->Fov * 0.5);
-        double bottom = -top;
-        double right = top * AspectRatio();
-        double left = -right;
+       
 
-        mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
+        //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
         //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
         //mat4 cameraView;
         //mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
         //
         //mat4_get_forward(cameraView, cameraDir);
-        mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
+        //mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
         //
 
+        vec3_print(cameraDir);
         mat4_print(mainCamera->Transform);
         mat4_print(mainCamera->ViewMatrix);
 
