@@ -63,18 +63,13 @@ void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double r
     mat4_get_forward(camera->Transform, cameraForward);
     mat4_get_up(camera->Transform, cameraForward);
 
-    //vec3_rotate_axis(cameraForward, V3_RIGHT, camera->Sensitivity * PI * CursorPositionY, cameraForward);
-    //vec3_rotate_axis(V3_UP, cameraForward, camera->Sensitivity * PI * (float)CursorPositionX, cameraForward);
+    vec3_rotate_axis(cameraForward, V3_RIGHT, camera->Sensitivity * PI * CursorPositionY, cameraForward);
+    vec3_rotate_axis(V3_UP, cameraForward, camera->Sensitivity * PI * (float)CursorPositionX, cameraForward);
 
-    //vec3 cameraTarget = vec3_def_add(cameraForward, cameraPos);
-
-    mat4 lookat;
-    mat4_lookat(cameraPos, V3_ZERO, V3_UP, lookat);
-    mat4_inverse(lookat, lookat);
+    vec3 cameraTarget = vec3_def_add(cameraForward, cameraPos);
 
     mat4 projection;
     mat4_projection_perspective(camera->Fov, AspectRatio(), camera->NearClip, camera->FarClip, projection);
-    //mat4_projection_orthographic(-2.0, 2.0, 2.0, -2.0, -2.0, 2.0, projection);
 
     mat4_multiply(camera->Transform, projection, camera->ViewMatrix);
 

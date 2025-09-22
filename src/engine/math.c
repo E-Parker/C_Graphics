@@ -271,7 +271,6 @@ void quaternion_mat4 (const quaternion q, mat4 out) {
 
 
 void mat4_multiply (const mat4 left, const mat4 right, mat4 out) {
-
     mat4 result = {
         left[0] * right[0] + left[1] * right[4] + left[2] * right[8] + left[3] * right[12],
         left[0] * right[1] + left[1] * right[5] + left[2] * right[9] + left[3] * right[13],
@@ -290,7 +289,6 @@ void mat4_multiply (const mat4 left, const mat4 right, mat4 out) {
         left[12] * right[2] + left[13] * right[6] + left[14] * right[10] + left[15] * right[14],
         left[12] * right[3] + left[13] * right[7] + left[14] * right[11] + left[15] * right[15],
     };
-
 
     mat4_copy(result, out);
 }
