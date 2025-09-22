@@ -75,6 +75,10 @@
 
 #define vec3_def_cross(a, b) { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] }
 
+#define vec2_scale(v, scale) v[0] *= scale; v[1] *= scale 
+#define vec3_scale(v, scale) v[0] *= scale; v[1] *= scale; v[2] *= scale 
+#define vec4_scale(v, scale) v[0] *= scale; v[1] *= scale; v[2] *= scale; v[3] *= scale 
+
 #define vec2_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]))
 #define vec3_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]))
 #define vec4_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]) + (a[3] * b[3]))
@@ -168,6 +172,8 @@ double vec4_magnitude(const vec4 v);
 void vec2_normalize(vec2 v); // normalize vector in-place.
 void vec3_normalize(vec3 v); // normalize vector in-place.
 void vec4_normalize(vec4 v); // normalize vector in-place.
+
+void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out);
 
 void quaternion_invert(quaternion q);
 void quaternion_multiply(const quaternion left, const quaternion right, quaternion out);

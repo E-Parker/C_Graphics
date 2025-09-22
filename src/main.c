@@ -72,6 +72,8 @@ int main(void) {
     StaticMesh* mesh = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
     StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
     
+    assert(mesh && lightVis);
+
     Object_StaticMesh_set_Material(mesh, 0, Mat0);
     Object_StaticMesh_set_Material(lightVis, 0, Mat1);
 
@@ -144,47 +146,53 @@ int main(void) {
 
         Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
 
-        vec3 cameraPos = { 0.0f, 0.0f, 0.0f };
-        vec3 cameraDir = { 0.0f, 0.0f, 1.0f };
+        vec3 cameraPos;
+        vec3 cameraDir;
 
-        //mat4_get_translation(mainCamera->Transform, cameraPos);
-        //mat4_get_forward(mainCamera->Transform, cameraDir);
-
-        mat4 cameraView;
+        mat4_get_translation(mainCamera->Transform, cameraPos);
+        mat4_get_forward(mainCamera->Transform, cameraDir);
 
         double top = mainCamera->FarClip * tan(DEG2RAD * mainCamera->Fov * 0.5);
         double bottom = -top;
         double right = top * AspectRatio();
         double left = -right;
 
-        //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
-
-        //mat4_lookat(cameraPos, V3_ZERO, V3_UP, cameraView);
-
-
+        mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
         //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
-        //mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
-        //mat4_print(mainCamera->ViewMatrix);
+        //mat4 cameraView;
+        //mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
+        //
+        //mat4_get_forward(cameraView, cameraDir);
+        mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
+        //
 
-        mat4 test = {
-            1.299038, 0.000000, 0.000000, 0.000000,
-            0.000000, 1.732051, 0.000000, -1.732051,
-            0.000000, 0.000000, -1.000002, 0.998002,
-            0.000000, 0.000000, -1.000000, 1.000000,
+        mat4_print(mainCamera->Transform);
+        mat4_print(mainCamera->ViewMatrix);
+
+        /*
+        vec3 cameraPos = { 2.239947, -2.032571, -2.337623 };
+        vec3 cameraDir = { -0.653333, 0.333807, 0.679507 };
+        
+        mat4 cameraView = {
+            0.936416, -0.000001, 0.900347, -0.007148,
+            0.400723, 1.632703, -0.416775, -1.446724,
+            0.653334, -0.333807, -0.679508, 3.728355,
+            0.653333, -0.333807, -0.679507, 3.730348
         };
+        */
 
+        //mat4_transpose(cameraView, cameraView);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", test);
+        UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
 
         UniformBuffer_update_all();
 
         //Shader_use(testShader);
-        //Object_StaticMesh_Draw(mesh);
 
         mesh->Draw(mesh);
         lightVis->Draw(lightVis);

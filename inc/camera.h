@@ -6,6 +6,7 @@
 typedef struct Camera {
     OBJECT_BODY();
     mat4 ViewMatrix;
+    vec3 Forward;
     
     float MoveSpeed;
     float Acceleration;

@@ -88,7 +88,7 @@ List* List_create_subset(List* list, u32 start, u32 end);
 
 // Creates T* variable, it, which is the current item in the loop. This will be a little faster than using List_at().
 // If you are using function pointers, de-reference it before calling.
-#define List_iterator(T, list) T* it = (T*)(list)->head; (u8*)it != (list)->tail; internal_List_getPrevPtr(T, list, it)
+#define List_iterator(T, list) T* it = (T*)(list)->tail; (u8*)it != (list)->head; internal_List_getNextPtr(T, list, it)
 //#define List_iterator_to(T, list, end) T* it = (T*)(list)->head; (void*)it != List_at(list, (u32)end); internal_List_getPrevPtr(T, list, it)
 //#define List_iterator_from(T, list, start) T* it = (T*)List_at(list, start); (u8*)it != (list)->tail; internal_List_getPrevPtr(T, list, it)
 //#define List_iterator_range(T, list, start, end) T* it = (T*)List_at(list, start); (void*)it != List_at(list, (u32)end); internal_List_getPrevPtr(T, list, it) 
@@ -327,13 +327,9 @@ void List_realloc(List* list, u32 Capacity) {
 
     u8* newData = (u8*)malloc(list->itemSize * Capacity);
 
-    // Early return if for some reason you're reallocating an empty array?? why are you doing that?
+    // Jump to end if for some reason you're reallocating an empty array?? why are you doing that?
     if (list->head == list->tail) {
-        free(list->data);
-        list->head = newData;
-        list->tail = newData;
-        list->data = newData;
-        return;
+        goto ReasignPointers;
     }
 
     // The copy can be simplified since the list is either continuous, or split in two.
@@ -354,6 +350,7 @@ void List_realloc(List* list, u32 Capacity) {
         internal_list_copy(newData, list->tail, bytesToCopy);
     }
 
+    ReasignPointers:
     // Reassign the head and tail to point into the new data section.
     list->tail = newData;
     list->head = newData + (oldCount * list->itemSize);
@@ -427,7 +424,7 @@ void* List_at(const List* list, const u32 index) {
     //
 
     // Return NULL if index is out of range.
-    if (index >= List_count(list)) {
+    if (index > List_count(list)) {
         return NULL;
     }
 
@@ -454,7 +451,7 @@ void List_remove_at(List* list, const u32 index) {
     //
 
     // Check that i is valid.
-    if (index >= List_count(list)) {
+    if (index > List_count(list)) {
         return;
     }
 
@@ -473,38 +470,20 @@ void List_remove_at(List* list, const u32 index) {
 
 
 void internal_List_push_back(List* list, void* data) {
-    // push a new value onto the back of the list.
-    //
-    //
-
-    // Early return if the list can still fit the next item. 
-    if (List_count(list) < list->capacity - 1) {
-        internal_List_getNextPtr(u8, list, list->head);
-        internal_list_copy(list->head, data, list->itemSize);
-        return;
-    }
-
     // Reallocate the array with a doubling factor of 1.5
-    List_realloc(list, list->capacity + (list->capacity >> 1));
-    internal_List_getNextPtr(u8, list, list->head);
+    if (List_count(list) >= list->capacity - 1) {
+        List_realloc(list, list->capacity + (list->capacity << 1));
+    }
     internal_list_copy(list->head, data, list->itemSize);
+    internal_List_getNextPtr(u8, list, list->head);
 }
 
 
 void internal_List_push_front(List* list, void* data) {
-    // push a new value onto the front of the list.
-    //
-    //
-
-    // Early return if the list can still fit the next item. 
-    if (List_count(list) < list->capacity) {
-        internal_list_copy(list->tail, data, list->itemSize);
-        internal_List_getPrevPtr(u8, list, list->tail);
-        return;
+    // Reallocate the array with a doubling factor of 1.5
+    if (List_count(list) >= list->capacity - 1) {
+        List_realloc(list, list->capacity + (list->capacity << 1));
     }
-
-    // Reallocate the array with a doubling factor of 1.5.
-    List_realloc(list, list->capacity + (list->capacity >> 1));
     internal_list_copy(list->tail, data, list->itemSize);
     internal_List_getPrevPtr(u8, list, list->tail);
 }

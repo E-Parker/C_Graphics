@@ -225,6 +225,26 @@ void vec4_normalize (vec4 v) {
 }
 
 
+void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out) {
+    vec3 axisNormaized = vec3_def_copy(axis);
+    vec3_normalize(axisNormaized);
+
+    angle /= 2.0;
+    double sinAngle = sin(angle);
+    double cosAngle = cos(angle);
+    vec3 axisAngle = vec3_def_scale(axisNormaized, sinAngle);
+
+    vec3 axisAngleCrossV = vec3_def_cross(axisAngle, v);
+    vec3 axisAngleCrossWV = vec3_def_cross(axisAngleCrossV, v);
+    vec3_scale(axisAngleCrossV, (2.0 * sinAngle));
+    vec3_scale(axisAngleCrossWV, 2.0);
+
+    vec3 result = vec3_def_add(axisAngleCrossV, axisAngleCrossWV);
+
+    return result;
+}
+
+
 void quaternion_invert (quaternion q) {
     float length = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
     length = (length != 0.0f) ? (float)(1.0 / sqrt((double)length)) : 1.0f;
@@ -293,27 +313,27 @@ void mat4_scale (const vec3 scale, mat4 out) {
 }
 
 void mat4_get_forward (const mat4 m, vec3 out) {
-    out[0] = m[2];
-    out[1] = m[6];
+    out[0] = m[8];
+    out[1] = m[9];
     out[2] = m[10];
 }
 
 void mat4_get_right (const mat4 m, vec3 out) {
     out[0] = m[0];
-    out[1] = m[4];
-    out[2] = m[8];   
+    out[1] = m[1];
+    out[2] = m[2];   
 }
 
 void mat4_get_up (const mat4 m, vec3 out) {
-    out[0] = m[1];
+    out[0] = m[4];
     out[1] = m[5];
-    out[2] = m[9];    
+    out[2] = m[6];    
 }
 
 void mat4_get_translation (const mat4 m, vec3 out) {
-    out[0] = m[3];
-    out[1] = m[7];
-    out[2] = m[11];
+    out[0] = m[12];
+    out[1] = m[13];
+    out[2] = m[14];
 }
 
 void mat4_transpose (const mat4 m, mat4 out) {
@@ -359,11 +379,26 @@ void mat4_projection_perspective (const double left, const double right, const d
     double FarToNear = far - near;
 
     mat4 result = {
-        (float)(near * 2.0 / RightToLeft), 0.0f, (float)((right + left) / RightToLeft), 0.0f,
-        0.0f, (float)(near * 2.0f / FarToNear), (float)((top + bottom) / TopToBottom), 0.0f,
-        0.0f, 0.0f, (float)((far + near) / FarToNear), (float)(far * near * 2.0 / FarToNear),
-        0.0f, 0.0f, -1.0f, 0.0f
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f,
     };
+
+    result[0] = ((float)near * 2.0f) / RightToLeft;
+    result[5] = ((float)near * 2.0f) / TopToBottom;
+    result[2] = ((float)right + (float)left) / RightToLeft;
+    result[6] = ((float)top + (float)bottom) / TopToBottom;
+    result[10] = -((float)far + (float)near) / FarToNear;
+    result[14] = -1.0f;
+    result[11] = -((float)far * (float)near * 2.0f) / FarToNear;
+
+    //mat4 result = {
+    //    (float)(near * 2.0 / RightToLeft), 0.0f, (float)((right + left) / RightToLeft), 0.0f,
+    //    0.0f, (float)(near * 2.0f / FarToNear), (float)((top + bottom) / TopToBottom), 0.0f,
+    //    0.0f, 0.0f, (float)((far + near) / FarToNear), (float)(far * near * 2.0 / FarToNear),
+    //    0.0f, 0.0f, -1.0f, 0.0f
+    //};
     
     mat4_copy(result, out);
 }

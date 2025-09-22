@@ -45,3 +45,28 @@ void internal_String_clone_to_buffer (String* string, char* destination) {
     }
     *++destination = '\0';
 }
+
+char* internal_String_first (String* string, char pattern) {
+    char* buffer = string->start;
+    while (buffer != string->end) {
+        if (*buffer == pattern) {
+            return buffer;
+        }
+        buffer++;
+    }
+    return NULL;
+}
+
+
+char* internal_String_last (String* string, char pattern) {
+    char* buffer = string->start;
+    char* match = NULL;
+    while (buffer != string->end) {
+        if (*buffer == pattern) {
+            match = buffer;
+        }
+        buffer++;
+    }
+    return match;
+
+}

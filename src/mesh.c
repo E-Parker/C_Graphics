@@ -177,24 +177,25 @@ void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMe
     List_push_back(&staticMesh->materials, material);
 }
 
+#include "assert.h"
 
 StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* parent) {
     StaticMesh* staticMesh = NULL;
     
     uint64_t bufferSizes[4] = { 0, 0, 0, 0 };
     
-    FILE* file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     fread(bufferSizes, 8, 4, file);
     
     if (ferror(file)) {
         goto ReturnMesh;
     }
 
-    fseek(file, sizeof(bufferSizes), SEEK_SET);
+    fseek(file, 0x20, SEEK_SET);
     uint64_t startOfData = ftell(file);
     fseek(file, 0, SEEK_END);
     uint64_t endOfData = ftell(file);
-    fseek(file, sizeof(bufferSizes), SEEK_SET);
+    fseek(file, 0x20, SEEK_SET);
 
     uint64_t bytesOfData = endOfData - startOfData;
     uint64_t expectedBytes = bufferSizes[0] + bufferSizes[1] + bufferSizes[2] + bufferSizes[3];
@@ -207,31 +208,36 @@ StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* paren
     if (vertexSize != normalSize || normalSize != tCoordSize) {
         goto ReturnMesh;
     }
-
-    //if (expectedBytes != bytesOfData) {
-    //    goto ReturnMesh;
-    //}
-
+    
     uint32_t* indexBuffer = (uint32_t*)malloc(bufferSizes[0]);
     GLfloat* vertexBuffer = (GLfloat*)malloc(bufferSizes[1]);
     GLfloat* normalBuffer = (GLfloat*)malloc(bufferSizes[2]);
     GLfloat* tCoordBuffer = (GLfloat*)malloc(bufferSizes[3]);
 
+    uint64_t errorCode;
+
     fread(indexBuffer,  sizeof(uint32_t), indexSize, file);
     fread(vertexBuffer, sizeof(vec3), vertexSize, file);
     fread(normalBuffer, sizeof(vec3), normalSize, file);
     fread(tCoordBuffer, sizeof(vec2), tCoordSize, file);
-    
-    MeshRender mesh = {.materialIndex = 0};
-    UploadMesh(&mesh, indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, indexSize, vertexSize);
 
+    if (ferror(file)) {
+        goto DestroyBuffersAndReturnMesh;
+    }
+    
+    staticMesh = Object_StaticMesh_create_empty(parent);
+    MeshRender mesh = {.materialIndex = 0};
+    List_push_back(&staticMesh->meshRenders, mesh);
+
+    UploadMesh((MeshRender*)List_at(&staticMesh->meshRenders, 0), indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, indexSize, vertexSize);
+
+    DestroyBuffersAndReturnMesh:
     free(indexBuffer);
     free(vertexBuffer);
     free(normalBuffer);
     free(tCoordBuffer);
 
-    staticMesh = Object_StaticMesh_create_empty(parent);
-    List_push_back(&staticMesh->meshRenders, mesh);
+    
 
     ReturnMesh:
     fclose(file);
@@ -247,14 +253,8 @@ StaticMesh* Object_StaticMesh_create_from_wave_front(const char* path, void* par
 StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
     
     // Find the file extension.
-    char* buffer = (char*)path;
-    char* ext = NULL;
-    while (*buffer) {
-        if (*buffer == '.') {
-            ext = buffer;
-        }
-        buffer++;
-    }
+    String pathString = String_from_ptr(path);
+    char* ext = String_last(pathString, '.');
 
     if (!ext) {
         return NULL;
@@ -286,6 +286,6 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
 void Object_StaticMesh_Draw(void* object) {
     StaticMesh* staticMesh = (StaticMesh*)object;
     for (List_iterator(MeshRender, &staticMesh->meshRenders)) {
-        DrawRenderable(it, List_at(&staticMesh->materials, it->materialIndex), staticMesh->Transform);
+        DrawRenderable(it, *(Material**)List_at(&staticMesh->materials, it->materialIndex), staticMesh->Transform);
     }
 }
