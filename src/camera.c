@@ -9,8 +9,6 @@
 #include "engine/math.h"
 #include "camera.h"
 
-#include "stdio.h"
-
 void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double ratio) {
     /* Update function for a camera with no-clip. */
 
@@ -51,10 +49,12 @@ void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double r
     double CursorPositionX, CursorPositionY;
     GetCursorPositionDelta(&CursorPositionX, &CursorPositionY);
 
-    camera->Transform[12] += desiredMovement[0] * camera->MoveSpeed * deltaTime;
-    camera->Transform[13] += desiredMovement[1] * camera->MoveSpeed * deltaTime;
-    camera->Transform[14] += desiredMovement[2] * camera->MoveSpeed * deltaTime;
-    
+    vec3_scale(desiredMovement, camera->MoveSpeed * deltaTime);
+
+    mat4 translation;
+    mat4_translate(desiredMovement, translation);
+    mat4_multiply(camera->Transform, translation, camera->Transform);
+
     vec3 cameraPos;
     vec3 cameraForward;
     vec3 cameraUp;
@@ -73,15 +73,14 @@ void Camera_NoClip_Update(Camera* camera, const double deltaTime, const double r
     mat4_inverse(lookat, lookat);
 
     mat4 projection;
-    double top = camera->NearClip * tan(DEG2RAD * camera->Fov * 0.5);
-    double bottom = -top;
-    double right = top * AspectRatio();
-    double left = -right;
+    mat4_projection_perspective(camera->Fov, AspectRatio(), camera->NearClip, camera->FarClip, projection);
+    //mat4_projection_orthographic(-2.0, 2.0, 2.0, -2.0, -2.0, 2.0, projection);
 
-    //mat4_projection_perspective(left, right, top, bottom, camera->NearClip, camera->FarClip, projection);
-    mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, projection);
+    mat4_multiply(camera->Transform, projection, camera->ViewMatrix);
 
-    mat4_multiply(lookat, projection, camera->ViewMatrix);
+    mat4_print(projection);
+    mat4_print(camera->Transform);
+    mat4_print(camera->ViewMatrix);
 
 }
 
@@ -93,7 +92,7 @@ Camera* Object_Camera_create() {
 
     object->MoveSpeed = 1.0f;
     object->Acceleration = 0.4f;
-    object->Fov = 80.0f;
+    object->Fov = 60.0f;
     object->NearClip = 0.001f;
     object->FarClip = 1024.0f;
     object->Sensitivity = 1.0f;

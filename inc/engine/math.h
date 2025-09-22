@@ -195,7 +195,8 @@ void mat4_get_translation(const mat4 m, vec3 out);
 void mat4_inverse(const mat4 m, mat4 out);
 void mat4_transpose(const mat4 m, mat4 out);
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);
-void mat4_projection_perspective(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);
+void mat4_projection_perspective(const double fov, const double aspect, const double near, const double far, mat4 out);
+void mat4_projection_frustum(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);
 void mat4_projection_orthographic(const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out);
 
 

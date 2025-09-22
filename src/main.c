@@ -35,6 +35,7 @@ int main(void) {
 
     // Load Missing Textures:
     CreateTexture("./assets/defaultAssets/defaultTexture.png", "defaultTexture", GL_RGBA, false, false, false, GL_LINEAR);
+    CreateTexture("./assets/defaultAssets/test.png", "testTexture", GL_RGBA, false, false, false, GL_LINEAR);
     CreateTexture("./assets/defaultAssets/missingTexture.png", "MissingTexture", GL_RGBA, false, false, false, GL_NEAREST);
     CreateTexture("./assets/defaultAssets/missingNormal.png", "missingNormal", GL_RGB, false, false, false, GL_LINEAR);
 
@@ -57,10 +58,10 @@ int main(void) {
     SetTextureFromAlias(Mat0, "missingNormal", 2);
     SetTextureFromAlias(Mat0, "Specular", 3);
 
-    SetTextureFromAlias(Mat1, "Specular", 0);
-    SetTextureFromAlias(Mat1, "Specular", 1);
+    SetTextureFromAlias(Mat1, "testTexture", 0);
+    SetTextureFromAlias(Mat1, "testTexture", 1);
     SetTextureFromAlias(Mat1, "missingNormal", 2);
-    SetTextureFromAlias(Mat1, "Specular", 3);
+    SetTextureFromAlias(Mat1, "testTexture", 3);
 
     // Load Font:
     //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
@@ -73,6 +74,10 @@ int main(void) {
     StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
     
     assert(mesh && lightVis);
+
+    vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
+    mat4_translate(cameraDefaultPos, mainCamera->Transform);
+   
 
     Object_StaticMesh_set_Material(mesh, 0, Mat0);
     Object_StaticMesh_set_Material(lightVis, 0, Mat1);
@@ -133,8 +138,13 @@ int main(void) {
         }
 
         vec3 meshTranslate = { (float)x, (float)y, 0.0f };
-
+        vec3 meshScale = { 0.5f, 0.5f, 0.5f };
+        
         mat4_translate(meshTranslate, mesh->Transform);
+        mat4 scale;
+
+        mat4_scale(meshScale, scale);
+        mat4_multiply(scale, mesh->Transform, mesh->Transform);
 
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
@@ -142,8 +152,6 @@ int main(void) {
 
         mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
         mat4_inverse(lightVis->Transform, lightVis->Transform);
-
-        //mat4_translate(lightPos, lightVis->Transform);
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
 
@@ -155,7 +163,6 @@ int main(void) {
         mat4_get_translation(mainCamera->Transform, cameraPos);
         mat4_get_forward(mainCamera->Transform, cameraDir);
 
-       
 
         //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
         //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
@@ -166,21 +173,8 @@ int main(void) {
         //mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
         //
 
-        vec3_print(cameraDir);
-        mat4_print(mainCamera->Transform);
-        mat4_print(mainCamera->ViewMatrix);
-
-        /*
-        vec3 cameraPos = { 2.239947, -2.032571, -2.337623 };
-        vec3 cameraDir = { -0.653333, 0.333807, 0.679507 };
-        
-        mat4 cameraView = {
-            0.936416, -0.000001, 0.900347, -0.007148,
-            0.400723, 1.632703, -0.416775, -1.446724,
-            0.653334, -0.333807, -0.679508, 3.728355,
-            0.653333, -0.333807, -0.679507, 3.730348
-        };
-        */
+        //vec3_print(cameraDir);
+        //mat4_print(mainCamera->ViewMatrix);
 
         //mat4_transpose(cameraView, cameraView);
 

@@ -177,7 +177,6 @@ void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMe
     List_push_back(&staticMesh->materials, material);
 }
 
-#include "assert.h"
 
 StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* parent) {
     StaticMesh* staticMesh = NULL;

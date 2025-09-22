@@ -271,24 +271,27 @@ void quaternion_mat4 (const quaternion q, mat4 out) {
 
 
 void mat4_multiply (const mat4 left, const mat4 right, mat4 out) {
+
     mat4 result = {
-        left[0] * right[0] + left[4] * right[1] + left[8] * right[2] + left[12] * right[3],
-        left[1] * right[0] + left[5] * right[1] + left[9] * right[2] + left[13] * right[3],
-        left[2] * right[0] + left[6] * right[1] + left[10] * right[2] + left[14] * right[3],
-        left[3] * right[0] + left[7] * right[1] + left[11] * right[2] + left[15] * right[3],
-        left[0] * right[4] + left[4] * right[5] + left[8] * right[6] + left[12] * right[7],
-        left[1] * right[4] + left[5] * right[5] + left[9] * right[6] + left[13] * right[7],
-        left[2] * right[4] + left[6] * right[5] + left[10] * right[6] + left[14] * right[7],
-        left[3] * right[4] + left[7] * right[5] + left[11] * right[6] + left[15] * right[7],
-        left[0] * right[8] + left[4] * right[9] + left[8] * right[10] + left[12] * right[11],
-        left[1] * right[8] + left[5] * right[9] + left[9] * right[10] + left[13] * right[11],
-        left[2] * right[8] + left[6] * right[9] + left[10] * right[10] + left[14] * right[11],
-        left[3] * right[8] + left[7] * right[9] + left[11] * right[10] + left[15] * right[11],
-        left[0] * right[12] + left[4] * right[13] + left[8] * right[14] + left[12] * right[15],
-        left[1] * right[12] + left[5] * right[13] + left[9] * right[14] + left[13] * right[15],
-        left[2] * right[12] + left[6] * right[13] + left[10] * right[14] + left[14] * right[15],
-        left[3] * right[12] + left[7] * right[13] + left[11] * right[14] + left[15] * right[15],
+        left[0] * right[0] + left[1] * right[4] + left[2] * right[8] + left[3] * right[12],
+        left[0] * right[1] + left[1] * right[5] + left[2] * right[9] + left[3] * right[13],
+        left[0] * right[2] + left[1] * right[6] + left[2] * right[10] + left[3] * right[14],
+        left[0] * right[3] + left[1] * right[7] + left[2] * right[11] + left[3] * right[15],
+        left[4] * right[0] + left[5] * right[4] + left[6] * right[8] + left[7] * right[12],
+        left[4] * right[1] + left[5] * right[5] + left[6] * right[9] + left[7] * right[13],
+        left[4] * right[2] + left[5] * right[6] + left[6] * right[10] + left[7] * right[14],
+        left[4] * right[3] + left[5] * right[7] + left[6] * right[11] + left[7] * right[15],
+        left[8] * right[0] + left[9] * right[4] + left[10] * right[8] + left[11] * right[12],
+        left[8] * right[1] + left[9] * right[5] + left[10] * right[9] + left[11] * right[13],
+        left[8] * right[2] + left[9] * right[6] + left[10] * right[10] + left[11] * right[14],
+        left[8] * right[3] + left[9] * right[7] + left[10] * right[11] + left[11] * right[15],
+        left[12] * right[0] + left[13] * right[4] + left[14] * right[8] + left[15] * right[12],
+        left[12] * right[1] + left[13] * right[5] + left[14] * right[9] + left[15] * right[13],
+        left[12] * right[2] + left[13] * right[6] + left[14] * right[10] + left[15] * right[14],
+        left[12] * right[3] + left[13] * right[7] + left[14] * right[11] + left[15] * right[15],
     };
+
+
     mat4_copy(result, out);
 }
 
@@ -409,29 +412,35 @@ void mat4_lookat (const vec3 viewer, const vec3 target, const vec3 viewerUp, mat
     vec3_normalize(up);
     
     mat4 result = {
-        side[0], up[0], -forward[0], 0.0f,
-        side[1], up[1], -forward[1], 0.0f,
-        side[2], up[2], -forward[2], 0.0f,
+        side[0], up[0], forward[0], 0.0f,
+        side[1], up[1], forward[1], 0.0f,
+        side[2], up[2], forward[2], 0.0f,
         -vec3_dot(side, viewer), -vec3_dot(up, viewer), -vec3_dot(forward, viewer), 1.0f,
     };
 
     mat4_copy(result, out);
 }
 
-void mat4_projection_perspective (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
+void mat4_projection_perspective (const double fovy, const double aspect, const double near, const double far, mat4 out) {
+    double top = near * tan(DEG2RAD * fovy * 0.5);
+    double bottom = -top;
+    double right = top * aspect;
+    double left = -right;
+    mat4_projection_frustum(left, right, top, bottom, near, far, out);
+}
+
+void mat4_projection_frustum (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
     double RightToLeft = right - left;
     double TopToBottom = top - bottom;
     double FarToNear = far - near;
+    
 
     mat4 result = {
-    ((float)near * 2.0f) / RightToLeft, 0.0f, 0.0f, 0.0f,
-    0.0f, ((float)near * 2.0f) / TopToBottom, 0.0f, 0.0f,
-    ((float)right + (float)left) / RightToLeft, ((float)top + (float)bottom) / TopToBottom -((float)far + (float)near) / FarToNear, -1.0f,
-    0.0f, 0.0f, -((float)far * (float)near * 2.0f) / FarToNear, 0.0f,
+        ((float)near * 2.0f) / RightToLeft, 0.0f, 0.0f, 0.0f,
+        0.0f, ((float)near * 2.0f) / TopToBottom, 0.0f, 0.0f,
+        ((float)right + (float)left) / RightToLeft, 0.0f, ((float)top + (float)bottom) / TopToBottom - ((float)far + (float)near) / FarToNear, -1.0f,
+        0.0f, 0.0f, -((float)far * (float)near * 2.0f) / FarToNear, 0.0f,
     };
-
- 
-    mat4_print(result);
 
     mat4_copy(result, out);
 }
