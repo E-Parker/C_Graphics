@@ -58,10 +58,10 @@ int main(void) {
     SetTextureFromAlias(Mat0, "missingNormal", 2);
     SetTextureFromAlias(Mat0, "Specular", 3);
 
-    SetTextureFromAlias(Mat1, "testTexture", 0);
-    SetTextureFromAlias(Mat1, "testTexture", 1);
+    SetTextureFromAlias(Mat1, "mushroomBody", 0);
+    SetTextureFromAlias(Mat1, "mushroomGlow", 1);
     SetTextureFromAlias(Mat1, "missingNormal", 2);
-    SetTextureFromAlias(Mat1, "testTexture", 3);
+    SetTextureFromAlias(Mat1, "Specular", 3);
 
     // Load Font:
     //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
@@ -77,16 +77,12 @@ int main(void) {
 
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
-   
 
-    Object_StaticMesh_set_Material(mesh, 0, Mat0);
-    Object_StaticMesh_set_Material(lightVis, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh, 0, Mat1);
+    Object_StaticMesh_set_Material(lightVis, 0, Mat0);
 
     Shader* testShader = Shader_create(Mat0->Program, "TestShader");
     ///Shader* testShader2 = Shader_create(Mat1->Program, "TestShader2");
-
-    //Uniform* mvpUniform;
-    //Uniform_set_data(mvpUniform, transform);
 
     int x = 0;
     int y = 0;
@@ -97,7 +93,7 @@ int main(void) {
 
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
-    vec3 lightColor = { 1.0f, 1.0f, 1.0f };
+    vec3 lightColor = { 2.0f, 2.0f, 2.0f };
     vec3 AmbientColor = { 0.8f, 0.8f, 0.8f };
     
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
@@ -161,10 +157,7 @@ int main(void) {
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
 
-
-
         mainCamera->Tick(mainCamera, DeltaTime());
-
 
         vec3 cameraPos;
         vec3 cameraDir = { 0.0f, 0.0f, 1.0f };
@@ -172,22 +165,7 @@ int main(void) {
         mat4_get_translation(mainCamera->Transform, cameraPos);
         vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
 
-        vec3_print(cameraDir);
-
-        //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, mainCamera->ViewMatrix);
-        //mat4_projection_perspective(left, right, top, bottom, mainCamera->NearClip, mainCamera->FarClip, mainCamera->ViewMatrix);
-        //mat4 cameraView;
-        //mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
-        //
-        //mat4_get_forward(cameraView, cameraDir);
-        //mat4_multiply(mainCamera->Transform, mainCamera->ViewMatrix, mainCamera->ViewMatrix);
-        //
-
-        //vec3_print(cameraDir);
-        //mat4_print(mainCamera->ViewMatrix);
-
-        //mat4_transpose(cameraView, cameraView);
-
+ 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
@@ -196,8 +174,6 @@ int main(void) {
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
 
         UniformBuffer_update_all();
-
-        //Shader_use(testShader);
 
         mesh->Draw(mesh);
         lightVis->Draw(lightVis);
