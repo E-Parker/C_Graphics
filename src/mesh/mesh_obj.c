@@ -194,3 +194,4 @@ Deinitialize:
     List_deinitialize(&parser.tCoordList);
     return staticMesh;
 }
+

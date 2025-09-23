@@ -29,14 +29,10 @@ uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8
         goto ObjectInitFail;
     }
 
-<<<<<<< HEAD
-    Object_SetAlias(object, "Empty");
-=======
     for (uint8_t i = 0; i < OBJECT_ALIAS_SIZE; i++) {
         object->Alias[i] = '\0';
     };
 
->>>>>>> rewrite
     mat4_copy(MAT4_IDENTITY, object->Transform);
     
     object->Data.Flags = 0;

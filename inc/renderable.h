@@ -19,16 +19,9 @@ typedef struct MeshRender {
 
 } MeshRender;
 
-<<<<<<< HEAD
-void Mesh_Draw(const Mesh* mesh, const Material* material, const mat4 transform);
-void Mesh_Free(Mesh* mesh);
-void Mesh_FreeSubmesh(Mesh* mesh);
-void Mesh_Upload(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  uint64_t indecies, const uint64_t vertecies);
-void Mesh_UploadSubmesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies);
-=======
 void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform);
 void FreeMesh(MeshRender* mesh);
 void FreeSubMesh(MeshRender* mesh);
 void UploadMesh(MeshRender* mesh, const uint32_t* indicesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  uint64_t indices, const uint64_t vertecies);
 void UploadSubMesh(MeshRender* mesh, MeshRender* source, const uint32_t* indicesArray, const uint32_t indices);
->>>>>>> rewrite
+

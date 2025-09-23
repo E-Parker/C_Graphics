@@ -13,19 +13,11 @@
 #include "camera.h"
 #include "mesh.h"
 
-<<<<<<< HEAD
-#include "renderable.h"
-
-
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 720;
-=======
 #include "stdio.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
->>>>>>> rewrite
 
 int main(void) {
 
@@ -76,17 +68,6 @@ int main(void) {
     //TextRender* testText = new TextRender();
     //SetFont(testText, "IBM", defautFont);
 
-<<<<<<< HEAD
-    //StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
-    //StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
-    
-    StaticMesh* lightVis = CreateStaticMeshCube();
-    
-    //mesh->SetMaterial(Mat0, 0);
-    //lightVis->SetMaterial(Mat1, 0);
-
-=======
->>>>>>> rewrite
     Camera* mainCamera = Object_Camera_create();
     StaticMesh* mesh = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
     StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
@@ -170,12 +151,8 @@ int main(void) {
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
-<<<<<<< HEAD
-        mat4_translate(lightPos, lightVis->Transform);
-=======
         mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
         mat4_inverse(lightVis->Transform, lightVis->Transform);
->>>>>>> rewrite
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
 
@@ -187,36 +164,6 @@ int main(void) {
         mat4_get_translation(mainCamera->Transform, cameraPos);
         vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
 
-<<<<<<< HEAD
-        mat4 cameraView;
-        mat4 cameraPerspective;
-
-        mat4_copy(MAT4_IDENTITY, cameraPerspective);
-
-        mat4_lookat(cameraPos, cameraDir, V3_UP, cameraView);
-        mat4_perspective(mainCamera->Fov, AspectRatio(), mainCamera->NearClip, mainCamera->FarClip, cameraPerspective);
-        mat4_multiply(cameraView, cameraPerspective, mainCamera->ViewMatrix);
-
-        UniformBuffer* buffer = UniformBuffer_get_self("FrameData");
-        void* data = UniformBuffer_get_shared(buffer);
-
-        //UniformBuffer* buffer1 = UniformBuffer_get_self("LightData");
-        //UniformStruct* u_lights;
-        //UniformBuffer_get_Struct(buffer1, "u_lights", &u_lights);
-
-        UniformBuffer_set_Global("FrameData", "u_time", &time);
-        UniformBuffer_set_Global("FrameData", "u_view", &mainCamera->ViewMatrix);
-        UniformBuffer_set_Global("FrameData", "u_position", &cameraPos);
-        UniformBuffer_set_Global("FrameData", "u_direction", &cameraDir);
-
-        UniformBuffer_update_all();
-
-        //Shader_use(testShader);
-
-        //mesh->Draw();
-        Mesh_Draw(lightVis->meshRenders, Mat0, (GLfloat*)&lightVis->Transform);
-
-=======
  
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
 
@@ -230,7 +177,6 @@ int main(void) {
         mesh->Draw(mesh);
         lightVis->Draw(lightVis);
        
->>>>>>> rewrite
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
     }

@@ -54,35 +54,6 @@ StaticMesh* Object_StaticMesh_create_empty(void* parent) {
 }
 
 
-void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMesh, const Material* material) {
-    if (!staticMesh) {
-        return;
-    }
-    
-    MeshRender* mesh = (MeshRender*)List_at(&staticMesh->meshRenders, subMesh);
-    
-    if (!mesh) {
-        return;
-    }
-
-    uint32_t materialCount = List_count(&staticMesh->materials);
-    
-    if (subMesh > materialCount) {
-        return;
-    }
-
-    long int indexOf;
-    if (List_contains_item(&staticMesh->materials, material, &indexOf)) {
-        mesh->materialIndex = indexOf;
-    }
-    else {
-        mesh->materialIndex = materialCount;
-    }
-
-    List_push_back(&staticMesh->materials, material);
-}
-
-
 StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
     
     // Find the file extension.
@@ -102,8 +73,8 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
     
     switch (fileExtentionPacked) {
     case ObjFile:       return Object_StaticMesh_create_from_wave_front(path, parent);
-    case GlbFile:       return NULL;
-    case GltfFile:      return NULL;
+    case GlbFile:       return Object_StaticMesh_create_from_graphics_library_binary_transmission_format(path, parent);
+    case GltfFile:      return Object_StaticMesh_create_from_graphics_library_transmission_format(path, parent);
     case BinFile:       return Object_StaticMesh_create_from_raw_data(path, parent);
     case BlendFile:     return NULL;
     case U3dFile:       return NULL;
@@ -121,4 +92,33 @@ void Object_StaticMesh_Draw(void* object) {
     for (List_iterator(MeshRender, &staticMesh->meshRenders)) {
         DrawRenderable(it, *(Material**)List_at(&staticMesh->materials, it->materialIndex), staticMesh->Transform);
     }
+}
+
+
+void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMesh, const Material* material) {
+    if (!staticMesh) {
+        return;
+    }
+
+    MeshRender* mesh = (MeshRender*)List_at(&staticMesh->meshRenders, subMesh);
+
+    if (!mesh) {
+        return;
+    }
+
+    uint32_t materialCount = List_count(&staticMesh->materials);
+
+    if (subMesh > materialCount) {
+        return;
+    }
+
+    long int indexOf;
+    if (List_contains_item(&staticMesh->materials, material, &indexOf)) {
+        mesh->materialIndex = indexOf;
+    }
+    else {
+        mesh->materialIndex = materialCount;
+    }
+
+    List_push_back(&staticMesh->materials, material);
 }
