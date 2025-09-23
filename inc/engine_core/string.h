@@ -19,6 +19,7 @@ typedef struct String {
 #define String_from_chars(buffer) { .start = (char*)(&buffer), .end = (char*)(&buffer) + sizeof(buffer) }
 #define String_from_ptr(buffer) {.start = (char*)buffer, .end = FindBufferEnd((const char*)buffer) }
 #define String_length(string) ((uint64_t)((string).end - (string).start) + 1)
+#define String_invalid(string) (!(string).start || !(string).end || (string).start == (string).end)
 
 #define String_as_lower(string) for (char* c = (string).start; c < (string).end; ++c) { *c = char_as_lower(*c); }
 #define String_as_upper(string) for (char* c = (string).start; c < (string).end; ++c) { *c = char_as_upper(*c); }

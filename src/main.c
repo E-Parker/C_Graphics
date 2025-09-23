@@ -94,7 +94,7 @@ int main(void) {
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor = { 0.8f, 0.8f, 0.8f };
+    vec3 AmbientColor = { 0.2f, 0.2f, 0.2f };
     
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
