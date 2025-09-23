@@ -6,8 +6,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "string_utilities.h"
-#include "gl_parse_shader.h"
+#include "engine_core/string.h"
+#include "engine_core/list.h"
+#include "engine/parse_shader.h"
 
 // Shader descriptor buffer for run-time shader compiling.
 ShaderDescriptor descriptorBuffer[GL_SHADER_MAX_DESCRIPTORS]; 
@@ -39,20 +40,20 @@ void internal_ReadShaderSource(const char* path) {
     fseek(file, 0, SEEK_END);
     uint64_t bufferSize = ftell(file);
     fseek(file, 0, SEEK_SET);
-    
+
     // Return early if the buffer isn't big enough to fit the file.
     if (bufferSize > GL_SHADER_SOURCE_BUFFER_SIZE) {
         printf("Shader load error: source file \"%s\" was too large to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_BUFFER_SIZE);
         fclose(file);
         return;
     }
-    
+
+    memset(&srcBuffer, '\0', GL_SHADER_SOURCE_BUFFER_SIZE);
     fread((char*)&srcBuffer, 1, bufferSize, file);
     int errorCode = ferror(file);
     fclose(file);
     
-    // Force the last index to null so open gl doesnt explode trying to parse it later.
-    srcBuffer[bufferSize] = '\0';
+    
 
     // Return the error if there was an stdio error reading the file.
     if (errorCode) {
@@ -83,13 +84,13 @@ void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
     glShaderSource(*shader, 1, &gl_srcBuffer, NULL);
     glCompileShader(*shader);
     
-    // File was handled sucessfully so update wall.
+    // File was handled successfully so update wall.
     srcBufferWall = false;
 }
 
 
 bool Shader_CompileProgramValidate(ShaderDescriptor* args) {
-    // Step through args untill the max descriptors is hit, or untill the end of the list is found.
+    // Step through args until the max descriptors is hit, or until the end of the list is found.
     
     for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
         if((args[i]).path[0] == '\0') {

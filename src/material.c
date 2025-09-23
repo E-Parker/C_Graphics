@@ -6,8 +6,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include "gl_parse_shader.h"
-#include "hash_table.h"
+#include "engine_core/hash_table.h"
+#include "engine/parse_shader.h"
 #include "texture.h"
 #include "material.h"
 

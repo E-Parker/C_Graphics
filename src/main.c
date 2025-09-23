@@ -4,36 +4,45 @@
 #include <assert.h>
 #include <math.h>
 
-#include "gl_utilities.h"
-#include "gl_math.h"
-#include "gl_shader_uniform.h"
+#include "engine/engine.h"
+#include "engine/math.h"
+#include "engine/shader_uniform.h"
 
 #include "texture.h"
 #include "material.h"
 #include "camera.h"
 #include "mesh.h"
 
+<<<<<<< HEAD
 #include "renderable.h"
 
 
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 720;
+=======
+#include "stdio.h"
+
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 480;
+
+>>>>>>> rewrite
 
 int main(void) {
 
+    
     // Initialize the window to the starting size and set the header.
-    GLFWwindow* window = Initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render");
+    if (!Engine_initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render"));
     InitShaders();
     InitTextures();
 
     // Add termination functions to be executed at the end of the program.
-    //glUtilAddTerminationFunction(DereferenceFonts);
-    glUtilAddTerminationFunction(DereferenceTextures);
-    glUtilAddTerminationFunction(DereferenceShaders);
-    glUtilAddTerminationFunction(glfwTerminate);
+    //Engine_add_termination_function(DereferenceFonts);
+    Engine_add_termination_function(DereferenceTextures);
+    Engine_add_termination_function(DereferenceShaders);
 
     // Load Missing Textures:
     CreateTexture("./assets/defaultAssets/defaultTexture.png", "defaultTexture", GL_RGBA, false, false, false, GL_LINEAR);
+    CreateTexture("./assets/defaultAssets/test.png", "testTexture", GL_RGBA, false, false, false, GL_LINEAR);
     CreateTexture("./assets/defaultAssets/missingTexture.png", "MissingTexture", GL_RGBA, false, false, false, GL_NEAREST);
     CreateTexture("./assets/defaultAssets/missingNormal.png", "missingNormal", GL_RGB, false, false, false, GL_LINEAR);
 
@@ -50,15 +59,16 @@ int main(void) {
     Material* Mat1 = Material_create("./assets/shaders/default.vert", "./assets/shaders/default.frag", 4, GL_BACK, GL_LESS);
 
     // Set Material Textures:
-    SetTextureFromAlias(Mat1, "Specular", 0);
-    SetTextureFromAlias(Mat1, "Specular", 1);
-    SetTextureFromAlias(Mat1, "missingNormal", 2);
-    SetTextureFromAlias(Mat1, "Specular", 3);
 
-    SetTextureFromAlias(Mat0, "mushroomBody", 0);
+    SetTextureFromAlias(Mat0, "Specular", 0);
     SetTextureFromAlias(Mat0, "defaultTexture", 1);
     SetTextureFromAlias(Mat0, "missingNormal", 2);
     SetTextureFromAlias(Mat0, "Specular", 3);
+
+    SetTextureFromAlias(Mat1, "mushroomBody", 0);
+    SetTextureFromAlias(Mat1, "mushroomGlow", 1);
+    SetTextureFromAlias(Mat1, "missingNormal", 2);
+    SetTextureFromAlias(Mat1, "Specular", 3);
 
     // Load Font:
     //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
@@ -66,6 +76,7 @@ int main(void) {
     //TextRender* testText = new TextRender();
     //SetFont(testText, "IBM", defautFont);
 
+<<<<<<< HEAD
     //StaticMesh* mesh = CreateStaticMeshFromWavefront("./assets/meshes/mushroom.obj");
     //StaticMesh* lightVis = CreateStaticMeshFromWavefront("./assets/meshes/icosphere.obj");
     
@@ -74,12 +85,22 @@ int main(void) {
     //mesh->SetMaterial(Mat0, 0);
     //lightVis->SetMaterial(Mat1, 0);
 
+=======
+>>>>>>> rewrite
     Camera* mainCamera = Object_Camera_create();
+    StaticMesh* mesh = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
+    
+    assert(mesh && lightVis);
+
+    vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
+    mat4_translate(cameraDefaultPos, mainCamera->Transform);
+
+    Object_StaticMesh_set_Material(mesh, 0, Mat1);
+    Object_StaticMesh_set_Material(lightVis, 0, Mat0);
 
     Shader* testShader = Shader_create(Mat0->Program, "TestShader");
-
-    //Uniform* mvpUniform;
-    //Uniform_set_data(mvpUniform, transform);
+    ///Shader* testShader2 = Shader_create(Mat1->Program, "TestShader2");
 
     int x = 0;
     int y = 0;
@@ -91,9 +112,9 @@ int main(void) {
     vec3 lightPos = { 0.0f, 5.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor = { 0.1f, 0.3f, 0.6f };
+    vec3 AmbientColor = { 0.2f, 0.2f, 0.2f };
     
-    glUtilSetAmbientColor(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
+    Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
     float lightRadius = 15.0f;
 
@@ -110,49 +131,63 @@ int main(void) {
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
 
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window)) {
-        
-        // FRAME STARTS HERE
-        glUtilInitializeFrame(window);
-        time = (GLfloat)Time();
+    bool captureCursor = true;
+    SetCaptureCursor(captureCursor);
+
+    while (Engine_execute_tick()) {
+
+        if (IsKeyPressed(GLFW_KEY_TAB)) {
+            captureCursor = !captureCursor;
+            SetCaptureCursor(captureCursor);
+        }
 
         if (IsKeyPressed(GLFW_KEY_UP)) {
             y++;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_DOWN)) {
             y--;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_RIGHT)) {
             x++;
         }
-        
+
         if (IsKeyPressed(GLFW_KEY_LEFT)) {
             x--;
         }
 
         vec3 meshTranslate = { (float)x, (float)y, 0.0f };
+        vec3 meshScale = { 0.5f, 0.5f, 0.5f };
+        
+        mat4_translate(meshTranslate, mesh->Transform);
+        mat4 scale;
 
-        //mat4_translate(meshTranslate, &mesh->Transform);
+        mat4_scale(meshScale, scale);
+        mat4_multiply(scale, mesh->Transform, mesh->Transform);
 
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
 
+<<<<<<< HEAD
         mat4_translate(lightPos, lightVis->Transform);
+=======
+        mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
+        mat4_inverse(lightVis->Transform, lightVis->Transform);
+>>>>>>> rewrite
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
-        
-        Camera_NoClip_Update(mainCamera, DeltaTime(), AspectRatio());
-        
-        vec3 cameraPos; 
-        vec3 cameraDir;
+
+        mainCamera->Tick(mainCamera, DeltaTime());
+
+        vec3 cameraPos;
+        vec3 cameraDir = { 0.0f, 0.0f, 1.0f };
 
         mat4_get_translation(mainCamera->Transform, cameraPos);
-        mat4_get_forward(mainCamera->Transform, cameraDir);
+        vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
 
+<<<<<<< HEAD
         mat4 cameraView;
         mat4 cameraPerspective;
 
@@ -181,26 +216,35 @@ int main(void) {
         //mesh->Draw();
         Mesh_Draw(lightVis->meshRenders, Mat0, (GLfloat*)&lightVis->Transform);
 
+=======
+ 
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
+
+        UniformBuffer_set_Global("FrameData", "u_time", &time);
+        UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
+        UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
+        UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
+
+        UniformBuffer_update_all();
+
+        mesh->Draw(mesh);
+        lightVis->Draw(lightVis);
+       
+>>>>>>> rewrite
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll and process events */
-        glUtilPollEvents();
     }
     
-    Object_Camera_destroy(mainCamera);
-    //Object_Mesh_destroy(mesh);
-    //Object_Mesh_destroy(lightVis);
+    mainCamera->Destroy(mainCamera);
+    mesh->Destroy(mesh);
+    lightVis->Destroy(lightVis);
 
     Material_destroy(&Mat0); 
     Material_destroy(&Mat1); 
     
     Shader_destroy(&testShader);
     
-    glUtilTerminate();
+    Engine_terminate();
     return 0;
 }
 

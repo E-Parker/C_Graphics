@@ -24,7 +24,7 @@ typedef struct Texture {
 
 #define internal_Texture_create(texture, gl_type, filter_type)\
 do {\
-texture = (Texture*)malloc(sizeof(Texture));\
+texture = (Texture*)calloc(1, sizeof(Texture));\
 texture->ID = GL_NONE;\
 texture->type = gl_type;\
 texture->filterType = filter_type;\

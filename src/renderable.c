@@ -2,13 +2,13 @@
 
 #include <stddef.h>
 
-#include "gl_math.h"
-#include "hash_table.h"
+#include "engine_core/hash_table.h"
+#include "engine/math.h"
 #include "material.h"
 #include "texture.h"
 #include "renderable.h"
 
-void Mesh_Free(Mesh* mesh) {
+void FreeMesh(MeshRender* mesh) {
 
     if (mesh->ElementBufferObject != GL_NONE) {
         glDeleteBuffers(1, &(mesh->ElementBufferObject));
@@ -37,7 +37,7 @@ void Mesh_Free(Mesh* mesh) {
 }
 
 
-void Mesh_FreeSubmesh(Mesh* mesh) {
+void FreeSubMesh(MeshRender* mesh) {
     /* Use this to free a mesh that was created by copying from another. */
 
     if (mesh->ElementBufferObject != GL_NONE) {
@@ -53,16 +53,16 @@ void Mesh_FreeSubmesh(Mesh* mesh) {
 }
 
 
-void Mesh_Upload(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const uint64_t indecies, const uint64_t vertecies) {
+void UploadMesh(MeshRender* mesh, const uint32_t* indicesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const uint64_t indices, const uint64_t vertecies) {
     /* Uploading mesh to GPU. points and normalBuffer must exist for the upload to work.
     tCoord data and face data is optional. */
 
     uint64_t vertexBytes = vertecies * sizeof(vec3);
     uint64_t tCoordBytes = vertecies * sizeof(vec2);
-    uint64_t indexBytes = indecies * sizeof(uint32_t);
+    uint64_t indexBytes = indices * sizeof(uint32_t);
     uint64_t normalBytes = vertexBytes;
 
-    mesh->indexBytes = indexBytes;
+    mesh->indices = indices;
 
     // Create a Vertex Attribute Object. This is kind of like a container for the buffer objects.              
     if (mesh->VertexAttributeObject == GL_NONE) { glGenVertexArrays(1, &(mesh->VertexAttributeObject)); }
@@ -92,10 +92,10 @@ void Mesh_Upload(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* verte
     }
 
     // First check if there are face indicies, then make an element array for them.
-    if (indeciesArray) {
+    if (indicesArray) {
         if (mesh->ElementBufferObject == GL_NONE) { glGenBuffers(1, &(mesh->ElementBufferObject)); }
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ElementBufferObject);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, indeciesArray, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, indicesArray, GL_STATIC_DRAW);
     }
 
     glBindVertexArray(GL_NONE);
@@ -104,11 +104,11 @@ void Mesh_Upload(Mesh* mesh, const uint32_t* indeciesArray, const GLfloat* verte
 
 }
 
-void Mesh_UploadSubmesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray, const uint32_t indecies) {
+void UploadSubMesh(MeshRender* mesh, MeshRender* source, const uint32_t* indicesArray, const uint32_t indices) {
     /* variant of UploadMesh for meshes that share vertices but have a different element buffer. */
 
-    uint64_t indexBytes = indecies * sizeof(uint32_t);
-    mesh->indexBytes = indexBytes;
+    uint64_t indexBytes = indices * sizeof(uint32_t);
+    mesh->indices = indices;
 
     if (mesh->VertexAttributeObject == GL_NONE) {
         glGenVertexArrays(1, &(mesh->VertexAttributeObject));
@@ -132,7 +132,7 @@ void Mesh_UploadSubmesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray,
 
     if (mesh->ElementBufferObject == GL_NONE) { glGenBuffers(1, &(mesh->ElementBufferObject)); }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ElementBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, indeciesArray, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, indicesArray, GL_STATIC_DRAW);
 
     glBindVertexArray(GL_NONE);
     glBindBuffer(GL_ARRAY_BUFFER, GL_NONE);
@@ -141,7 +141,7 @@ void Mesh_UploadSubmesh(Mesh* mesh, Mesh* source, const uint32_t* indeciesArray,
 }
 
 
-void Mesh_Draw(const Mesh* mesh, const Material* material, const mat4 transform) {
+void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform) {
     // Bind the material's shader program and textures.
 
     BindMaterial(material);
@@ -152,7 +152,7 @@ void Mesh_Draw(const Mesh* mesh, const Material* material, const mat4 transform)
     // Bind the VAO and draw the elements.
     glBindVertexArray(mesh->VertexAttributeObject);
     glUniformMatrix4fv(u_mvp, 1, GL_FALSE, transform);
-    glDrawElements(GL_TRIANGLES, mesh->indexBytes, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, mesh->indices, GL_UNSIGNED_INT, 0);
 
     // unbind the VAO.
     glBindVertexArray(GL_NONE);

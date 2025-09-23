@@ -1,13 +1,13 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stb_image.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+#include "stb_image.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
+#include "assert.h"
+#include "stdio.h"
+#include "stdbool.h"
+#include "string.h"
 
-#include "hash_table.h"
+#include "engine_core/hash_table.h"
 #include "texture.h"
 
 
@@ -24,7 +24,7 @@ void InitTextures() {
 void InternalUploadTexture(Texture* texture, uint8_t* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
     
     if (texture->ID == GL_NONE) {
-        glGenTextures(1, &texture->ID);
+        glGenTextures(1, &(texture->ID));
     }
 
     glBindTexture(texture->type, texture->ID);

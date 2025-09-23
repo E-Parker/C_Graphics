@@ -6,9 +6,9 @@
 #include <GLFW/glfw3.h>
 
 #define GL_SHADER_MAX_DESCRIPTORS 0x40 
-#define GL_ERROR_LOG_SIZE 0x200
+#define GL_ERROR_LOG_SIZE 0x1000
 #define GL_SHADER_PATH_SIZE 0x80 
-#define GL_SHADER_SOURCE_BUFFER_SIZE 0x1000
+#define GL_SHADER_SOURCE_BUFFER_SIZE 0x4000
 
 typedef struct {
     // Struct to store shader reference, type, and file path. 
