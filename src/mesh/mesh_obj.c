@@ -145,7 +145,8 @@ int ParseLine (ObjParser* parser) {
         return SEGMENT_MISSING_TAG;
     }
 
-    
+    // Figure out the tag, 
+    // then do things depending on what the tag is.
 
     return 0;
 }
@@ -181,7 +182,8 @@ StaticMesh* Object_StaticMesh_create_from_wave_front(const char* path, void* par
         }
     }
 
-
+    // Upload the mesh and sub-meshes.
+    // also handle correcting the indicies.
 
 Deinitialize:
     List_deinitialize(&parser.vi);
