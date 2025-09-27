@@ -87,7 +87,7 @@ void CreateRawTexture(const char* path, Texture* texture, GLenum internalFormat,
     uint8_t* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
 
     if (!data) {
-        printf("Error creating raw Texture from: \" %s \". The texture will be discarded.", path);
+        printf("Error creating raw Texture from: \" %s \". The texture will be discarded.\n", path);
         return;
     }
 
@@ -124,7 +124,7 @@ Texture* CreateTexture(const char* path, const char* alias, GLenum internalForma
     uint8_t* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
 
     if (!data) {
-        printf("Error creating Texture: \"%s\" From: \"%s\". The Texture will be discarded.", aliasUsed, path);
+        printf("Error creating Texture: \"%s\" From: \"%s\". The Texture will be discarded.\n", aliasUsed, path);
         return NULL;
     }
 
@@ -165,7 +165,7 @@ Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GL
         uint8_t* data = stbi_load(texturePaths[i], &texture->width, &texture->height, &texture->channels, 0);
         
         if (!data) {
-            printf("Error creating Cube Map Texture: \"%s\" At index, %d, From: \"%s\". The texture will be discarded.", alias, i, texturePaths[i]);
+            printf("Error creating Cube Map Texture: \"%s\" At index, %d, From: \"%s\". The texture will be discarded.\n", alias, i, texturePaths[i]);
             return NULL;
         }
 
@@ -196,7 +196,7 @@ void DeleteTexture(const char* alias) {
     HashTable_find(TextureTable, alias, &texture);
 
     if (!texture) {
-        printf("Error deleting Texture: \"%s\". No Texture with that name found.", alias);
+        printf("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias);
         return;
     }
 
@@ -207,6 +207,8 @@ void DeleteTexture(const char* alias) {
 void DereferenceTextures() {
     /* Call this function at the end of your program to ensure all tracked textures are properly cleaned up. */
 
+    printf("De-referencing Textures ...\n");
+
     // Iterate through all the positions in the hash table.
     for (HashTable_array_iterator(TextureTable)) {
         Texture* texture = HashTable_array_at(Texture, TextureTable, i);
@@ -214,4 +216,5 @@ void DereferenceTextures() {
         InternalDeleteTexture(texture);
     }
     HashTable_destroy(&TextureTable);
+    printf("Done!\n");
 }

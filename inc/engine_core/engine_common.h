@@ -15,3 +15,4 @@ typedef void	(*Function_Void_NoParam)	();
 typedef void	(*Function_Void_OneParam)	(void*);
 typedef void	(*Function_Void_TwoParam)	(void*, void*);
 typedef void	(*Function_Void_ThreeParam) (void*, void*, void*);
+typedef void	(*Function_Void_FourParam)  (void*, void*, void*, void*);

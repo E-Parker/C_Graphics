@@ -124,9 +124,9 @@ GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
     
     memcpy(args, descriptorBuffer, argsCount);
     
-    descriptorBuffer[argsCount - 1].shader = 0;
-    descriptorBuffer[argsCount - 1].type = 0;
     descriptorBuffer[argsCount - 1].path = "";
+    descriptorBuffer[argsCount - 1].type = 0;
+    descriptorBuffer[argsCount - 1].shader = 0;
 
     return internal_Shader_CompileProgram((ShaderDescriptor*)&descriptorBuffer);
 }

@@ -6,35 +6,40 @@
 #include "string.h"
 
 #include "engine_core/hash_table.h"
-#include "engine/parse_shader.h"
 #include "texture.h"
+#include "engine/shader_uniform.h"
 #include "material.h"
 
 
-// Macro defs:
-#ifndef MATERIAL_BUFFER_SIZE
-#define MATERIAL_BUFFER_SIZE 0xff
-#endif
+#define MATERIAL_BUFFER_SIZE 0x100
 
 
-Material* Material_create(char* vertexProgramPath, char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction) {
+Material* Material_create(const Shader* shader, const uint32_t textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
+    
+    if (!shader) {
+        return NULL;
+    }
 
     Material* newMaterial = (Material*)malloc(sizeof(Material));
-    if (!newMaterial) return NULL;
+    
+    if (!newMaterial) {
+        return NULL;
+    }
 
-    newMaterial->TexturesUsed = numberOfTextures;
+    newMaterial->ShaderProgram = shader;
+    newMaterial->TextureCount = textureCount;
     newMaterial->CullFunction = cullFuncton;
     newMaterial->DepthFunction = depthFunction;
     
-    newMaterial->Textures = NULL;
-    
-    if(numberOfTextures != 0) {
-        newMaterial->Textures = (Texture**)calloc(numberOfTextures, sizeof(Texture*));
+    if(textureCount != 0) {
+        newMaterial->Textures = (Texture**)calloc(textureCount, sizeof(Texture*));
     }
 
-    // compile the shader programs
-    Shader_CompileProgram(newMaterial->Program, {0, GL_VERTEX_SHADER, vertexProgramPath}, {0, GL_FRAGMENT_SHADER, fragmentProgramPath} );
-    
+    else {
+        newMaterial->Textures = NULL;
+    }
+
+
     return newMaterial;
 
 }
@@ -46,9 +51,9 @@ void Material_destroy(Material** material) {
         return;
     }
 
-    if ((*material)->TexturesUsed != 0) {
+    if ((*material)->TextureCount != 0) {
 
-        for (int i = 0; i < (*material)->TexturesUsed; i++) {
+        for (int i = 0; i < (*material)->TextureCount; i++) {
             if ((*material)->Textures[i]) {
                 DeleteTexture((*material)->Textures[i]->alias);
             }
@@ -56,8 +61,8 @@ void Material_destroy(Material** material) {
         free((*material)->Textures);
     }
 
-    glDeleteProgram((*material)->Program);
-    (*material)->Program = GL_NONE;
+    Shader_destroy(&(*material)->ShaderProgram);
+
     free(*material);
     (*material) = NULL;
 }
@@ -72,7 +77,7 @@ void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t 
         return;
     }
     
-    if (index >= material->TexturesUsed) {
+    if (index >= material->TextureCount) {
         printf("Warning: Material Texture index out of range. Discarding texture.\n");
         return;
     }
@@ -99,7 +104,7 @@ void SetTextureFromAlias(const Material* material, const char* alias, uint32_t i
         return;
     }
 
-    if (index >= material->TexturesUsed) {
+    if (index >= material->TextureCount) {
         printf("Warning: Material Texture index out of range. Discarding texture.\n");
         return;
     }
@@ -130,12 +135,12 @@ void BindMaterial(const Material* material){
     }
 
     // Set the shader program and get the uniform from the shader.
-    glUseProgram(material->Program);
+    glUseProgram(material->ShaderProgram->Program);
     glCullFace(material->CullFunction);
     glDepthFunc(material->DepthFunction);
 
     // Set the active texture for each texture in the material.
-    for (uint32_t i = 0; i < material->TexturesUsed; i++) {
+    for (uint32_t i = 0; i < material->TextureCount; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         if (material->Textures[i]) {
             glBindTexture(material->Textures[i]->type, material->Textures[i]->ID);

@@ -2,22 +2,21 @@
 
 #include "stdint.h"
 
-#define MATERIAL_BUFFER_SIZE 0xff
-
 // Forward Declarations
 typedef struct HashTable HashTable;
 typedef struct Texture Texture;
+typedef struct Shader Shader;
 
 typedef struct Material {
-    HashTable* Uniforms;
+    //HashTable* Uniforms;
     Texture** Textures;
-    uint32_t TexturesUsed;
-    GLuint Program;
+    Shader* ShaderProgram;
+    uint32_t TextureCount;
     GLenum CullFunction;
     GLenum DepthFunction;
 } Material;
 
-Material* Material_create(char* vertexProgramPath, char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
+Material* Material_create(const Shader* shader, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
 void Material_destroy(Material** material);
 
 void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t index);

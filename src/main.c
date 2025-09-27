@@ -7,6 +7,7 @@
 #include "engine/engine.h"
 #include "engine/math.h"
 #include "engine/shader_uniform.h"
+#include "engine/parse_shader.h"
 
 #include "texture.h"
 #include "material.h"
@@ -43,12 +44,27 @@ int main(void) {
     CreateTexture("./assets/textures/MushroomGlow.png", "mushroomGlow", GL_RGB, false, false, false, GL_LINEAR);
     CreateTexture("./assets/defaultAssets/missingSpecular.png", "Specular", GL_RGB, false, false, false, GL_LINEAR);
 
-    // Load Materials:
-    //Material* DefaultTextMaterial = new Material("./assets/shaders/defaultText.vert", "./assets/shaders/defaultText.frag", 1, GL_BACK, GL_ALWAYS);
-    //Material* NormalMaterial = new Material("./assets/shaders/default.vert", "./assets/shaders/normal_color.frag", 0, GL_BACK, GL_LESS);
-    //Material* TChoodColorMaterial = new Material("./assets/shaders/default.vert", "./assets/shaders/tcoord_color.frag", 0, GL_BACK, GL_LESS);
-    Material* Mat0 = Material_create("./assets/shaders/default.vert", "./assets/shaders/default.frag", 4, GL_BACK, GL_LESS);
-    Material* Mat1 = Material_create("./assets/shaders/default.vert", "./assets/shaders/default.frag", 4, GL_BACK, GL_LESS);
+
+    // Create shaders:
+    GLuint DefaultShaderProgram;
+    GLuint NormalShaderProgram;
+
+    Shader_CompileProgram(DefaultShaderProgram, 
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER}, 
+        { .path = "./assets/shaders/default.frag", .type = GL_FRAGMENT_SHADER }
+    );
+
+    Shader_CompileProgram(NormalShaderProgram,
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
+    );
+
+    
+
+    // Create Materials:
+    Material* Mat0 = Material_create(Shader_create(DefaultShaderProgram, "DefaultShader"), 4, GL_BACK, GL_LESS);
+    Material* Mat1 = Material_create(Shader_create(DefaultShaderProgram, "DefaultShader"), 4, GL_BACK, GL_LESS);
+    Material* Normals = Material_create(Shader_create(NormalShaderProgram, "NormalShader"), 0, GL_BACK, GL_LESS);
 
     // Set Material Textures:
 
@@ -79,9 +95,6 @@ int main(void) {
 
     Object_StaticMesh_set_Material(mesh, 0, Mat1);
     Object_StaticMesh_set_Material(lightVis, 0, Mat0);
-
-    Shader* testShader = Shader_create(Mat0->Program, "TestShader");
-    ///Shader* testShader2 = Shader_create(Mat1->Program, "TestShader2");
 
     int x = 0;
     int y = 0;
@@ -187,8 +200,6 @@ int main(void) {
 
     Material_destroy(&Mat0); 
     Material_destroy(&Mat1); 
-    
-    Shader_destroy(&testShader);
     
     Engine_terminate();
     return 0;

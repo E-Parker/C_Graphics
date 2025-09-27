@@ -4,6 +4,7 @@
 
 #include "engine_core/hash_table.h"
 #include "engine/math.h"
+#include "engine/shader_uniform.h"
 #include "material.h"
 #include "texture.h"
 #include "renderable.h"
@@ -147,7 +148,7 @@ void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4
     BindMaterial(material);
 
     // Get the uniform from the shader.
-    GLint u_mvp = glGetUniformLocation(material->Program, "u_mvp");
+    GLint u_mvp = glGetUniformLocation(material->ShaderProgram->Program, "u_mvp");
 
     // Bind the VAO and draw the elements.
     glBindVertexArray(mesh->VertexAttributeObject);

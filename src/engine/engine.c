@@ -137,11 +137,15 @@ void Engine_add_termination_function(Function_Void_NoParam function) {
 }
 
 void Engine_terminate () {
+    printf("Starting Engine termination ...\n");
+
     for (List_iterator(Function_Void_NoParam, &(frame.TerminationFunctions))) {
         (*it)();
     }
 
     List_deinitialize(&(frame.TerminationFunctions));
+
+    printf("Engine terminated successfully.\n");
 }
 
 

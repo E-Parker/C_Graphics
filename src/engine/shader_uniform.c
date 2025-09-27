@@ -30,10 +30,13 @@ void DereferenceShaders() {
     // After this is called, all functions will fail until InitShaders() is called again.
     //
 
+    printf("De-referencing Shaders ...\n");
+
     // Destroy the uniform buffers.
     for (uint64_t i = 0; i < UniformBufferTable->Size; i++) {
         if (UniformBufferTable->Array[i].Value) {
             UniformBuffer_destroy((UniformBuffer**)&(UniformBufferTable->Array[i].Value));
+            UniformBufferTable->Array[i].Value = NULL;  // TODO: Rewrite this!! you should not have to set this manually to avoid a double free!!!
         }
     }
 
@@ -41,6 +44,7 @@ void DereferenceShaders() {
     for (uint64_t i = 0; i < ShaderProgramTable->Size; i++) {
         if (ShaderProgramTable->Array[i].Value) {
             Shader_destroy((Shader**)&(ShaderProgramTable->Array[i].Value));
+            ShaderProgramTable->Array[i].Value = NULL;  // TODO: Rewrite this!! you should not have to set this manually to avoid a double free!!!
         }
     }
 
@@ -54,6 +58,8 @@ void DereferenceShaders() {
     // Now destroy the tables which store them. 
     HashTable_destroy(&ShaderProgramTable);
     HashTable_destroy(&UniformBufferTable);
+
+    printf("Done!\n");
 }
 
 void UniformBuffer_destroy(UniformBuffer** buffer) {
@@ -397,7 +403,6 @@ Shader* Shader_create(const GLuint program, const char* alias) {
 
     memcpy(shaderName, alias, aliasLength);
 
-    shader->Program = program;
     shader->Alias = shaderName;
     shader->AliasEnd = shaderName + aliasLength - 1;
     shader->Program = program;
@@ -435,6 +440,18 @@ void Shader_destroy(Shader** shader){
     free((*shader)->Alias);
     free((*shader));
     *shader = NULL;
+}
+
+Shader* Shader_get(const char* alias) {
+
+    Shader* shader = NULL;
+    HashTable_find(ShaderProgramTable, alias, &shader);
+    
+    if (shader) {
+        shader->References++;
+    }
+
+    return shader;
 }
 
 void Shader_get_uniform(const Shader* shader, const char* alias, Uniform** outVal) {

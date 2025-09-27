@@ -4,7 +4,6 @@ typedef struct HashTable Hashtable;
 
 typedef struct Texture {
     // Struct to hold graphics data for a texture. Avoid using this manually since the system cannot track it.
-
     char* alias;
     GLuint ID;
     GLenum type;

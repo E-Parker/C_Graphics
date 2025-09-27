@@ -143,6 +143,8 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
 Shader* Shader_create(const GLuint program, const char* alias);
 void Shader_destroy(Shader** shader);
 
+Shader* Shader_get(const char* alias);
+
 void Shader_set_uniform(const Shader* shader, const char* alias, void* data);
 void Shader_set_uniformBuffer(const Shader* shader, const char* alias, void* data);
 
