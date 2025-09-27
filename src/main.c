@@ -55,7 +55,7 @@ int main(void) {
     );
 
     Shader_CompileProgram(NormalShaderProgram,
-        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/normal_color.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
     );
 
@@ -93,7 +93,7 @@ int main(void) {
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
 
-    Object_StaticMesh_set_Material(mesh, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh, 0, Normals);
     Object_StaticMesh_set_Material(lightVis, 0, Mat0);
 
     int x = 0;
@@ -182,6 +182,7 @@ int main(void) {
 
         UniformBuffer_set_Global("FrameData", "u_time", &time);
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
+        UniformBuffer_set_Global("FrameData2", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
 
