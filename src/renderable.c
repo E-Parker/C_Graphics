@@ -1,6 +1,6 @@
-#include <glad/glad.h>
+#include "glad/glad.h"
 
-#include <stddef.h>
+#include "stddef.h"
 
 #include "engine_core/hash_table.h"
 #include "engine/math.h"

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "stdio.h"
+#include "stdint.h"
+#include "stdbool.h"
 
 #define READER_BUFFER_SIZE 0x100
 

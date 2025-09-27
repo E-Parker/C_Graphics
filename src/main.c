@@ -1,8 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include <assert.h>
-#include <math.h>
+#include "assert.h"
+#include "math.h"
 
 #include "engine/engine.h"
 #include "engine/math.h"

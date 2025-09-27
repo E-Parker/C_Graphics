@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <assert.h>
-
 typedef struct HashTable Hashtable;
 
 typedef struct Texture {
@@ -46,7 +40,3 @@ void DeleteTexture(const char* alias);
 Texture* CreateTexture(const char* path, const char* alias, GLenum internalFormat, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType);
 Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GLenum internalFormat, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType);
 
-
-#ifdef __cplusplus
-}
-#endif

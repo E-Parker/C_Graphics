@@ -18,6 +18,7 @@
 // 
 //
 
+// TODO: Implemented "GetComponent" with ObjectType as input.
 
 extern const uint8_t Object_TypeNone;
 extern const uint8_t Object_TypeStaticMesh;

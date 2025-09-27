@@ -1,10 +1,10 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include "stdio.h"
+#include "string.h"
+#include "stdbool.h"
+#include "stdint.h"
 
 #include "engine_core/string.h"
 #include "engine_core/list.h"

@@ -2,7 +2,6 @@
 #include "GLFW/glfw3.h"
 #include "stb_image.h"
 
-#include "assert.h"
 #include "stdio.h"
 #include "stdbool.h"
 #include "string.h"

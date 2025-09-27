@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <glad/glad.h>
 
 // Forward declarations:
@@ -156,10 +152,4 @@ void Shader_get_uniformBuffer(const Shader* shader, const char* alias, UniformBu
 #define Shader_get_uniform_count(shader) (shader->Uniforms->SlotsUsed)
 #define Shader_get_buffer_count(shader) (shader->UniformBuffers->SlotsUsed)
 
-
 void Shader_debug(const GLuint program);
-
-
-#ifdef __cplusplus
-}
-#endif

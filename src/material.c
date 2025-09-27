@@ -1,10 +1,9 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stb_image.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+#include "stb_image.h"
 
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
+#include "stdio.h"
+#include "string.h"
 
 #include "engine_core/hash_table.h"
 #include "engine/parse_shader.h"
@@ -21,7 +20,7 @@
 Material* Material_create(char* vertexProgramPath, char* fragmentProgramPath, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction) {
 
     Material* newMaterial = (Material*)malloc(sizeof(Material));
-    assert(newMaterial);
+    if (!newMaterial) return NULL;
 
     newMaterial->TexturesUsed = numberOfTextures;
     newMaterial->CullFunction = cullFuncton;
