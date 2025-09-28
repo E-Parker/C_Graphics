@@ -1,20 +1,18 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "stdio.h"
 #include "assert.h"
 #include "math.h"
 
+#include "engine_core/engine_types.h"
+#include "engine_core/engine_shader.h"
+
+#include "engine/object.h"
+#include "engine/object/camera.h"
+#include "engine/object/mesh.h"
 #include "engine/engine.h"
-#include "engine/math.h"
-#include "engine/shader_uniform.h"
-#include "engine/parse_shader.h"
 
-#include "texture.h"
-#include "material.h"
-#include "camera.h"
-#include "mesh.h"
-
-#include "stdio.h"
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
@@ -46,28 +44,34 @@ int main(void) {
 
 
     // Create shaders:
-    GLuint DefaultShaderProgram;
-    GLuint NormalShaderProgram;
-
-    Shader_CompileProgram(DefaultShaderProgram, 
+    Shader_create("DefaultShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER}, 
         { .path = "./assets/shaders/default.frag", .type = GL_FRAGMENT_SHADER }
     );
 
-    Shader_CompileProgram(NormalShaderProgram,
+    Shader_create("DitherShader",
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/dithered_alpha.frag", .type = GL_FRAGMENT_SHADER }
+    );
+
+    Shader_create("TCoordShader",
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/tcoord_color.frag", .type = GL_FRAGMENT_SHADER }
+    );
+
+    Shader_create("NormalShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
     );
 
-    
-
     // Create Materials:
-    Material* Mat0 = Material_create(Shader_create(DefaultShaderProgram, "DefaultShader"), 4, GL_BACK, GL_LESS);
-    Material* Mat1 = Material_create(Shader_create(DefaultShaderProgram, "DefaultShader"), 4, GL_BACK, GL_LESS);
-    Material* Normals = Material_create(Shader_create(NormalShaderProgram, "NormalShader"), 0, GL_BACK, GL_LESS);
+    Material* Mat0 = Material_create(Shader_get("DefaultShader"), 4, GL_BACK, GL_LESS);
+    Material* Mat1 = Material_create(Shader_get("DefaultShader"), 4, GL_BACK, GL_LESS);
+    Material* Dither = Material_create(Shader_get("DitherShader"), 1, GL_BACK, GL_LESS);
+    Material* TCoords = Material_create(Shader_get("TCoordShader"), 0, GL_BACK, GL_LESS);
+    Material* Normals = Material_create(Shader_get("NormalShader"), 0, GL_BACK, GL_LESS);
 
     // Set Material Textures:
-
     SetTextureFromAlias(Mat0, "Specular", 0);
     SetTextureFromAlias(Mat0, "defaultTexture", 1);
     SetTextureFromAlias(Mat0, "missingNormal", 2);
@@ -78,28 +82,47 @@ int main(void) {
     SetTextureFromAlias(Mat1, "missingNormal", 2);
     SetTextureFromAlias(Mat1, "Specular", 3);
 
-    // Load Font:
-    //Font* defautFont = CreateFont("./assets/defaultAssets/IBMPlexMono-Regular.ttf", "IBM", DefaultTextMaterial, 22.0f);
+    SetTextureFromAlias(Dither, "mushroomBody", 0);
 
-    //TextRender* testText = new TextRender();
-    //SetFont(testText, "IBM", defautFont);
 
     Camera* mainCamera = Object_Camera_create();
-    StaticMesh* mesh = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* mesh1 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* mesh2 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
+    StaticMesh* mesh3 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
     StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
     
-    assert(mesh && lightVis);
-
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
 
-    Object_StaticMesh_set_Material(mesh, 0, Normals);
+    Object_StaticMesh_set_Material(mesh0, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh1, 0, Normals);
+    Object_StaticMesh_set_Material(mesh2, 0, TCoords);
+    Object_StaticMesh_set_Material(mesh3, 0, Dither);
     Object_StaticMesh_set_Material(lightVis, 0, Mat0);
+    
 
-    int x = 0;
-    int y = 0;
+    vec3 mesh0Translate = { 1.0f, 0.0f, 1.0f };
+    vec3 mesh1Translate = { 1.0f, 0.0f, -1.0f };
+    vec3 mesh2Translate = { -1.0f, 0.0f, 1.0f };
+    vec3 mesh3Translate = { -1.0f, 0.0f, -1.0f };
 
-    GLfloat time = 0.0f;
+    vec3 meshScale = { 0.5f, 0.5f, 0.5f };
+    mat4 scale;
+    mat4_scale(meshScale, scale);
+
+    mat4_translate(mesh0Translate, mesh0->Transform);
+    mat4_translate(mesh1Translate, mesh1->Transform);
+    mat4_translate(mesh2Translate, mesh2->Transform);
+    mat4_translate(mesh3Translate, mesh3->Transform);
+
+    mat4_multiply(scale, mesh0->Transform, mesh0->Transform);
+    mat4_multiply(scale, mesh1->Transform, mesh1->Transform);
+    mat4_multiply(scale, mesh2->Transform, mesh2->Transform);
+    mat4_multiply(scale, mesh3->Transform, mesh3->Transform);
+
+
+    
     
     GLuint activeLights = 2;
 
@@ -135,31 +158,6 @@ int main(void) {
             SetCaptureCursor(captureCursor);
         }
 
-        if (IsKeyPressed(GLFW_KEY_UP)) {
-            y++;
-        }
-
-        if (IsKeyPressed(GLFW_KEY_DOWN)) {
-            y--;
-        }
-
-        if (IsKeyPressed(GLFW_KEY_RIGHT)) {
-            x++;
-        }
-
-        if (IsKeyPressed(GLFW_KEY_LEFT)) {
-            x--;
-        }
-
-        vec3 meshTranslate = { (float)x, (float)y, 0.0f };
-        vec3 meshScale = { 0.5f, 0.5f, 0.5f };
-        
-        mat4_translate(meshTranslate, mesh->Transform);
-        mat4 scale;
-
-        mat4_scale(meshScale, scale);
-        mat4_multiply(scale, mesh->Transform, mesh->Transform);
-
         lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
         lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
         lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
@@ -176,10 +174,10 @@ int main(void) {
 
         mat4_get_translation(mainCamera->Transform, cameraPos);
         vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
-
  
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
+        GLfloat time = Time();
 
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
         UniformBuffer_set_Global("FrameData", "u_time", &time);
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
@@ -187,7 +185,10 @@ int main(void) {
 
         UniformBuffer_update_all();
 
-        mesh->Draw(mesh);
+        mesh0->Draw(mesh0);
+        mesh1->Draw(mesh1);
+        mesh2->Draw(mesh2);
+        mesh3->Draw(mesh3);
         lightVis->Draw(lightVis);
        
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
@@ -195,11 +196,17 @@ int main(void) {
     }
     
     mainCamera->Destroy(mainCamera);
-    mesh->Destroy(mesh);
+    mesh0->Destroy(mesh0);
+    mesh1->Destroy(mesh1);
+    mesh2->Destroy(mesh2);
+    mesh3->Destroy(mesh3);
     lightVis->Destroy(lightVis);
 
     Material_destroy(&Mat0); 
     Material_destroy(&Mat1); 
+    Material_destroy(&Dither);
+    Material_destroy(&Normals);
+    Material_destroy(&TCoords);
     
     Engine_terminate();
     return 0;

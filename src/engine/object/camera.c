@@ -1,15 +1,15 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "math.h"
 
 #include "stdlib.h"
+#include "stdio.h"
 #include "string.h"
+#include "math.h"
 
 #include "engine/engine.h"
+#include "engine/object/camera.h"
 #include "engine/math.h"
-#include "camera.h"
 
-#include "stdio.h"
 
 
 Camera* Object_Camera_create() {
@@ -40,7 +40,8 @@ void Object_Camera_destroy(void* camera) {
 
 void Object_Camera_recalulate_view(Camera* camera) {
 
-    double CursorPositionX, CursorPositionY;
+    double CursorPositionX = 0.0;
+    double CursorPositionY = 0.0;
     GetCursorPositionDelta(&CursorPositionX, &CursorPositionY);
 
     quaternion rotationPitch = quaternion_def_from_axis(V3_RIGHT, camera->Sensitivity * PI * -CursorPositionY);
@@ -56,6 +57,7 @@ void Object_Camera_recalulate_view(Camera* camera) {
     mat4_from_quaternion(camera->Rotation, rotation);
 
     mat4 projection;
+    //mat4_projection_orthographic(-5.0, 5.0, 5.0, -5.0, -5.0, 5.0, projection);
     mat4_projection_perspective(camera->Fov, AspectRatio(), camera->NearClip, camera->FarClip, projection);
 
     mat4_multi_multiply(4, &camera->Transform, &rotation, &projection, &camera->ViewMatrix);

@@ -1,17 +1,9 @@
-#include "stdint.h"
-#include "stddef.h"
-#include "stdlib.h"
+#include "engine_core/engine_types.h"
 
 #include "engine_core/string.h"
-#include "engine_core/list.h"
+#include "engine/object/mesh.h"
 
-#include "file_reader.h"
-#include "renderable.h"
-#include "mesh.h"
-
-char segmentBuffer[0x100];
-
-#define BUFFER_MAX_SIZE 0x1000
+#include "engine_core/renderable.h"
 
 #define PackByte_uint16(a, b) ( ((uint16_t)b << 8) | (uint16_t)a )
 #define PackByte_uint32(a, b, c, d) ( ((uint32_t)d << 24) | ((uint32_t)c << 16) | ((uint32_t)b << 8) | (uint32_t)a )

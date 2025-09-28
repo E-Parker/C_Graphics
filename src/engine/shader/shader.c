@@ -7,10 +7,12 @@
 #include "stdbool.h"
 #include "string.h"
 
-#include "engine_core/string.h"
 #include "engine_core/hash_table.h"
+#include "engine_core/string.h"
 #include "engine/math.h"
-#include "engine/shader_uniform.h"
+
+#include "engine/shader/shader_uniform.h"
+#include "engine/shader.h"
 
 #define MAX_ALIAS_SIZE 512
 
@@ -30,8 +32,6 @@ void DereferenceShaders() {
     // After this is called, all functions will fail until InitShaders() is called again.
     //
 
-    printf("De-referencing Shaders ...\n");
-
     // Destroy the uniform buffers.
     for (uint64_t i = 0; i < UniformBufferTable->Size; i++) {
         if (UniformBufferTable->Array[i].Value) {
@@ -48,7 +48,8 @@ void DereferenceShaders() {
         }
     }
 
-    // Destroy the shader programs.
+    // TODO: Check if this is still necessary. Textures *should* manage themselves.
+    // Destroy the textures.
     //for (uint64_t i = 0; i < TextureTable->Size; i++) {
     //    if (TextureTable->Array[i].Value) {
     //        Texture_destroy((Texture**)&(TextureTable->Array[i].Value));
@@ -59,7 +60,6 @@ void DereferenceShaders() {
     HashTable_destroy(&ShaderProgramTable);
     HashTable_destroy(&UniformBufferTable);
 
-    printf("Done!\n");
 }
 
 void UniformBuffer_destroy(UniformBuffer** buffer) {
@@ -213,13 +213,20 @@ void UniformBuffer_update_all() {
 Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sharedBuffer) {
     // Initialize a Uniform that is a part of a buffer.
 
+    if (!info || info->BlockOffset == -1) {
+        return NULL;
+    }
+
     // Get the byte size of the type.
     uint64_t size = size_from_gl_type(info->Type);
 
     // allocate enough space for the Uniform header + the space required to store it's data. 
     Uniform* newUniform = (Uniform*)malloc(sizeof(Uniform));
-    assert(newUniform != NULL);
-    assert(info->BlockOffset != -1);
+    
+    if (!newUniform) {
+        return NULL;
+    }
+
     newUniform->Data = (void*)(((uint8_t*)sharedBuffer) + info->BlockOffset);
     newUniform->UniformType = UNIFORM_TYPE_SHARED;
     newUniform->Location = info->Location;
@@ -244,7 +251,10 @@ Uniform* internal_Uniform_create(const UniformInformation* info) {
 
     // allocate enough space for the Uniform header + the space required to store it's data. 
     Uniform* newUniform = (Uniform*)malloc(sizeof(Uniform));
-    assert(newUniform != NULL);
+    
+    if (!newUniform) {
+        return NULL;
+    }
 
     newUniform->Data = calloc(size,info->Elements);
     newUniform->UniformType = UNIFORM_TYPE_SINGLE;
@@ -373,14 +383,14 @@ void UniformStruct_set_member(UniformStruct* uniformStruct, const char* alias, v
     }
 }
 
-Shader* Shader_create(const GLuint program, const char* alias) {
+void internal_Shader_create(const GLuint program, const char* alias) {
     /* create a new shader, populate the fields and return a pointer to it. */
 
     Shader* shader;
     HashTable_find(ShaderProgramTable, alias, &shader);
 
     if (shader) {
-        shader->References++;
+        shader->references++;
         return shader;
     }
 
@@ -392,11 +402,11 @@ Shader* Shader_create(const GLuint program, const char* alias) {
     shader = (Shader*)calloc(1, sizeof(Shader));
     assert(shader != NULL);
 
-    shader->Uniforms = HashTable_create(Uniform, uniformCount);
-    shader->UniformBuffers = HashTable_create(UniformBuffer, bufferCount);
+    shader->uniforms = HashTable_create(Uniform, uniformCount);
+    shader->uniformBuffers = HashTable_create(UniformBuffer, bufferCount);
    
-    internal_Program_uniform_parse(program, shader->Uniforms);
-    internal_Program_buffer_parse(program, shader->UniformBuffers);
+    internal_Program_uniform_parse(program, shader->uniforms);
+    internal_Program_buffer_parse(program, shader->uniformBuffers);
 
     char* aliasEnd = FindBufferEnd(alias);
     uint64_t aliasLength = aliasEnd - alias + 1;
@@ -406,41 +416,39 @@ Shader* Shader_create(const GLuint program, const char* alias) {
 
     memcpy(shaderName, alias, aliasLength);
 
-    shader->Alias = shaderName;
-    shader->AliasEnd = shaderName + aliasLength - 1;
-    shader->Program = program;
+    shader->alias.start = shaderName;
+    shader->alias.end = shaderName + aliasLength - 1;
+    shader->program = program;
 
     HashTable_insert(ShaderProgramTable, alias, shader);
-
-    return shader;
-
 }
 
 void Shader_destroy(Shader** shader){
     /* Free a shader allocated with CreateShader. */
     
-    if (--(*shader)->References != 0) {
+    if ((*shader)->references > 1) {
+        (*shader)->references--;
         return;
     }
 
-    glDeleteProgram((*shader)->Program);
-    (*shader)->Program = GL_NONE;
+    glDeleteProgram((*shader)->program);
+    (*shader)->program = GL_NONE;
 
-    for (HashTable_array_iterator((*shader)->Uniforms)) {
-        Uniform* uniform = HashTable_array_at(Uniform, (*shader)->Uniforms, i);
+    for (HashTable_array_iterator((*shader)->uniforms)) {
+        Uniform* uniform = HashTable_array_at(Uniform, (*shader)->uniforms, i);
         if (uniform) {
             free(uniform->Alias);
             free(uniform->Data);
-            (*shader)->Uniforms->Array[i].Value = NULL;
+            (*shader)->uniforms->Array[i].Value = NULL;
         }
     }
 
-    for (HashTable_array_iterator((*shader)->UniformBuffers)) {
-        UniformBuffer* buffer = (UniformBuffer*)((*shader)->UniformBuffers->Array[i].Value);
+    for (HashTable_array_iterator((*shader)->uniformBuffers)) {
+        UniformBuffer* buffer = (UniformBuffer*)((*shader)->uniformBuffers->Array[i].Value);
         UniformBuffer_destroy(&buffer);
     }
 
-    free((*shader)->Alias);
+    free((*shader)->alias.start);
     free((*shader));
     *shader = NULL;
 }
@@ -451,18 +459,18 @@ Shader* Shader_get(const char* alias) {
     HashTable_find(ShaderProgramTable, alias, &shader);
     
     if (shader) {
-        shader->References++;
+        shader->references++;
     }
 
     return shader;
 }
 
 void Shader_get_uniform(const Shader* shader, const char* alias, Uniform** outVal) {
-    HashTable_find(shader->Uniforms, alias, outVal);
+    HashTable_find(shader->uniforms, alias, outVal);
 }
 
 void Shader_get_uniformBuffer(const Shader* shader, const char* alias, UniformBuffer** outVal) {
-    HashTable_find(shader->UniformBuffers, alias, outVal);
+    HashTable_find(shader->uniformBuffers, alias, outVal);
 }
 
 void Shader_debug(const GLuint program) {
@@ -494,11 +502,11 @@ void Shader_set_uniformBuffer(const Shader* shader, const char* alias, void* dat
 
 void Shader_use(const Shader* shader) {
 
-    glUseProgram(shader->Program);
+    glUseProgram(shader->program);
        
     // for each non-buffer uniform, upload it to the GPU.
-    for (HashTable_array_iterator(shader->Uniforms)) {
-        Uniform* uniform = HashTable_array_at(Uniform, shader->Uniforms, i);
+    for (HashTable_array_iterator(shader->uniforms)) {
+        Uniform* uniform = HashTable_array_at(Uniform, shader->uniforms, i);
         if (uniform != NULL) {
             //printf("Uniform Location: %d", uniform->Location);
             //printf("\t array location: %d %c", shader->Uniforms->ActiveIndicies[i], '\n');

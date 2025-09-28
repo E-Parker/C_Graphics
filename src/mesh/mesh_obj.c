@@ -1,13 +1,10 @@
-#include "stdint.h"
-#include "stddef.h"
-#include "stdlib.h"
-
+#include "stdio.h"
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 #include "engine_core/list.h"
+#include "engine/object/mesh.h"
 
-#include "file_reader.h"
-#include "renderable.h"
-#include "mesh.h"
+#include "engine_core/renderable.h"
 
 #define BUFFER_SIZE 0x1000
 #define SEGMENT_COUNT 16
@@ -18,6 +15,7 @@
 #define SEGMENT_TOO_LARGE -4
 #define SEGMENT_MISSING_TAG -5
 
+char segmentBuffer[0x100];
 
 typedef struct ObjParser {
     List vi;

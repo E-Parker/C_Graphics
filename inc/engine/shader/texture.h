@@ -15,14 +15,6 @@ typedef struct Texture {
 
 } Texture;
 
-#define internal_Texture_create(texture, gl_type, filter_type)\
-do {\
-texture = (Texture*)calloc(1, sizeof(Texture));\
-texture->ID = GL_NONE;\
-texture->type = gl_type;\
-texture->filterType = filter_type;\
-} while(false)\
-
 void InitTextures();
 
 void InternalUploadTexture(Texture* texture, uint8_t* data, GLenum internalFormat, GLenum format, GLenum uploadType);
@@ -32,7 +24,6 @@ void InternalCreateTexture(Texture* texture, const bool isManaged, const char* a
 void CreateRawTexture(const char* path, Texture* texture, GLenum internalFormat, GLenum format, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType);
 
 bool FindTexture(const char* alias, Texture** outValue);
-
 
 void DereferenceTextures();
 void DeleteTexture(const char* alias);

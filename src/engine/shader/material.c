@@ -1,14 +1,12 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "stb_image.h"
 
-#include "stdio.h"
+#include "stdlib.h"
 #include "string.h"
+#include "stdio.h"
 
 #include "engine_core/hash_table.h"
-#include "texture.h"
-#include "engine/shader_uniform.h"
-#include "material.h"
+#include "engine_core/engine_shader.h"
 
 
 #define MATERIAL_BUFFER_SIZE 0x100
@@ -17,6 +15,7 @@
 Material* Material_create(const Shader* shader, const uint32_t textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
     
     if (!shader) {
+        printf("Material Error: Shader was null!\n");
         return NULL;
     }
 
@@ -135,7 +134,7 @@ void BindMaterial(const Material* material){
     }
 
     // Set the shader program and get the uniform from the shader.
-    glUseProgram(material->ShaderProgram->Program);
+    glUseProgram(material->ShaderProgram->program);
     glCullFace(material->CullFunction);
     glDepthFunc(material->DepthFunction);
 

@@ -3,12 +3,12 @@
 
 #include "stdio.h"
 #include "string.h"
-#include "stdbool.h"
-#include "stdint.h"
 
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 #include "engine_core/list.h"
-#include "engine/parse_shader.h"
+
+#include "engine/shader/parse_shader.h"
 
 // Shader descriptor buffer for run-time shader compiling.
 ShaderDescriptor descriptorBuffer[GL_SHADER_MAX_DESCRIPTORS]; 
@@ -19,11 +19,11 @@ bool srcBufferWall = false;
 const GLchar* gl_srcBuffer = (GLchar*)srcBuffer;
 
 
-void internal_ReadShaderSource(const char* path) {
+void internal_ReadShaderProgramSource(const char* path) {
    
     // Check that the last call to this function was handled correctly
     if (srcBufferWall) {
-        printf("Shader load warning: Last source file was not handled / recived correctly.");
+        printf("Shader load warning: Last source file was not handled / received correctly.");
         srcBufferWall = false;
     }
     
@@ -66,12 +66,12 @@ void internal_ReadShaderSource(const char* path) {
 }
 
 
-void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
+void internal_CompileShaderProgram(GLuint* shader, GLint type, const char* path) {
     // Takes an empty shader*, type of shader, and path to source file. 
     // Reads the path to a c-string and compiles the shader for OpenGL.
     // 
     
-    internal_ReadShaderSource(path);
+    internal_ReadShaderProgramSource(path);
     
     // if reading the shader failed, return early.
     if (!srcBufferWall) {
@@ -89,7 +89,7 @@ void internal_CompileShader(GLuint* shader, GLint type, const char* path) {
 }
 
 
-bool Shader_CompileProgramValidate(ShaderDescriptor* args) {
+bool ShaderProgram_CompileProgramValidate(ShaderDescriptor* args) {
     // Step through args until the max descriptors is hit, or until the end of the list is found.
     
     for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
@@ -115,7 +115,7 @@ bool Shader_CompileProgramValidate(ShaderDescriptor* args) {
 }
 
 
-GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
+GLuint ShaderProgram_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
     // Expects an array of arguments, adds the null terminator depending on argsCount.
     
     // Check that 
@@ -128,22 +128,22 @@ GLuint Shader_CompileProgramDynamic(ShaderDescriptor* args, int argsCount) {
     descriptorBuffer[argsCount - 1].type = 0;
     descriptorBuffer[argsCount - 1].shader = 0;
 
-    return internal_Shader_CompileProgram((ShaderDescriptor*)&descriptorBuffer);
+    return internal_ShaderProgram_CompileProgram((ShaderDescriptor*)&descriptorBuffer);
 }
 
 // TODO: remove this function. it has literally one caller. See two lines up ^^^ 
-GLuint internal_Shader_CompileProgram(ShaderDescriptor* args) {
+GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     // Expects an array of arguments with a null terminated end. 
     
     // Validate args:
-    if(!Shader_CompileProgramValidate(args)) return GL_NONE;
+    if(!ShaderProgram_CompileProgramValidate(args)) return GL_NONE;
 
     // Set up a new shader program and compile it.
     GLuint program = glCreateProgram(); // Create a new empty program.
 
     // Iterate until end of args. Compile and attach each shader.
     for (ShaderDescriptor* it = args; it->path[0] != '\0'; it++) {
-        internal_CompileShader(&it->shader, it->type, it->path);
+        internal_CompileShaderProgram(&it->shader, it->type, it->path);
         glAttachShader(program, it->shader);
     }
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "glad/glad.h"
-#include "engine_core/engine_common.h"
+
+#include "engine_core/engine_types.h"
+#include "engine_core/list.h"
 #include "engine/math.h"
 
 // Standard Buffer Size is the maximum size any alias can be.
@@ -18,13 +20,8 @@
 // 
 //
 
-// TODO: Implemented "GetComponent" with ObjectType as input.
+// TODO: Implemented "GetComponent" with ObjectType as input. This will be the basis for polymorphic data.
 
-extern const uint8_t Object_TypeNone;
-extern const uint8_t Object_TypeStaticMesh;
-extern const uint8_t Object_TypeSkinnedMesh;
-extern const uint8_t Object_TypeText;
-extern const uint8_t Object_TypeCamera;
 
 typedef struct Object {
     // Holds basic information that all objects in a scene will have. Instead of using inheritance & polymorphism, which has some 

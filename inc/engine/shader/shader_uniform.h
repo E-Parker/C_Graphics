@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 // Forward declarations:
 typedef struct HashTable HashTable;
@@ -116,42 +116,3 @@ void UniformBuffer_update_all();
 #define UniformBuffer_set_Struct_Global(bufferAlias, structAlias, memberAlias, Value) (internal_UniformBuffer_set_Struct(UniformBuffer_get_self(bufferAlias), structAlias, memberAlias, Value))
 #define UniformBuffer_set_Struct_at_Global(bufferAlias, structAlias, memberAlias, index, Value) (internal_UniformBuffer_set_Struct_at(UniformBuffer_get_self(bufferAlias), structAlias, memberAlias, index, Value))
 
-//  SHADER
-//
-//
-
-typedef struct Shader {
-    char* Alias;                // Name of the shader.
-    char* AliasEnd;
-    GLuint Program;             // Location of the shader program on the GPU.
-    HashTable* Uniforms;        // Table of uniforms.
-    HashTable* UniformBuffers;  // Table of uniform buffers.
-    uint64_t References;
-} Shader;
-
-void InitShaders();
-void Shader_use(const Shader* shader);
-void DereferenceShaders();
-
-GLint internal_Program_uniform_count(const GLuint program);
-GLint internal_Program_buffer_count(const GLuint program);
-void internal_Program_uniform_parse(const GLuint program, HashTable* table);
-void internal_Program_buffer_parse(const GLuint program, HashTable* table);
-static void internal_Program_buffer_uniform_parse(const GLuint program, const uint16_t uniformCount, const GLint* indicies, UniformBuffer* uniformBuffer);
-static void internal_program_uniformStruct_parse(const GLuint program, const uint16_t uniformCount, GLint* indicies, UniformBuffer* uniformBuffer);
-
-Shader* Shader_create(const GLuint program, const char* alias);
-void Shader_destroy(Shader** shader);
-
-Shader* Shader_get(const char* alias);
-
-void Shader_set_uniform(const Shader* shader, const char* alias, void* data);
-void Shader_set_uniformBuffer(const Shader* shader, const char* alias, void* data);
-
-void Shader_get_uniform(const Shader* shader, const char* alias, Uniform** outVal);
-void Shader_get_uniformBuffer(const Shader* shader, const char* alias, UniformBuffer** outVal);
-
-#define Shader_get_uniform_count(shader) (shader->Uniforms->SlotsUsed)
-#define Shader_get_buffer_count(shader) (shader->UniformBuffers->SlotsUsed)
-
-void Shader_debug(const GLuint program);

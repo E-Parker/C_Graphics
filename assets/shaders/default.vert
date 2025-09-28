@@ -23,11 +23,12 @@ uniform mat4 u_mvp;
 out vec3 v_position;
 out vec3 v_normal;    
 out vec2 v_tcoord;
+out float v_time;
 
 void main() {
   v_position = (u_mvp * vec4(aPosition, 1.0)).xyz;
   v_normal = aNormal;
   v_tcoord = aTcoord;
-  
+  v_time = u_time;
   gl_Position = u_view * u_mvp * vec4(aPosition, 1.0);
 }

@@ -491,14 +491,13 @@ void mat4_projection_perspective (const double fovy, const double aspect, const 
     double bottom = -top;
     double right = top * aspect;
     double left = -right;
-    mat4_projection_frustum(left, right, top, bottom, near, far, out);
+    mat4_projection_frustum (left, right, top, bottom, near, far, out);
 }
 
 void mat4_projection_frustum (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
     double RightToLeft = right - left;
     double TopToBottom = top - bottom;
     double FarToNear = far - near;
-    
 
     mat4 result = {
         ((float)near * 2.0f) / RightToLeft, 0.0f, 0.0f, 0.0f,

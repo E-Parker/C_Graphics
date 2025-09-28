@@ -1,10 +1,10 @@
 #version 460 core
 
 out vec4 FragColor;
-in vec3 position;
-in vec3 normal;
-in vec2 tcoord;
-in float time;
+in vec3 v_position;
+in vec3 v_normal;
+in vec2 v_tcoord;
+in float v_time;
 
 uniform sampler2D albedo;
 
@@ -19,12 +19,12 @@ vec3 hash32(vec2 p) {
 
 void main() {
     
-    vec4 color = texture(albedo, tcoord);
+    vec4 color = texture(albedo, v_tcoord);
     
     float scaledDepth = (4.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / (gl_DepthRange.far - gl_DepthRange.near);
 	float clipDepth = scaledDepth / gl_FragCoord.w;
 
-    vec2 seed = vec2(time, time * 2.0) + gl_FragCoord.xy;
+    vec2 seed = vec2(v_time, v_time * 2.0) + gl_FragCoord.xy;
 	vec3 rand_v3 = hash32(seed);
 	float poly_rand = rand_v3.r * rand_v3.g;// * rand_v3.b;
 

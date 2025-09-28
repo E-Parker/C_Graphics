@@ -7,36 +7,9 @@
 // For documentation please see README.md  
 //
 
-
 #pragma once
 
-#ifdef LIST_USE_STDDEF
-#include "stdint.h"
-#include "stdbool.h"
-#define u64 uint64_t
-#define u32 uint32_t
-#define u16 uint16_t
-#define u8 uint8_t
-#define i64 int64_t
-#define i32 int32_t
-#define i16 int16_t
-#define i8 uint8_t
-#else
-#define u64 unsigned long int
-#define u32 unsigned int
-#define u16 unsigned short
-#define u8 unsigned char
-#define i64 long int
-#define i32 int
-#define i16 short
-#define i8 signed char
-#endif
-
-#ifndef _STDBOOL
-#define bool int
-#define true 1
-#define false 0
-#endif
+#include "engine_core/engine_types.h"
 
 //#define LIST_USE_MEMCPY
 
@@ -125,27 +98,8 @@ void* List_at(const List* list, const u32 index);
 
 void List_append(List* dst, List* src);
 
-#ifndef LIST_IMPLEMENTATION
 
-#undef u64
-#undef u32
-#undef u16
-#undef i64
-#undef i32
-#undef i16
-
-#ifndef _STDBOOL
-#undef bool
-#undef true
-#undef false
-#endif
-
-#else
-
-#ifdef LIST_USE_MEMCPY
-#include <string.h>
-#endif
-#include <stdlib.h>
+#ifdef LIST_IMPLEMENTATION
 
 List* internal_List_create(const u32 ItemSize, const u32 Capacity) {
     List* newList = (List*)malloc(sizeof(List));
@@ -536,15 +490,22 @@ void List_append(List* dst, List* src) {
     // leave early if the list contain different data "types".
     if (dst->itemSize != src->itemSize) return;
 
-    u32 srcByteCount = List_byte_count(src);
-    u32 combinedByteCount = List_byte_count(dst) + srcByteCount;
+    u32 sourceByteCount = List_byte_count(src);
+    u32 sourceCount = List_count(src);
+    u32 combinedCount = List_count(dst) + sourceCount;
     void* srcArray = List_create_array(src);
 
-    // TODO: This is a bug.
-    List_realloc(dst, combinedByteCount);       // realloc only does anything when the new capacity is greater than the existing one.
-    List_reorder(dst);                          // reorder skips lists already in order, so if realloc is called this also doesn't waste time.
-    internal_list_copy(dst->head, srcArray, srcByteCount);  // since the list has to be in order, and is big enough, just internal_list_copy the bytes from src.
-    dst->head += srcByteCount;
+    if (combinedCount >= dst->capacity) {
+        List_realloc(dst, combinedCount);
+    }
+
+    else {
+        List_reorder(dst);
+    }
+
+    // At this point, the list must be in order since both realloc and reorder cause the array to not be split.
+    internal_list_copy(dst->head, srcArray, sourceByteCount);
+    dst->head += sourceByteCount;
     free(srcArray);
 }
 

@@ -1,11 +1,8 @@
-#include "stdint.h"
-#include "stddef.h"
-#include "stdlib.h"
-
+#include "stdio.h"
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 #include "engine_core/list.h"
+#include "engine/object/mesh.h"
 
-#include "file_reader.h"
-#include "renderable.h"
-#include "mesh.h"
+#include "engine_core/renderable.h"
 

@@ -7,17 +7,26 @@
 #include "string.h"
 
 #include "engine_core/hash_table.h"
-#include "texture.h"
+#include "engine/shader/texture.h"
 
 
-static HashTable* TextureTable;
+HashTable TextureTable;
+
+
+#define internal_Texture_create(texture, gl_type, filter_type)\
+texture = (Texture*)calloc(1, sizeof(Texture));\
+if(!texture) return NULL;\
+texture->ID = GL_NONE;\
+texture->type = gl_type;\
+texture->filterType = filter_type;\
+
 
 bool FindTexture(const char* alias, Texture** outValue) {
-    return HashTable_find(TextureTable, alias, outValue);
+    return HashTable_find(&TextureTable, alias, outValue);
 }
 
 void InitTextures() {
-    TextureTable = HashTable_create(Texture, 512);
+    HashTable_initialize(Texture, &TextureTable, 512);
 }
 
 void InternalUploadTexture(Texture* texture, uint8_t* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
@@ -50,13 +59,16 @@ void InternalUploadTextureMimmap(Texture* texture, uint8_t* data, GLenum interna
 }
 
 void InternalDeleteTexture(Texture* texture) {
-    if (--texture->references != 0) return;
+    if (texture->references > 1) {
+        texture->references--;
+        return;
+    }
 
     if (texture->ID != GL_NONE) {
         glDeleteTextures(1, &(texture->ID));
     }
     texture->ID = GL_NONE;
-    HashTable_remove(TextureTable, texture->alias);
+    HashTable_remove(&TextureTable, texture->alias);
 
 }
 
@@ -71,7 +83,7 @@ void InternalCreateTexture(Texture* texture, const bool isManaged, const char* a
         InternalUploadTexture(texture, data, internalFormat, format, GL_TEXTURE_2D);
     }
 
-    texture->alias = HashTable_insert(TextureTable, alias, texture);
+    texture->alias = HashTable_insert(&TextureTable, alias, texture);
     
     texture->references++;
 
@@ -111,7 +123,7 @@ Texture* CreateTexture(const char* path, const char* alias, GLenum internalForma
     else { aliasUsed = (char*)alias; }
 
     // try to find the texture in the table.
-    HashTable_find(TextureTable, aliasUsed, &texture);
+    HashTable_find(&TextureTable, aliasUsed, &texture);
 
     // if it is found in the table, return it instead of making a new one.
     if (texture) {
@@ -150,7 +162,7 @@ Texture* CreateTexture(const char* path, const char* alias, GLenum internalForma
 Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GLenum internalFormat, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType) {
 
     Texture* texture = NULL;
-    HashTable_find(TextureTable, alias, &texture);
+    HashTable_find(&TextureTable, alias, &texture);
 
     // if the texture doesn't already exist, make a new one, and return that instead.
     if (texture) {
@@ -159,7 +171,7 @@ Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GL
     
     internal_Texture_create(texture, GL_TEXTURE_CUBE_MAP, filterType);
 
-    for (uint16_t i = 0; i < 6; i++) {
+    for (uint8_t i = 0; i < 6; i++) {
 
         stbi_set_flip_vertically_on_load(true);
         uint8_t* data = stbi_load(texturePaths[i], &texture->width, &texture->height, &texture->channels, 0);
@@ -187,13 +199,13 @@ Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GL
 
 
 void DeleteTexture(const char* alias) {
-    /* This function manages deleting textures from the table. The texture will be deleted from graphics memory if it isn't referenced anywhere. */
+   // delete a texture from the table. The texture will be deleted from graphics memory if it isn't referenced anywhere else.
 
     if (!alias) return;
 
     Texture* texture = NULL;
 
-    HashTable_find(TextureTable, alias, &texture);
+    HashTable_find(&TextureTable, alias, &texture);
 
     if (!texture) {
         printf("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias);
@@ -205,16 +217,13 @@ void DeleteTexture(const char* alias) {
 
 
 void DereferenceTextures() {
-    /* Call this function at the end of your program to ensure all tracked textures are properly cleaned up. */
+    // Call this function at the end of your program to ensure all tracked textures are properly cleaned up.
 
-    printf("De-referencing Textures ...\n");
-
-    // Iterate through all the positions in the hash table.
-    for (HashTable_array_iterator(TextureTable)) {
-        Texture* texture = HashTable_array_at(Texture, TextureTable, i);
-        texture->references = 1;
+    for (HashTable_array_iterator(&TextureTable)) {
+        Texture* texture = HashTable_array_at(Texture, &TextureTable, i);
+        texture->references = 0;
         InternalDeleteTexture(texture);
     }
-    HashTable_destroy(&TextureTable);
-    printf("Done!\n");
+
+    HashTable_deinitialize(&TextureTable);
 }

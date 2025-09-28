@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine_core/engine_common.h"
+#include "engine_core/engine_types.h"
 #include "engine_core/list.h"
 
 typedef struct GLFWwindow GLFWwindow;
@@ -42,7 +42,6 @@ typedef struct FrameData {
 
 } FrameData;
 
-
 bool    Engine_initialize(const int width, const int height, const char* tittle);
 void    Engine_terminate ();
 void    Engine_add_termination_function (Function_Void_NoParam function);
@@ -72,3 +71,5 @@ void APIENTRY internal_Engine_mouse_callback (GLFWwindow* window, double xPos, d
 void APIENTRY internal_Engine_scroll_callback (GLFWwindow* window, double xoffset, double yoffset);
 void APIENTRY internal_Engine_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods);
 void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
+
+// TODO: implement error handling.

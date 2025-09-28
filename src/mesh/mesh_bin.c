@@ -1,13 +1,12 @@
-#include "stdint.h"
-#include "stddef.h"
+#include "stdio.h"
 #include "stdlib.h"
 
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 #include "engine_core/list.h"
+#include "engine/object/mesh.h"
 
-#include "file_reader.h"
-#include "renderable.h"
-#include "mesh.h"
+#include "engine_core/renderable.h"
 
 
 StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* parent) {

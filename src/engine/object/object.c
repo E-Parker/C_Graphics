@@ -1,16 +1,8 @@
-#include "stdlib.h"
-
+#include "engine_core/engine_types.h"
 #include "engine_core/list.h"
+
 #include "engine/math.h"
-#include "object.h"
-
-
-const uint8_t Object_TypeNone          = 0x01;
-const uint8_t Object_TypeStaticMesh    = 0x02;
-const uint8_t Object_TypeSkinnedMesh   = 0x03;
-const uint8_t Object_TypeText          = 0x04;
-const uint8_t Object_TypeCamera        = 0x05;
-
+#include "engine/object.h"
 
 uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8_t type) {
 

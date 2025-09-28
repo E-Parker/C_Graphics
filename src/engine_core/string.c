@@ -1,10 +1,11 @@
-#include "stdint.h"
+
 #include "assert.h"
 
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 
 
-void internal_String_clone_substring (String* source, String* destination, uint64_t start, uint64_t end) {
+void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end) {
     assert(start < end);
     assert(end <= String_length(*destination) && start < String_length(*destination));
 
