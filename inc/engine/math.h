@@ -209,6 +209,7 @@ void mat4_get_right(const mat4 m, vec3 out);
 void mat4_get_up(const mat4 m, vec3 out);
 void mat4_get_translation(const mat4 m, vec3 out);
 
+float mat4_determinant(const mat4 m);
 void mat4_inverse(const mat4 m, mat4 out);
 void mat4_transpose(const mat4 m, mat4 out);
 void mat4_lookat(const vec3 viewer, const vec3 target, const vec3 up, mat4 out);

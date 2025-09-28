@@ -11,7 +11,7 @@ struct Light {
   float attenuation;    // 4    48
 };
 
-layout (std140, binding = 0) uniform FrameData2 {
+layout (std140, binding = 0) uniform FrameData {
     mat4 u_view;
     vec3 u_position;
     vec3 u_direction;

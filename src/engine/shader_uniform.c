@@ -120,7 +120,7 @@ void internal_UniformBuffer_set(UniformBuffer* buffer, const char* alias, void* 
     // set the value of an item in a buffer by its variable name.
 
     if (!buffer) {
-        printf("Error UniformBuffer_set:\t\tBuffer \"%s\" does not exist.\n", alias);
+        printf("Error UniformBuffer_set:\t\tBuffer value \"%s\" does not exist.\n", alias);
         return;
     }
 
@@ -186,10 +186,13 @@ void internal_UniformBuffer_set_Struct_at(UniformBuffer* buffer, const char* ali
 }
 
 UniformBuffer* UniformBuffer_get_self(const char* alias) {
-    // Simple wrapper function to access the UniformBufferTable.
-    assert(UniformBufferTable);
     UniformBuffer* outVal;
     HashTable_find(UniformBufferTable, alias, &outVal);
+    
+    if (!outVal) {
+        printf("Error UniformBuffer_get_self:\t\tBuffer \"%s\" does not exist.\n", alias);
+    }
+    
     return outVal;
 }
 
@@ -578,15 +581,16 @@ void internal_Program_buffer_parse(const GLuint program, HashTable* table) {
         assert(alias != NULL);
         memcpy(alias, buffer, aliasLength + 1);
 
-        UniformBuffer* newBuffer;
-        HashTable_find(UniformBufferTable, alias, &newBuffer);
+        UniformBuffer* uniformBuffer;
+        HashTable_find(UniformBufferTable, alias, &uniformBuffer);
         glGetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_BINDING, &binding);
 
         // if it already exists, insert that one instead.
-        if (newBuffer) {
-            newBuffer->References++;
-            glUniformBlockBinding(program, binding, newBuffer->BufferObject);
-            HashTable_insert(table, newBuffer->Alias, newBuffer);
+        if (uniformBuffer) {
+            uniformBuffer->References++;
+            // TODO: For some reason, explicitly using this macro causes issues. Just not binding seems to work for some reason.
+            //glUniformBlockBinding(program, uniformBuffer->BindingIndex, uniformBuffer->BufferObject);
+            HashTable_insert(table, alias, uniformBuffer);
             free(alias);
             continue;
         }
@@ -595,40 +599,40 @@ void internal_Program_buffer_parse(const GLuint program, HashTable* table) {
         glGetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
         glGetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &indicies);
 
-        newBuffer = (UniformBuffer*)calloc(1, sizeof(UniformBuffer) + size);
-        assert(newBuffer != NULL);
+        uniformBuffer = (UniformBuffer*)calloc(1, sizeof(UniformBuffer) + size);
+        assert(uniformBuffer != NULL);
 
-
-        // Hash tables are intentionally oversized. This is because we don't know how many indicies are actually parts of structures.
-        newBuffer->Uniforms = HashTable_create(Uniform, indicies);
-        newBuffer->UniformStructs = HashTable_create(UniformStruct, indicies);
+        // Hash tables are intentionally oversized. 
+        // This is because we don't know how many indicies are actually parts of structures. 
+        // The above function returns ALL indicies, including those not a part of the buffer.
+        uniformBuffer->Uniforms = HashTable_create(Uniform, indicies);
+        uniformBuffer->UniformStructs = HashTable_create(UniformStruct, indicies);
 
         uniformIndicies = (GLint*)calloc(indicies, sizeof(GLint));
         assert(uniformIndicies != NULL);
         glGetActiveUniformBlockiv(program, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniformIndicies);
         
-        internal_Program_buffer_uniform_parse(program, indicies, uniformIndicies, newBuffer);
-        internal_program_uniformStruct_parse(program, indicies, uniformIndicies, newBuffer);
+        internal_Program_buffer_uniform_parse(program, indicies, uniformIndicies, uniformBuffer);
+        internal_program_uniformStruct_parse(program, indicies, uniformIndicies, uniformBuffer);
 
         free(uniformIndicies);
 
-        newBuffer->Alias = alias;
-        newBuffer->AliasLength = aliasLength;
-        newBuffer->UniformType = UNIFORM_TYPE_BUFFER;
-        newBuffer->Size = size;
-        newBuffer->BindingIndex = binding;
-        newBuffer->References = 1;
-        newBuffer->ChangesMade = 0;
+        uniformBuffer->Alias = alias;
+        uniformBuffer->AliasLength = aliasLength;
+        uniformBuffer->UniformType = UNIFORM_TYPE_BUFFER;
+        uniformBuffer->Size = size;
+        uniformBuffer->BindingIndex = binding;
+        uniformBuffer->References = 1;
+        uniformBuffer->ChangesMade = 0;
 
-        glGenBuffers(1, &(newBuffer->BufferObject));
-        glBindBuffer(GL_UNIFORM_BUFFER, newBuffer->BufferObject);
+        glGenBuffers(1, &(uniformBuffer->BufferObject));
+        glBindBuffer(GL_UNIFORM_BUFFER, uniformBuffer->BufferObject);
         glBufferData(GL_UNIFORM_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-        glBindBufferBase(GL_UNIFORM_BUFFER, newBuffer->BindingIndex, newBuffer->BufferObject);
+        glBindBufferBase(GL_UNIFORM_BUFFER, uniformBuffer->BindingIndex, uniformBuffer->BufferObject);
         glBindBuffer(GL_UNIFORM_BUFFER, GL_NONE);
 
-        // Insert the buffer into the both the storage buffer table and the local table.
-        HashTable_insert(UniformBufferTable, alias, newBuffer);
-        HashTable_insert(table, alias, newBuffer);
+        HashTable_insert(UniformBufferTable, alias, uniformBuffer);
+        HashTable_insert(table, alias, uniformBuffer);
     }
 }
 

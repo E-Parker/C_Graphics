@@ -404,46 +404,57 @@ void mat4_transpose (const mat4 m, mat4 out) {
     mat4_copy(result, out);
 }
 
-void mat4_inverse(const mat4 m, mat4 out) {
-    // Cache the matrix values (speed optimization)
-    float a00 = m[0], a01 = m[4], a02 = m[8], a03 = m[12];
-    float a10 = m[1], a11 = m[5], a12 = m[9], a13 = m[13];
-    float a20 = m[2], a21 = m[6], a22 = m[10], a23 = m[14];
-    float a30 = m[3], a31 = m[7], a32 = m[11], a33 = m[15];
+float mat4_determinant(const mat4 m) {
+    float b00 = m[0] * m[5] - m[4] * m[1];
+    float b01 = m[0] * m[9] - m[8] * m[1];
+    float b02 = m[0] * m[13] - m[12] * m[1];
+    float b03 = m[4] * m[9] - m[8] * m[5];
+    float b04 = m[4] * m[13] - m[12] * m[5];
+    float b05 = m[8] * m[13] - m[12] * m[9];
+    float b06 = m[2] * m[7] - m[6] * m[3];
+    float b07 = m[2] * m[11] - m[10] * m[3];
+    float b08 = m[2] * m[15] - m[14] * m[3];
+    float b09 = m[6] * m[11] - m[10] * m[7];
+    float b10 = m[6] * m[15] - m[14] * m[7];
+    float b11 = m[10] * m[15] - m[14] * m[11];
 
-    float b00 = a00 * a11 - a01 * a10;
-    float b01 = a00 * a12 - a02 * a10;
-    float b02 = a00 * a13 - a03 * a10;
-    float b03 = a01 * a12 - a02 * a11;
-    float b04 = a01 * a13 - a03 * a11;
-    float b05 = a02 * a13 - a03 * a12;
-    float b06 = a20 * a31 - a21 * a30;
-    float b07 = a20 * a32 - a22 * a30;
-    float b08 = a20 * a33 - a23 * a30;
-    float b09 = a21 * a32 - a22 * a31;
-    float b10 = a21 * a33 - a23 * a31;
-    float b11 = a22 * a33 - a23 * a32;
+    return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+}
+
+void mat4_inverse(const mat4 m, mat4 out) {
+    float b00 = m[0] * m[5] - m[4] * m[1];
+    float b01 = m[0] * m[9] - m[8] * m[1];
+    float b02 = m[0] * m[13] - m[12] * m[1];
+    float b03 = m[4] * m[9] - m[8] * m[5];
+    float b04 = m[4] * m[13] - m[12] * m[5];
+    float b05 = m[8] * m[13] - m[12] * m[9];
+    float b06 = m[2] * m[7] - m[6] * m[3];
+    float b07 = m[2] * m[11] - m[10] * m[3];
+    float b08 = m[2] * m[15] - m[14] * m[3];
+    float b09 = m[6] * m[11] - m[10] * m[7];
+    float b10 = m[6] * m[15] - m[14] * m[7];
+    float b11 = m[10] * m[15] - m[14] * m[11];
 
     // Calculate the invert determinant 
-    float invDet = 1.0f / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
+    float invDet = 1.0f / mat4_determinant(m);
 
     mat4 result = {
-        (a11 * b11 - a12 * b10 + a13 * b09) * invDet,
-        (-a10 * b11 + a12 * b08 - a13 * b07) * invDet,
-        (a10 * b10 - a11 * b08 + a13 * b06) * invDet,
-        (-a10 * b09 + a11 * b07 - a12 * b06) * invDet,
-        (-a01 * b11 + a02 * b10 - a03 * b09) * invDet,
-        (a00 * b11 - a02 * b08 + a03 * b07) * invDet,
-        (-a00 * b10 + a01 * b08 - a03 * b06) * invDet,
-        (a00 * b09 - a01 * b07 + a02 * b06) * invDet,
-        (a31 * b05 - a32 * b04 + a33 * b03) * invDet,
-        (-a30 * b05 + a32 * b02 - a33 * b01) * invDet,
-        (a30 * b04 - a31 * b02 + a33 * b00) * invDet,
-        (-a30 * b03 + a31 * b01 - a32 * b00) * invDet,
-        (-a21 * b05 + a22 * b04 - a23 * b03) * invDet,
-        (a20 * b05 - a22 * b02 + a23 * b01) * invDet,
-        (-a20 * b04 + a21 * b02 - a23 * b00) * invDet,
-        (a20 * b03 - a21 * b01 + a22 * b00) * invDet,
+        (m[5] * b11 - m[9] * b10 + m[13] * b09) * invDet,
+        (-m[1] * b11 + m[9] * b08 - m[13] * b07) * invDet,
+        (m[1] * b10 - m[5] * b08 + m[13] * b06) * invDet,
+        (-m[1] * b09 + m[5] * b07 - m[9] * b06) * invDet,
+        (-m[4] * b11 + m[8] * b10 - m[12] * b09) * invDet,
+        (m[0] * b11 - m[8] * b08 + m[12] * b07) * invDet,
+        (-m[0] * b10 + m[4] * b08 - m[12] * b06) * invDet,
+        (m[0] * b09 - m[4] * b07 + m[8] * b06) * invDet,
+        (m[7] * b05 - m[11] * b04 + m[15] * b03) * invDet,
+        (-m[3] * b05 + m[11] * b02 - m[15] * b01) * invDet,
+        (m[3] * b04 - m[7] * b02 + m[15] * b00) * invDet,
+        (-m[3] * b03 + m[7] * b01 - m[11] * b00) * invDet,
+        (-m[6] * b05 + m[10] * b04 - m[14] * b03) * invDet,
+        (m[2] * b05 - m[10] * b02 + m[14] * b01) * invDet,
+        (-m[2] * b04 + m[6] * b02 - m[14] * b00) * invDet,
+        (m[2] * b03 - m[6] * b01 + m[10] * b00) * invDet,
     };
     
     mat4_copy(result, out);
@@ -453,7 +464,7 @@ void mat4_lookat (const vec3 viewer, const vec3 target, const vec3 viewerUp, mat
     float length = 0.0f;
     float ilength = 0.0f;
 
-    vec3 relativePosition = vec3_def_sub(viewer, target);
+    vec3 relativePosition = vec3_def_sub(target, viewer);
     vec3 forward = vec3_def_copy(relativePosition);
     vec3_normalize(forward);
 
@@ -466,10 +477,10 @@ void mat4_lookat (const vec3 viewer, const vec3 target, const vec3 viewerUp, mat
     vec3_normalize(up);
     
     mat4 result = {
-        side[0], up[0], forward[0], 0.0f,
-        side[1], up[1], forward[1], 0.0f,
-        side[2], up[2], forward[2], 0.0f,
-        -vec3_dot(side, viewer), -vec3_dot(up, viewer), -vec3_dot(forward, viewer), 1.0f,
+        -side[0], -up[0], -forward[0], 0.0f,
+        -side[1], -up[1], -forward[1], 0.0f,
+        -side[2], -up[2], -forward[2], 0.0f,
+        vec3_dot(side, viewer), vec3_dot(up, viewer), vec3_dot(forward, viewer), 1.0f,
     };
 
     mat4_copy(result, out);
