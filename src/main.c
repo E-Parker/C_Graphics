@@ -14,15 +14,11 @@
 #include "engine/engine.h"
 
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
-
 int main(void) {
 
     
     // Initialize the window to the starting size and set the header.
-    if (!Engine_initialize(SCREEN_WIDTH, SCREEN_HEIGHT, "Delta Render"));
+    if (!Engine_initialize(320, 200, "Delta Render"));
     InitShaders();
     InitTextures();
 

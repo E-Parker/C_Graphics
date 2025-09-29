@@ -241,8 +241,6 @@ void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out) {
     vec3_scale(axisAngleCrossWV, 2.0);
 
     vec3 result = vec3_def_add(axisAngleCrossV, axisAngleCrossWV);
-
-    return result;
 }
 
 void vec3_rotate(const vec3 v, const quaternion q, vec3 out) {

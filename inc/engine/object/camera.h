@@ -18,13 +18,10 @@ typedef struct Camera {
 
 } Camera;
 
-void Object_Camera_update_noclip(void* object, const double deltaTime);
-
-
-void Object_Camera_recalulate_view(Camera* camera);
-
 
 Camera* Object_Camera_create();
 void Object_Camera_destroy(void* camera);
 
+u8 Object_Camera_update_noclip(void* object, const double deltaTime);
+void Object_Camera_recalulate_view(Camera* camera);
 

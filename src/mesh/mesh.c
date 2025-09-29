@@ -20,8 +20,10 @@
 #define FbxFile 0x6600202020786266      // .fbx     - "Filmbox" format, Maya version.
 
 
-void Object_StaticMesh_destroy(StaticMesh* mesh) {
-    OBJECT_DESTROY_BODY(mesh);
+void Object_StaticMesh_destroy(void* object) {
+    OBJECT_DESTROY_BODY(object);
+    
+    StaticMesh* mesh = (StaticMesh*)object;
 
     for (List_iterator(MeshRender, &mesh->meshRenders)) {
         FreeMesh(it);
@@ -87,7 +89,7 @@ void Object_StaticMesh_Draw(void* object) {
 }
 
 
-void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, const Material* material) {
+void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, Material* material) {
     if (!staticMesh) {
         return;
     }

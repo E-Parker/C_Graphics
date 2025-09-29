@@ -1,9 +1,8 @@
 #pragma once
 
+#include "GLFW/glfw3.h"
 #include "engine_core/engine_types.h"
 #include "engine_core/list.h"
-
-typedef struct GLFWwindow GLFWwindow;
 
 typedef struct FrameData {
 

@@ -391,7 +391,7 @@ void internal_Shader_create(const GLuint program, const char* alias) {
 
     if (shader) {
         shader->references++;
-        return shader;
+        return;
     }
 
     GLint uniformCount = internal_Program_uniform_count(program);

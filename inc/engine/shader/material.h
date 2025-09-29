@@ -16,7 +16,7 @@ typedef struct Material {
     GLenum      DepthFunction;
 } Material;
 
-Material* Material_create(const Shader* shader, const u32 numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
+Material* Material_create(Shader* shader, const u32 numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
 void Material_destroy(Material** material);
 
 void SetTextureFromPointer(const Material* material, Texture* texture, u32 index);

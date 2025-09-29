@@ -12,7 +12,7 @@
 #define MATERIAL_BUFFER_SIZE 0x100
 
 
-Material* Material_create(const Shader* shader, const u32 textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
+Material* Material_create(Shader* shader, const u32 textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
     
     if (!shader) {
         printf("Material Error: Shader was null!\n");

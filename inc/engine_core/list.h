@@ -88,7 +88,7 @@ void* List_create_array(List* list);
 
 u32 List_count(const List* list);
 u32 List_byte_count(const List* list);
-bool List_contains_item(const List* list, void* item, i64* out);
+bool List_contains_item(const List* list, void* item, u64* out);
 
 void List_realloc(List* list, u32 Capacity);
 void List_reorder(List* list);
@@ -353,9 +353,9 @@ u32 List_count(const List* list) {
 }
 
 
-bool List_contains_item(List* list, void* item, i64* out) {
+bool List_contains_item(const List* list, void* item, u64* out) {
     u8* itemAsBytes = (u8*)item;
-    i64 itemIndex = 0;
+    u64 itemIndex = 0;
     for (List_iterator(u8, list), ++itemIndex) {
         for (u32 i = 0; i < list->itemSize; ++i) {
             if (it[i] != itemAsBytes[i]) {
@@ -367,7 +367,7 @@ bool List_contains_item(List* list, void* item, i64* out) {
         NotMatching:
         continue;
     }
-    if (out) *out = -1;
+    if (out) *out = 0;
     return false;
 }
 

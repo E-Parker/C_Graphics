@@ -64,7 +64,7 @@ void Object_Camera_recalulate_view(Camera* camera) {
 
 }
 
-void Object_Camera_update_noclip(void* object, const double deltaTime) {
+u8 Object_Camera_update_noclip(void* object, const double deltaTime) {
 
     Camera* camera = (Camera*)object;
 
@@ -123,4 +123,5 @@ void Object_Camera_update_noclip(void* object, const double deltaTime) {
     mat4_multiply(camera->Transform, translation, camera->Transform);
 
     Object_Camera_recalulate_view(camera);
+    return 0;
 }

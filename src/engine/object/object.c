@@ -77,7 +77,7 @@ void Object_set_alias(void* objectPtr, const char* string) {
     char* currentCharacter = (char*)string;
     
     for(u8 i = 0; i < OBJECT_ALIAS_SIZE; i++) {
-        if(currentCharacter == '\0') {
+        if(*currentCharacter == '\0') {
             gameObjectAlias[i] = '\0';
         }
 

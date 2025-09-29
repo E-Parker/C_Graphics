@@ -22,5 +22,8 @@ StaticMesh* Object_StaticMesh_create_from_wave_front(const char* path, void* par
 StaticMesh* Object_StaticMesh_create_from_graphics_library_transmission_format(const char* Path, void* parent);
 StaticMesh* Object_StaticMesh_create_from_graphics_library_binary_transmission_format(const char* Path, void* parent);
 
-void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, const Material* material);
+void Object_StaticMesh_destroy(void* objecti);
+
+
+void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, Material* material);
 void Object_StaticMesh_Draw(void* object);
