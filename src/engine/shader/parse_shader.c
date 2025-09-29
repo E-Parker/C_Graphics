@@ -38,7 +38,7 @@ void internal_ReadShaderProgramSource(const char* path) {
     
     // Get the size of the file.
     fseek(file, 0, SEEK_END);
-    uint64_t bufferSize = ftell(file);
+    u64 bufferSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     // Return early if the buffer isn't big enough to fit the file.

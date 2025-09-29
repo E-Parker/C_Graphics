@@ -4,12 +4,12 @@
 #include "engine/math.h"
 #include "engine/object.h"
 
-uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8_t type) {
+u8 internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type) {
 
     // Perform blind cast to object. All object types have the same header alignment so this is safe, assuming an object is passed in here.
     Object* object = (Object*)objectPtr;
     Object* parent = (Object*)parentPtr;
-    uint8_t errorCode = ERRORCODE_OBJECT_SUCCESS;
+    u8 errorCode = ERRORCODE_OBJECT_SUCCESS;
 
     if (objectPtr == parentPtr) {
         errorCode = ERRORCODE_OBJECT_SELF_PARENT;
@@ -21,7 +21,7 @@ uint8_t internal_Object_Initialize(void* objectPtr, void* parentPtr, const uint8
         goto ObjectInitFail;
     }
 
-    for (uint8_t i = 0; i < OBJECT_ALIAS_SIZE; i++) {
+    for (u8 i = 0; i < OBJECT_ALIAS_SIZE; i++) {
         object->Alias[i] = '\0';
     };
 
@@ -51,7 +51,7 @@ void internal_Object_Deinitialize(void* objectPtr) {
     // TODO: come up with a better solution.
     // This is okay, but maybe sort of bad because recursion. 
     // Could potentially blow up the stack.
-    for(uint64_t i = 0; i < List_count(&object->Children); i++) {
+    for(u64 i = 0; i < List_count(&object->Children); i++) {
         Object* childObject;
         List_pop_front(&object->Children, childObject);
         childObject->Destroy(childObject);
@@ -66,7 +66,7 @@ void internal_Object_DestroyDefault(void* objectPtr) {
 }
 
 
-uint8_t internal_Object_TickDefault(void* ptr, const double deltaTime) {
+u8 internal_Object_TickDefault(void* ptr, const double deltaTime) {
     OBJECT_TICK_BODY(ptr)
     return ERRORCODE_OBJECT_SUCCESS;
 }
@@ -76,7 +76,7 @@ void Object_set_alias(void* objectPtr, const char* string) {
     char* gameObjectAlias = (char*)objectPtr;
     char* currentCharacter = (char*)string;
     
-    for(uint8_t i = 0; i < OBJECT_ALIAS_SIZE; i++) {
+    for(u8 i = 0; i < OBJECT_ALIAS_SIZE; i++) {
         if(currentCharacter == '\0') {
             gameObjectAlias[i] = '\0';
         }
@@ -123,7 +123,7 @@ void Object_set_parent(void* objectPtr, void* parentPtr) {
     if (parent) {
         List_remove_at(&parent->Children, object->internal_IndexOf);
         // TODO: look into maybe changing this to a less brute force method.
-        uint64_t newChildIndex = 0;
+        u64 newChildIndex = 0;
         for (List_iterator(Object*, &parent->Children), newChildIndex++) {
             (*it)->internal_IndexOf = newChildIndex;
         }
@@ -138,17 +138,17 @@ void Object_set_parent(void* objectPtr, void* parentPtr) {
 }
 
 
-bool Object_flag_compare(uint32_t data, uint32_t mask) {
+bool Object_flag_compare(u32 data, u32 mask) {
     data |= 0xff000000;
     mask |= 0xff000000;
     return ((data & mask) == mask) & 1;
 }
 
-void Object_flag_set(uint32_t* data, uint32_t mask) {
+void Object_flag_set(u32* data, u32 mask) {
     *data |= mask;
 }
 
-void Object_flag_unset(uint32_t* data, uint32_t mask) {
+void Object_flag_unset(u32* data, u32 mask) {
     mask &= 0x00ffffff;
     *data &= ~mask;
 }

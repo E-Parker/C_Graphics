@@ -199,7 +199,7 @@ void quaternion_invert(quaternion q);
 void quaternion_multiply(const quaternion left, const quaternion right, quaternion out);
 void mat4_from_quaternion(const quaternion q, mat4 out); // 4x4 matrix from quaternion.
 
-void mat4_multi_multiply (uint64_t count, ... );
+void mat4_multi_multiply (u64 count, ... );
 void mat4_multiply(const mat4 left, const mat4 right, mat4 out); // Multiply two 4x4 matrices.
 void mat4_translate(const vec3 translation, mat4 out);
 void mat4_scale(const vec3 scale, mat4 out);

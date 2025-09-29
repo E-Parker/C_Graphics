@@ -20,8 +20,8 @@ typedef struct UniformGeneric {
     // Template body for any uniform type
     #define UNIFORM_BODY()\
     char* Alias;\
-    uint16_t AliasLength;\
-    uint16_t UniformType;\
+    u16 AliasLength;\
+    u16 UniformType;\
     GLint Location;\
     
     UNIFORM_BODY()
@@ -43,11 +43,11 @@ typedef struct UniformInformation {
 typedef struct Uniform {
     // Structure to store an OpenGL Uniform. Same size as UniformBuffer struct
     UNIFORM_BODY()
-    uint32_t Type;      // GLenum type of the uniform. Needed to do upload.
-    uint32_t Offset;    // Only meaningful for uniforms that are part of structures.
-    uint32_t Elements;  // value of 1 means it is not an array.
-    uint64_t Size;      // byte size of each element.
-    uint64_t Stride;    // zero unless the uniform is part of a structure.
+    u32 Type;      // GLenum type of the uniform. Needed to do upload.
+    u32 Offset;    // Only meaningful for uniforms that are part of structures.
+    u32 Elements;  // value of 1 means it is not an array.
+    u64 Size;      // byte size of each element.
+    u64 Stride;    // zero unless the uniform is part of a structure.
     void* Data;
 } Uniform;
 
@@ -59,24 +59,24 @@ void internal_Uniform_set_at(Uniform* uniform, int i, void* data);
 
 #define Uniform_exec_if_type(UniformType, ...) ( if((Uniform*)uniform->UniformType == UniformType){ __VA_ARGS__ })
 #define internal_Uniform_get_data(T, uniform) ((T*)((Uniform*)uniform->Data))
-#define internal_Uniform_get_data_size(uniform) (uint64_t)(uniform->Size * uniform->Elements)
+#define internal_Uniform_get_data_size(uniform) (u64)(uniform->Size * uniform->Elements)
 #define Uniform_set_data(uniform, data) (internal_Uniform_set_data(uniform, (void*)data))
 #define Uniform_set_at(uniform, i, data) (internal_Uniform_set_at(uniform, i, (void*)data))
 
 typedef struct UniformStruct {
     // similar to Uniform buffers, used to store an openGL struct.
     UNIFORM_BODY()
-    uint32_t Offset;
-    uint32_t Elements;
-    uint64_t Size;      // total size of the struct.
+    u32 Offset;
+    u32 Elements;
+    u64 Size;      // total size of the struct.
     HashTable* Members; 
     void* Data;
 } UniformStruct;
 
-UniformStruct* internal_UniformStruct_create(char* alias, const uint16_t aliasLength, const UniformInformation* info, const uint16_t memberCount, const uint64_t elements, void* shared);
+UniformStruct* internal_UniformStruct_create(char* alias, const u16 aliasLength, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared);
 
 void UniformStruct_get_member(UniformStruct* uniformStruct, const char* alias, Uniform** outVal);
-void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, uint64_t i, void* data);
+void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, u64 i, void* data);
 void UniformStruct_set_member(UniformStruct* uniformStruct, const char* alias, void* data);
 
 //  SHADER UNIFORM BUFFER
@@ -86,17 +86,17 @@ void UniformStruct_set_member(UniformStruct* uniformStruct, const char* alias, v
 typedef struct UniformBuffer {
     // Structure to store an OpenGL buffer. Same size as Uniform struct
     UNIFORM_BODY()
-    uint64_t Size;          // Total byte size of the buffer.
+    u64 Size;          // Total byte size of the buffer.
     GLint BufferObject;
-    uint32_t BindingIndex;  // binding index of the buffer on the GPU.
-    uint32_t References;
-    uint32_t ChangesMade;
+    u32 BindingIndex;  // binding index of the buffer on the GPU.
+    u32 References;
+    u32 ChangesMade;
     HashTable* Uniforms;
     HashTable* UniformStructs;
 } UniformBuffer;
 
 void UniformBuffer_destroy(UniformBuffer** buffer);
-void internal_UniformBuffer_set_region(const UniformBuffer* buffer, const uint64_t byteIndex, const uint64_t regionSizeInBytes, const void* data);
+void internal_UniformBuffer_set_region(const UniformBuffer* buffer, const u64 byteIndex, const u64 regionSizeInBytes, const void* data);
 void internal_UniformBuffer_set_all(const UniformBuffer* buffer, const void* data);
 void internal_UniformBuffer_set(UniformBuffer* buffer, const char* alias, void* data);
 void internal_UniformBuffer_buffer(const UniformBuffer* buffer);
@@ -110,7 +110,7 @@ void internal_UniformBuffer_set_Struct_at(UniformBuffer* buffer, const char* ali
 UniformBuffer* UniformBuffer_get_self(const char* alias);
 void UniformBuffer_update_all();
 
-#define UniformBuffer_get_shared(buffer) ((void*)((uint8_t*)buffer + sizeof(UniformBuffer)))
+#define UniformBuffer_get_shared(buffer) ((void*)((u8*)buffer + sizeof(UniformBuffer)))
 #define UniformBuffer_set(buffer, alias, Value) (internal_UniformBuffer_set(buffer, alias, (void*)Value))
 #define UniformBuffer_set_Global(bufferAlias, alias, Value) (UniformBuffer_set(UniformBuffer_get_self(bufferAlias), alias, Value))
 #define UniformBuffer_set_Struct_Global(bufferAlias, structAlias, memberAlias, Value) (internal_UniformBuffer_set_Struct(UniformBuffer_get_self(bufferAlias), structAlias, memberAlias, Value))

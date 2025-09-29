@@ -12,7 +12,7 @@
 #define MATERIAL_BUFFER_SIZE 0x100
 
 
-Material* Material_create(const Shader* shader, const uint32_t textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
+Material* Material_create(const Shader* shader, const u32 textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
     
     if (!shader) {
         printf("Material Error: Shader was null!\n");
@@ -67,7 +67,7 @@ void Material_destroy(Material** material) {
 }
 
 
-void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t index){
+void SetTextureFromPointer(const Material* material, Texture* texture, u32 index){
     /* Manually set a texture from a texture pointer. AVOID USING!!!
     The textures set this way will be UNAMANGED and must be freed MANUALLY. */
 
@@ -95,7 +95,7 @@ void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t 
     texture->references++;
 }
 
-void SetTextureFromAlias(const Material* material, const char* alias, uint32_t index) {
+void SetTextureFromAlias(const Material* material, const char* alias, u32 index) {
     /* Set a material's texture at the given index, by the texture's alias. */
 
     if (!material) {
@@ -139,7 +139,7 @@ void BindMaterial(const Material* material){
     glDepthFunc(material->DepthFunction);
 
     // Set the active texture for each texture in the material.
-    for (uint32_t i = 0; i < material->TextureCount; i++) {
+    for (u32 i = 0; i < material->TextureCount; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
         if (material->Textures[i]) {
             glBindTexture(material->Textures[i]->type, material->Textures[i]->ID);

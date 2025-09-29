@@ -29,7 +29,7 @@ void InitTextures() {
     HashTable_initialize(Texture, &TextureTable, 512);
 }
 
-void InternalUploadTexture(Texture* texture, uint8_t* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
+void InternalUploadTexture(Texture* texture, u8* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
     
     if (texture->ID == GL_NONE) {
         glGenTextures(1, &(texture->ID));
@@ -43,7 +43,7 @@ void InternalUploadTexture(Texture* texture, uint8_t* data, GLenum internalForma
     glTexImage2D(uploadType, 0, internalFormat, texture->width, texture->height, 0, format, GL_UNSIGNED_BYTE, data);
 }
 
-void InternalUploadTextureMimmap(Texture* texture, uint8_t* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
+void InternalUploadTextureMimmap(Texture* texture, u8* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
     
     if (texture->ID == GL_NONE) {
         glGenTextures(1, &texture->ID);
@@ -73,7 +73,7 @@ void InternalDeleteTexture(Texture* texture) {
 }
 
 
-void InternalCreateTexture(Texture* texture, const bool isManaged, const char* alias, const GLenum internalFormat, const GLenum format, uint8_t* data, bool useMipmap) {
+void InternalCreateTexture(Texture* texture, const bool isManaged, const char* alias, const GLenum internalFormat, const GLenum format, u8* data, bool useMipmap) {
     /* Internal function for creating managed textures. */
 
     if (useMipmap) {
@@ -96,7 +96,7 @@ void CreateRawTexture(const char* path, Texture* texture, GLenum internalFormat,
     texture->filterType = filterType;
 
     stbi_set_flip_vertically_on_load(true);
-    uint8_t* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
+    u8* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
 
     if (!data) {
         printf("Error creating raw Texture from: \" %s \". The texture will be discarded.\n", path);
@@ -133,7 +133,7 @@ Texture* CreateTexture(const char* path, const char* alias, GLenum internalForma
     internal_Texture_create(texture, GL_TEXTURE_2D, filterType);
 
     stbi_set_flip_vertically_on_load(true);
-    uint8_t* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
+    u8* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
 
     if (!data) {
         printf("Error creating Texture: \"%s\" From: \"%s\". The Texture will be discarded.\n", aliasUsed, path);
@@ -171,10 +171,10 @@ Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GL
     
     internal_Texture_create(texture, GL_TEXTURE_CUBE_MAP, filterType);
 
-    for (uint8_t i = 0; i < 6; i++) {
+    for (u8 i = 0; i < 6; i++) {
 
         stbi_set_flip_vertically_on_load(true);
-        uint8_t* data = stbi_load(texturePaths[i], &texture->width, &texture->height, &texture->channels, 0);
+        u8* data = stbi_load(texturePaths[i], &texture->width, &texture->height, &texture->channels, 0);
         
         if (!data) {
             printf("Error creating Cube Map Texture: \"%s\" At index, %d, From: \"%s\". The texture will be discarded.\n", alias, i, texturePaths[i]);

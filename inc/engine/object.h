@@ -32,11 +32,11 @@ typedef struct Object {
     //  
     #define OBJECT_BODY() \
     char Alias[OBJECT_ALIAS_SIZE];          /* <----- These will be the same for any object.                        */ \
-    union {uint8_t Type;                    /*     _- Only use the lower 8 bits, the first 8 represent type.        */ \
-    uint32_t Flags;} Data;                  /* <--+-- General purpose bit flags. useful for keeping object state.   */ \
+    union {u8 Type;                    /*     _- Only use the lower 8 bits, the first 8 represent type.        */ \
+    u32 Flags;} Data;                  /* <--+-- General purpose bit flags. useful for keeping object state.   */ \
     mat4 Transform;                         /* <----- 4 * 4 matrix, represents the position & rotation.             */ \
     List Children;                          /* <----- list of child objects.                                        */ \
-    uint64_t internal_IndexOf;              /* <----- Index of the object in it's parent's children list.           */ \
+    u64 internal_IndexOf;              /* <----- Index of the object in it's parent's children list.           */ \
     Object* Parent;                         /* <----- pointer to the parent node. If NULL, assumed to be a root.    */ \
     Function_Tick Tick;                     /* <----- function to update the object.                                */ \
     Function_Void_OneParam Draw;            /* <----- function to draw the object.                                  */ \
@@ -52,16 +52,16 @@ typedef struct Object {
 
 #define Object_IsType(object, Type) ((*((Object*)object)->Type) == Type)
 
-uint8_t internal_Object_Initialize (void* objectPtr, void* parentPtr, const uint8_t type);
+u8 internal_Object_Initialize (void* objectPtr, void* parentPtr, const u8 type);
 void    internal_Object_Deinitialize (void* objectPtr);
 void    internal_Object_DestroyDefault (void* objectPtr);
-uint8_t internal_Object_TickDefault (void* objectPtr, const double deltaTime);
+u8 internal_Object_TickDefault (void* objectPtr, const double deltaTime);
 
 void Object_get_world_space_transform (void* objectPtr, mat4 out);
 void Object_set_parent (void* objectPtr, void* parentPtr);
 void Object_set_alias (void* objectPtr, const char* string);
 
-bool Object_flag_compare (uint32_t data, uint32_t mask);
-void Object_flag_set (uint32_t* data, uint32_t mask);
-void Object_flag_unset (uint32_t* data, uint32_t mask);
+bool Object_flag_compare (u32 data, u32 mask);
+void Object_flag_set (u32* data, u32 mask);
+void Object_flag_unset (u32* data, u32 mask);
 

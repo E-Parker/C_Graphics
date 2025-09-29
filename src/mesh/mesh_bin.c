@@ -12,7 +12,7 @@
 StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* parent) {
     StaticMesh* staticMesh = NULL;
 
-    uint64_t bufferSizes[4] = { 0, 0, 0, 0 };
+    u64 bufferSizes[4] = { 0, 0, 0, 0 };
 
     FILE* file = fopen(path, "rb");
     fread(bufferSizes, 8, 4, file);
@@ -22,31 +22,31 @@ StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* paren
     }
 
     fseek(file, 0x20, SEEK_SET);
-    uint64_t startOfData = ftell(file);
+    u64 startOfData = ftell(file);
     fseek(file, 0, SEEK_END);
-    uint64_t endOfData = ftell(file);
+    u64 endOfData = ftell(file);
     fseek(file, 0x20, SEEK_SET);
 
-    uint64_t bytesOfData = endOfData - startOfData;
-    uint64_t expectedBytes = bufferSizes[0] + bufferSizes[1] + bufferSizes[2] + bufferSizes[3];
+    u64 bytesOfData = endOfData - startOfData;
+    u64 expectedBytes = bufferSizes[0] + bufferSizes[1] + bufferSizes[2] + bufferSizes[3];
 
-    uint64_t indexSize = bufferSizes[0] / sizeof(uint32_t);
-    uint64_t vertexSize = bufferSizes[1] / sizeof(vec3);
-    uint64_t normalSize = bufferSizes[2] / sizeof(vec3);
-    uint64_t tCoordSize = bufferSizes[3] / sizeof(vec2);
+    u64 indexSize = bufferSizes[0] / sizeof(u32);
+    u64 vertexSize = bufferSizes[1] / sizeof(vec3);
+    u64 normalSize = bufferSizes[2] / sizeof(vec3);
+    u64 tCoordSize = bufferSizes[3] / sizeof(vec2);
 
     if (vertexSize != normalSize || normalSize != tCoordSize) {
         goto ReturnMesh;
     }
 
-    uint32_t* indexBuffer = (uint32_t*)malloc(bufferSizes[0]);
+    u32* indexBuffer = (u32*)malloc(bufferSizes[0]);
     GLfloat* vertexBuffer = (GLfloat*)malloc(bufferSizes[1]);
     GLfloat* normalBuffer = (GLfloat*)malloc(bufferSizes[2]);
     GLfloat* tCoordBuffer = (GLfloat*)malloc(bufferSizes[3]);
 
-    uint64_t errorCode;
+    u64 errorCode;
 
-    fread(indexBuffer, sizeof(uint32_t), indexSize, file);
+    fread(indexBuffer, sizeof(u32), indexSize, file);
     fread(vertexBuffer, sizeof(vec3), vertexSize, file);
     fread(normalBuffer, sizeof(vec3), normalSize, file);
     fread(tCoordBuffer, sizeof(vec2), tCoordSize, file);

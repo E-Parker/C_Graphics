@@ -1,9 +1,8 @@
 #include "glad/glad.h"
 
-#include "stdbool.h"
-#include "stdint.h"
 #include "math.h"
 
+#include "engine_core/engine_types.h"
 #include "engine/math.h"
 
 // GL TYPE CONSTANT DEFINITIONS:
@@ -308,7 +307,7 @@ void mat4_from_quaternion (const quaternion q, mat4 out) {
 }
 
 
-void mat4_multi_multiply (uint64_t count, ... ) {
+void mat4_multi_multiply (u64 count, ... ) {
     va_list args;
     va_start(args, count);
 
@@ -316,7 +315,7 @@ void mat4_multi_multiply (uint64_t count, ... ) {
     GLfloat* arg = va_arg(args, GLfloat*);
     mat4_copy(arg, result);
 
-    for (uint64_t i = 1; i < count - 1; ++i) {
+    for (u64 i = 1; i < count - 1; ++i) {
         arg = va_arg(args, GLfloat*);
         mat4_multiply(result, arg, result);
     }

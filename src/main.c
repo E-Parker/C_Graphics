@@ -86,11 +86,12 @@ int main(void) {
 
 
     Camera* mainCamera = Object_Camera_create();
-    StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
-    StaticMesh* mesh1 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
-    StaticMesh* mesh2 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
-    StaticMesh* mesh3 = Object_StaticMesh_create("./assets/meshes/mesh0.bin", NULL);
-    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/mesh1.bin", NULL);
+    StaticMesh* groundMesh = Object_StaticMesh_create("./assets/meshes/ground.bin", NULL);
+    StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
+    StaticMesh* mesh1 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
+    StaticMesh* mesh2 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
+    StaticMesh* mesh3 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
+    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/arrow.bin", NULL);
     
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
@@ -100,8 +101,8 @@ int main(void) {
     Object_StaticMesh_set_Material(mesh2, 0, TCoords);
     Object_StaticMesh_set_Material(mesh3, 0, Dither);
     Object_StaticMesh_set_Material(lightVis, 0, Mat0);
+    Object_StaticMesh_set_Material(groundMesh, 0, Mat0);
     
-
     vec3 mesh0Translate = { 1.0f, 0.0f, 1.0f };
     vec3 mesh1Translate = { 1.0f, 0.0f, -1.0f };
     vec3 mesh2Translate = { -1.0f, 0.0f, 1.0f };
@@ -121,19 +122,16 @@ int main(void) {
     mat4_multiply(scale, mesh2->Transform, mesh2->Transform);
     mat4_multiply(scale, mesh3->Transform, mesh3->Transform);
 
+    GLint activeLights = 2;
 
-    
-    
-    GLuint activeLights = 2;
-
-    vec3 lightPos = { 0.0f, 5.0f, 0.0f };
+    vec3 lightPos = { 0.0f, 2.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
     vec3 lightColor = { 2.0f, 2.0f, 2.0f };
     vec3 AmbientColor = { 0.2f, 0.2f, 0.2f };
+    float lightRadius = 25.0f;
     
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
-    float lightRadius = 15.0f;
 
     UniformBuffer_set_Global("LightData", "u_activeLights", &activeLights);
     UniformBuffer_set_Global("LightData", "u_ambientColor", &AmbientColor);
@@ -147,6 +145,9 @@ int main(void) {
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 1, &lightDir);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
+
+    UniformBuffer_update_all();
+
 
     bool captureCursor = true;
     SetCaptureCursor(captureCursor);
@@ -178,13 +179,14 @@ int main(void) {
         GLfloat time = Time();
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
-        UniformBuffer_set_Global("FrameData", "u_time", &time);
+        UniformBuffer_set_Global    ("FrameData", "u_time", &time);
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
 
         UniformBuffer_update_all();
 
+        groundMesh->Draw(groundMesh);
         mesh0->Draw(mesh0);
         mesh1->Draw(mesh1);
         mesh2->Draw(mesh2);

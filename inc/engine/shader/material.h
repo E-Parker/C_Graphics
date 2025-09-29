@@ -9,18 +9,18 @@ typedef struct Shader Shader;
 
 typedef struct Material {
     //HashTable* Uniforms;
-    Texture** Textures;
-    Shader* ShaderProgram;
-    uint32_t TextureCount;
-    GLenum CullFunction;
-    GLenum DepthFunction;
+    Texture**   Textures;
+    Shader*     ShaderProgram;
+    u32         TextureCount;
+    GLenum      CullFunction;
+    GLenum      DepthFunction;
 } Material;
 
-Material* Material_create(const Shader* shader, const uint32_t numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
+Material* Material_create(const Shader* shader, const u32 numberOfTextures, const GLenum cullFuncton, const GLenum depthFunction);
 void Material_destroy(Material** material);
 
-void SetTextureFromPointer(const Material* material, Texture* texture, uint32_t index);
-void SetTextureFromAlias(const Material* material, const char* alias, uint32_t index);
+void SetTextureFromPointer(const Material* material, Texture* texture, u32 index);
+void SetTextureFromAlias(const Material* material, const char* alias, u32 index);
 void BindMaterial(const Material* material);
 
 

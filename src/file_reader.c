@@ -17,8 +17,8 @@ int Reader_Deinitialize(Reader* reader) {
 }
 
 
-char internal_Reader_at(Reader* reader, uint64_t index) {
-	uint32_t blockContainingIndex = index / READER_BUFFER_SIZE;
+char internal_Reader_at(Reader* reader, u64 index) {
+	u32 blockContainingIndex = index / READER_BUFFER_SIZE;
 	
     // if the block containing the character we're after is before the current position, 
 	// we need to reset to the start of the line.
@@ -27,11 +27,11 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 		reader->currentBlock = 0;
 	}
 
-	uint32_t blocksToContaining = blockContainingIndex - reader->currentBlock;
-	uint16_t blockIndex = index % READER_BUFFER_SIZE;
+	u32 blocksToContaining = blockContainingIndex - reader->currentBlock;
+	u16 blockIndex = index % READER_BUFFER_SIZE;
 
 	// request blocks until we're in the correct block.
-	for (uint32_t i = 0; i < blocksToContaining; ++i) {
+	for (u32 i = 0; i < blocksToContaining; ++i) {
 		fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);
 	}
 
@@ -42,7 +42,7 @@ char internal_Reader_at(Reader* reader, uint64_t index) {
 
 
 bool internal_Reader_FindLineEnd(Reader* reader) {
-	// Set buffer end to max uint32_t so when buffer overrun occurs, we can detect if the line is too big to fit in the buffer.
+	// Set buffer end to max u32 so when buffer overrun occurs, we can detect if the line is too big to fit in the buffer.
 	reader->bufferEnd = ~0;
 	
     // request size of buffer +1 so that the first byte of bufferEnd is overwriten.
@@ -50,7 +50,7 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 	
     // line is less than the length of the buffer:
 	if (reader->bufferEnd == ~0) {
-		for (uint16_t i = 0; i < READER_BUFFER_SIZE; ++i) {
+		for (u16 i = 0; i < READER_BUFFER_SIZE; ++i) {
 			if (reader->buffer[i] == '\0') {
 				reader->length += i;
 				return true;
@@ -78,7 +78,7 @@ int Reader_NextLine(Reader* reader) {
 #ifndef READER_LIMIT_LINE_END_DEPTH
     while (!internal_Reader_FindLineEnd(reader)) {}
 #else
-    uint64_t iteration = 0;
+    u64 iteration = 0;
     while (!internal_Reader_FindLineEnd(reader)) { if (iteration >= READER_LIMIT_LINE_END_DEPTH) return EFBIG; ++iteration; }
 #endif
     fsetpos(reader->fileDesc, &reader->fileLinePos);

@@ -28,7 +28,7 @@ typedef struct String {
 #define String_last(string, pattern) internal_String_last(&(string), pattern);
 
 #define String_clone(source, destination) destination.end = destination.start; for (char* c = (source).start; c < (source).end; ++c, ++destination.end) { *destination.end = *c; }  
-#define String_substring(source, start, end) { .start = (source).start + (u64)start, .end = (source).start + (uint64_t)end }
+#define String_substring(source, start, end) { .start = (source).start + (u64)start, .end = (source).start + (u64)end }
 #define String_clone_substring(source, destination, start, end) internal_String_clone_substring (&source, &destination, (u64)start, (u64)end)
 
 void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end);

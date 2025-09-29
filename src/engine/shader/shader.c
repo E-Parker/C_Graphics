@@ -33,7 +33,7 @@ void DereferenceShaders() {
     //
 
     // Destroy the uniform buffers.
-    for (uint64_t i = 0; i < UniformBufferTable->Size; i++) {
+    for (u64 i = 0; i < UniformBufferTable->Size; i++) {
         if (UniformBufferTable->Array[i].Value) {
             UniformBuffer_destroy((UniformBuffer**)&(UniformBufferTable->Array[i].Value));
             UniformBufferTable->Array[i].Value = NULL;  // TODO: Rewrite this!! you should not have to set this manually to avoid a double free!!!
@@ -41,7 +41,7 @@ void DereferenceShaders() {
     }
 
     // Destroy the shader programs.
-    for (uint64_t i = 0; i < ShaderProgramTable->Size; i++) {
+    for (u64 i = 0; i < ShaderProgramTable->Size; i++) {
         if (ShaderProgramTable->Array[i].Value) {
             Shader_destroy((Shader**)&(ShaderProgramTable->Array[i].Value));
             ShaderProgramTable->Array[i].Value = NULL;  // TODO: Rewrite this!! you should not have to set this manually to avoid a double free!!!
@@ -50,7 +50,7 @@ void DereferenceShaders() {
 
     // TODO: Check if this is still necessary. Textures *should* manage themselves.
     // Destroy the textures.
-    //for (uint64_t i = 0; i < TextureTable->Size; i++) {
+    //for (u64 i = 0; i < TextureTable->Size; i++) {
     //    if (TextureTable->Array[i].Value) {
     //        Texture_destroy((Texture**)&(TextureTable->Array[i].Value));
     //    }
@@ -98,7 +98,7 @@ void UniformBuffer_destroy(UniformBuffer** buffer) {
     *buffer = NULL;
 }
 
-void internal_UniformBuffer_set_region(const UniformBuffer* buffer, const uint64_t byteIndex, const uint64_t regionSizeInBytes, const void* data) {
+void internal_UniformBuffer_set_region(const UniformBuffer* buffer, const u64 byteIndex, const u64 regionSizeInBytes, const void* data) {
     glBindBuffer(GL_UNIFORM_BUFFER, buffer->BufferObject);
     glBufferSubData(GL_UNIFORM_BUFFER, byteIndex, regionSizeInBytes, data);
     glBindBuffer(GL_UNIFORM_BUFFER, GL_NONE);
@@ -218,7 +218,7 @@ Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sh
     }
 
     // Get the byte size of the type.
-    uint64_t size = size_from_gl_type(info->Type);
+    u64 size = size_from_gl_type(info->Type);
 
     // allocate enough space for the Uniform header + the space required to store it's data. 
     Uniform* newUniform = (Uniform*)malloc(sizeof(Uniform));
@@ -227,7 +227,7 @@ Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sh
         return NULL;
     }
 
-    newUniform->Data = (void*)(((uint8_t*)sharedBuffer) + info->BlockOffset);
+    newUniform->Data = (void*)(((u8*)sharedBuffer) + info->BlockOffset);
     newUniform->UniformType = UNIFORM_TYPE_SHARED;
     newUniform->Location = info->Location;
     newUniform->Alias = info->Alias;
@@ -247,7 +247,7 @@ Uniform* internal_Uniform_create(const UniformInformation* info) {
     //
     
     // Get the byte size of the type.
-    uint64_t size = size_from_gl_type(info->Type);
+    u64 size = size_from_gl_type(info->Type);
 
     // allocate enough space for the Uniform header + the space required to store it's data. 
     Uniform* newUniform = (Uniform*)malloc(sizeof(Uniform));
@@ -278,11 +278,11 @@ void internal_Uniform_set_at(Uniform* uniform, int i, void* data) {
         return;
     }
 
-    uint8_t* elementAddress;
-    uint8_t* dataAddress;
+    u8* elementAddress;
+    u8* dataAddress;
 
-    elementAddress = (uint8_t*)uniform->Data;
-    dataAddress = (uint8_t*)data + (i * uniform->Size);
+    elementAddress = (u8*)uniform->Data;
+    dataAddress = (u8*)data + (i * uniform->Size);
     memcpy(elementAddress, dataAddress, uniform->Size);
     
     //printf("Name:\t%s\tStride:\t%04X\tOffset:\t%04X\n",uniform->Alias, (int)(i * uniform->Stride), (int)uniform->Offset);
@@ -296,25 +296,25 @@ void internal_Uniform_set_data(Uniform* uniform, void* data) {
         return;
     }
 
-    uint8_t* elementAddress;
-    uint8_t* dataAddress;
+    u8* elementAddress;
+    u8* dataAddress;
 
-    for (uint32_t i = 0; i < uniform->Elements; i++) {
-        elementAddress = (uint8_t*)uniform->Data;
-        dataAddress = (uint8_t*)data + (i * uniform->Size);
+    for (u32 i = 0; i < uniform->Elements; i++) {
+        elementAddress = (u8*)uniform->Data;
+        dataAddress = (u8*)data + (i * uniform->Size);
         memcpy(elementAddress, dataAddress, uniform->Size);
     }
 }
 
-UniformStruct* internal_UniformStruct_create(char* alias, const uint16_t aliasLength, const UniformInformation* info, const uint16_t memberCount, const uint64_t elements, void* shared) {
+UniformStruct* internal_UniformStruct_create(char* alias, const u16 aliasLength, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared) {
 
-    uint64_t totalSize = 0;
-    uint64_t stride = 0;
-    uint32_t* offsets = (uint32_t*)malloc(sizeof(uint32_t) * memberCount);
+    u64 totalSize = 0;
+    u64 stride = 0;
+    u32* offsets = (u32*)malloc(sizeof(u32) * memberCount);
     assert(offsets);
 
     // for each member, get it's local offset.
-    for (uint16_t i = 0; i < memberCount; i++) {
+    for (u16 i = 0; i < memberCount; i++) {
         offsets[i] = stride;
         stride += size_from_gl_type(info[i].Type) * info[i].Elements;
         stride += 16 - (stride % 16);  // OpenGL structs are aligned to 16.
@@ -332,7 +332,7 @@ UniformStruct* internal_UniformStruct_create(char* alias, const uint16_t aliasLe
     newStruct->Elements = elements;
     newStruct->Offset = info[0].BlockOffset;
 
-    for (uint16_t i = 0; i < memberCount; i++) {
+    for (u16 i = 0; i < memberCount; i++) {
         
         // Find the smallest offset in the struct, which is the same as the offset of the struct. 
         if (info[i].BlockOffset < newStruct->Offset) newStruct->Offset = info[0].BlockOffset;
@@ -349,7 +349,7 @@ void UniformStruct_get_member(UniformStruct* uniformStruct, const char* alias, U
     HashTable_find(uniformStruct->Members, alias, outVal);
 }
 
-void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, uint64_t i, void* data) {
+void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, u64 i, void* data) {
 
     Uniform* uniform;
     HashTable_find(uniformStruct->Members, alias, &uniform);
@@ -357,11 +357,11 @@ void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias
         printf("Error UniformStruct_set_member\t: could not find Uniform in Structure \"%s\" named \"%s\"\n", uniformStruct->Alias, alias);
         return;
     }
-    uint8_t* elementAddress;
-    uint8_t* dataAddress;
+    u8* elementAddress;
+    u8* dataAddress;
 
-    elementAddress = (uint8_t*)uniformStruct->Data + (i * uniform->Stride) + uniform->Offset;
-    dataAddress = (uint8_t*)data + (i * uniform->Size);
+    elementAddress = (u8*)uniformStruct->Data + (i * uniform->Stride) + uniform->Offset;
+    dataAddress = (u8*)data + (i * uniform->Size);
     memcpy(elementAddress, dataAddress, uniform->Size);
 }
 
@@ -373,12 +373,12 @@ void UniformStruct_set_member(UniformStruct* uniformStruct, const char* alias, v
         printf("Error UniformStruct_set_member\t: could not find Uniform in Structure \"%s\" named \"%s\"\n", uniformStruct->Alias, alias);
         return;
     }
-    uint8_t* elementAddress;
-    uint8_t* dataAddress;
+    u8* elementAddress;
+    u8* dataAddress;
 
-    for (uint64_t i = 0; i < uniformStruct->Elements; i++) {
-        elementAddress = (uint8_t*)uniformStruct->Data + (i * uniform->Stride) + uniform->Offset;
-        dataAddress = (uint8_t*)data + (i * uniform->Size);
+    for (u64 i = 0; i < uniformStruct->Elements; i++) {
+        elementAddress = (u8*)uniformStruct->Data + (i * uniform->Stride) + uniform->Offset;
+        dataAddress = (u8*)data + (i * uniform->Size);
         memcpy(elementAddress, dataAddress, uniform->Size);
     }
 }
@@ -409,7 +409,7 @@ void internal_Shader_create(const GLuint program, const char* alias) {
     internal_Program_buffer_parse(program, shader->uniformBuffers);
 
     char* aliasEnd = FindBufferEnd(alias);
-    uint64_t aliasLength = aliasEnd - alias + 1;
+    u64 aliasLength = aliasEnd - alias + 1;
 
     char* shaderName = (char*)malloc(aliasLength);
     assert(shaderName != NULL);
@@ -516,7 +516,7 @@ void Shader_use(const Shader* shader) {
     
 
     // Set the active texture for each texture in the material.
-    //for (uint16_t i = 0; i < material->TexturesUsed; i++) {
+    //for (u16 i = 0; i < material->TexturesUsed; i++) {
     //    if (material->Textures[i] != nullptr) {
     //        glActiveTexture(GL_TEXTURE0 + i);
     //        glBindTexture(GL_TEXTURE_2D, material->Textures[i]->ID);
@@ -644,9 +644,9 @@ void internal_Program_buffer_parse(const GLuint program, HashTable* table) {
     }
 }
 
-static void internal_program_uniformStruct_parse(const GLuint program, const uint16_t uniformCount, GLint* indicies, UniformBuffer* uniformBuffer) {
+static void internal_program_uniformStruct_parse(const GLuint program, const u16 uniformCount, GLint* indicies, UniformBuffer* uniformBuffer) {
     
-    uint16_t ValidStructCount = 0;
+    u16 ValidStructCount = 0;
 
     GLint* blockOffsetParams = (GLint*)malloc(uniformCount * sizeof(GLint));
     assert(blockOffsetParams != NULL);
@@ -657,8 +657,8 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
     // Struct parsing variables:
     char* structName = NULL;
     char* nextStructName = NULL;
-    uint16_t structMembers = 0;
-    uint64_t structElements = 1;
+    u16 structMembers = 0;
+    u64 structElements = 1;
     char* ArrayIdent = NULL;
     char* structIdent = NULL;
     bool ArrayIsFist = false;
@@ -669,7 +669,7 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
         indicies = (GLint*)malloc(uniformCount * sizeof(GLint));
         assert(indicies);
 
-        for (uint16_t i = 0; i < uniformCount; i++) {
+        for (u16 i = 0; i < uniformCount; i++) {
             indicies[i] = i;
         }
     }
@@ -680,12 +680,12 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
 
     glGetActiveUniformsiv(program, uniformCount, indicies, GL_UNIFORM_OFFSET, blockOffsetParams);
 
-    for (uint16_t i = 0; i < uniformCount; i++) {
+    for (u16 i = 0; i < uniformCount; i++) {
 
         GLsizei length;
         GLint elements;
         GLenum type;
-        uint16_t CurrentOffset = 0;
+        u16 CurrentOffset = 0;
 
         glGetActiveUniform(program, indicies[i], MAX_ALIAS_SIZE, &length, &elements, &type, buffer);
 
@@ -694,7 +694,7 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
         structIdent = strchr(buffer, '.');
 
         char* nameEnd = ArrayIdent ? ArrayIdent : structIdent;
-        uint16_t structNameLength = ArrayIdent ? ArrayIdent - buffer + 1 : structIdent - buffer + 1;
+        u16 structNameLength = ArrayIdent ? ArrayIdent - buffer + 1 : structIdent - buffer + 1;
 
         if (!structIdent) {
             continue;
@@ -734,7 +734,7 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
         // The current member is unique. Create info for it 
             
         // this downcast is fine as long as MaxAliasSize is < 0xffff.
-        uint16_t memberNameLength = length - (structIdent - buffer);
+        u16 memberNameLength = length - (structIdent - buffer);
         char* memberName = (char*)calloc(1, memberNameLength);
         assert(memberName);
 
@@ -769,7 +769,7 @@ static void internal_program_uniformStruct_parse(const GLuint program, const uin
 }
 
 
-static void internal_Program_buffer_uniform_parse(const GLuint program, const uint16_t uniformCount, const GLint* indicies, UniformBuffer* uniformBuffer) {
+static void internal_Program_buffer_uniform_parse(const GLuint program, const u16 uniformCount, const GLint* indicies, UniformBuffer* uniformBuffer) {
 
     GLint* blockOffsetParams = (GLint*)malloc(uniformCount * sizeof(GLint));
     assert(blockOffsetParams != NULL);
@@ -779,7 +779,7 @@ static void internal_Program_buffer_uniform_parse(const GLuint program, const ui
     
     glGetActiveUniformsiv(program, uniformCount, indicies, GL_UNIFORM_OFFSET, blockOffsetParams);
 
-    for (uint16_t i = 0; i < uniformCount; i++) {
+    for (u16 i = 0; i < uniformCount; i++) {
         
         GLsizei length;
         GLint elements;
@@ -822,7 +822,7 @@ void internal_Program_uniform_parse(const GLuint program, HashTable* table) {
     //
     
     GLint uniformCount = internal_Program_uniform_count(program);
-    uint64_t validUniformCount = uniformCount;
+    u64 validUniformCount = uniformCount;
     GLsizei length;
     GLint location;
     GLint elements;

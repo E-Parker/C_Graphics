@@ -5,9 +5,9 @@
 
 #include "engine_core/renderable.h"
 
-#define PackByte_uint16(a, b) ( ((uint16_t)b << 8) | (uint16_t)a )
-#define PackByte_uint32(a, b, c, d) ( ((uint32_t)d << 24) | ((uint32_t)c << 16) | ((uint32_t)b << 8) | (uint32_t)a )
-#define PackByte_uint64(a, b, c, d, e, f, g, h) ( ((uint64_t)h << 56) | ((uint64_t)g << 48) | ((uint64_t)f << 40) | ((uint64_t)e << 32) | ((uint64_t)d << 24) | ((uint64_t)c << 16) | ((uint64_t)b << 8) | (uint64_t)a )
+#define PackByte_uint16(a, b) ( ((u16)b << 8) | (u16)a )
+#define PackByte_uint32(a, b, c, d) ( ((u32)d << 24) | ((u32)c << 16) | ((u32)b << 8) | (u32)a )
+#define PackByte_uint64(a, b, c, d, e, f, g, h) ( ((u64)h << 56) | ((u64)g << 48) | ((u64)f << 40) | ((u64)e << 32) | ((u64)d << 24) | ((u64)c << 16) | ((u64)b << 8) | (u64)a )
 
 // Supported File Formats:
 #define ObjFile 0x6F002020206A626F      // .obj     - WaveFront
@@ -56,7 +56,7 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
         return NULL;
     }
 
-    uint64_t fileExtentionPacked = 0;
+    u64 fileExtentionPacked = 0;
     String fileExtentionPackedBytes = String_from_chars(fileExtentionPacked);
     String fileExtention = String_from_ptr(ext);
         
@@ -87,7 +87,7 @@ void Object_StaticMesh_Draw(void* object) {
 }
 
 
-void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMesh, const Material* material) {
+void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, const Material* material) {
     if (!staticMesh) {
         return;
     }
@@ -98,13 +98,13 @@ void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const uint32_t subMe
         return;
     }
 
-    uint32_t materialCount = List_count(&staticMesh->materials);
+    u32 materialCount = List_count(&staticMesh->materials);
 
     if (subMesh > materialCount) {
         return;
     }
 
-    long int indexOf;
+    u64 indexOf;
     if (List_contains_item(&staticMesh->materials, material, &indexOf)) {
         mesh->materialIndex = indexOf;
     }

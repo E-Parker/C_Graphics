@@ -25,7 +25,7 @@ typedef struct ObjParser {
     List vertexList;
     List normalList;
     List tCoordList;
-    uint64_t materialCount;
+    u64 materialCount;
     FILE* file;
     char buffer[BUFFER_SIZE];
 } ObjParser;
@@ -74,12 +74,12 @@ Vector3 Vector3FromString(const std::string data) {
 }
 */
 
-int parseSplits(char* line, uint16_t segmentCount, String* segments) {
+int parseSplits(char* line, u16 segmentCount, String* segments) {
 
-    uint16_t splits = 0;
+    u16 splits = 0;
     char* currentChar = line;
 
-    for (uint16_t i = 0; i < 0xffff; ++i, ++currentChar) {
+    for (u16 i = 0; i < 0xffff; ++i, ++currentChar) {
         // Check the current character.
         switch ((int)(*currentChar)) {
         case '\0': return EARLY_EOF;// End of file reached early.
@@ -106,11 +106,11 @@ int parseSplits(char* line, uint16_t segmentCount, String* segments) {
     return -3;
 }
 
-int parseFaceIndicies(List* vi, List* ti, List* ni, uint16_t segmentCount, String* segments, uint16_t bufferSize, char* buffer) {
+int parseFaceIndicies(List* vi, List* ti, List* ni, u16 segmentCount, String* segments, u16 bufferSize, char* buffer) {
     // This function parses a wavefront file face data, adding it to the list of vertex indices, texture indicies, and normal indicies. 
     // Returns the number of vertices added. 
 
-    for (uint8_t i = 0; i < segmentCount; ++i) {
+    for (u8 i = 0; i < segmentCount; ++i) {
 
         if (String_invalid(segments[i])) {
             break;
@@ -163,9 +163,9 @@ StaticMesh* Object_StaticMesh_create_from_wave_front(const char* path, void* par
 
     StaticMesh* staticMesh = NULL;
 
-    List_initialize(uint32_t, &parser.vi, 512);
-    List_initialize(uint32_t, &parser.ni, 512);
-    List_initialize(uint32_t, &parser.ti, 512);
+    List_initialize(u32, &parser.vi, 512);
+    List_initialize(u32, &parser.ni, 512);
+    List_initialize(u32, &parser.ti, 512);
     List_initialize(vec3, &parser.vertexList, 512);
     List_initialize(vec3, &parser.normalList, 512);
     List_initialize(vec2, &parser.tCoordList, 512);
