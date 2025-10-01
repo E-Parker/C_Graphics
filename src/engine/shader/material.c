@@ -12,138 +12,93 @@
 #define MATERIAL_BUFFER_SIZE 0x100
 
 
-Material* Material_create(Shader* shader, const u32 textureCount, const GLenum cullFuncton, const GLenum depthFunction) {
-    
-    if (!shader) {
-        printf("Material Error: Shader was null!\n");
-        return NULL;
-    }
-
+Material* Material_create (const MaterialDescriptor descriptor) {
+    Shader* shader = Shader_get(descriptor.alias);
     Material* newMaterial = (Material*)malloc(sizeof(Material));
-    
-    if (!newMaterial) {
-        return NULL;
-    }
+    Engine_validate(newMaterial, ENOMEM);
 
-    newMaterial->ShaderProgram = shader;
-    newMaterial->TextureCount = textureCount;
-    newMaterial->CullFunction = cullFuncton;
-    newMaterial->DepthFunction = depthFunction;
-    
-    if(textureCount != 0) {
-        newMaterial->Textures = (Texture**)calloc(textureCount, sizeof(Texture*));
-    }
+     shader->references++;
 
+    String aliasString = String_from_ptr(descriptor.alias);
+    String_create_dirty(&aliasString, &newMaterial->ShaderAlias);
+
+    newMaterial->TextureCount = descriptor.textureCount;
+    newMaterial->CullFunction = descriptor.cullFunction;
+    newMaterial->DepthFunction = descriptor.depthFunction;
+    
+    if(newMaterial->TextureCount != 0) {
+        newMaterial->TextureAliases = (Texture**)calloc(descriptor.textureCount, sizeof(String));
+        for (u64 i = 0; i < newMaterial->TextureCount; ++i) {
+            String currentAlias = String_from_ptr(descriptor.textures[i]);
+            String_create_dirty(&currentAlias, &newMaterial->TextureAliases[i]);
+        }
+    }
     else {
-        newMaterial->Textures = NULL;
+        newMaterial->TextureAliases = NULL;
     }
-
 
     return newMaterial;
-
 }
 
 
-void Material_destroy(Material** material) {
+void Material_destroy (Material** material) {
     if (!material || !(*material)) {
         printf("Error deleting Material: Material is null!");
         return;
     }
 
+    for (u64 i = 0; i < (*material)->TextureCount; ++i) {
+        Texture* texture;
+        Texture_get_String((*material)->TextureAliases[i], &texture);
+    }
+
     if ((*material)->TextureCount != 0) {
 
         for (int i = 0; i < (*material)->TextureCount; i++) {
-            if ((*material)->Textures[i]) {
-                DeleteTexture((*material)->Textures[i]->alias);
-            }
+            Texture_delete_String((*material)->TextureAliases[i]);
+            String_free_dirty(&(*material)->TextureAliases[i]);
         }
-        free((*material)->Textures);
+        free((*material)->TextureAliases);
     }
-
-    Shader_destroy(&(*material)->ShaderProgram);
+    
+    Shader_delete_String((*material)->ShaderAlias);
+    String_free_dirty(&(*material)->ShaderAlias);
 
     free(*material);
     (*material) = NULL;
 }
 
 
-void SetTextureFromPointer(const Material* material, Texture* texture, u32 index){
-    /* Manually set a texture from a texture pointer. AVOID USING!!!
-    The textures set this way will be UNAMANGED and must be freed MANUALLY. */
-
-    if (!material) {
-        printf("Error setting Material Texture: Material is null.\n");
-        return;
-    }
-    
-    if (index >= material->TextureCount) {
-        printf("Warning: Material Texture index out of range. Discarding texture.\n");
-        return;
-    }
-
-    if (!texture) {
-        printf("Error setting Material Texture: Texture must not be null.\n");
-        return;
-    }
-
-    // If a texture already exists in that slot, try to delete it.
-    if (material->Textures[index]) {
-        DeleteTexture(material->Textures[index]->alias);
-    }
-
-    material->Textures[index] = texture;
-    texture->references++;
-}
-
-void SetTextureFromAlias(const Material* material, const char* alias, u32 index) {
-    /* Set a material's texture at the given index, by the texture's alias. */
-
-    if (!material) {
-        printf("Error setting Material Texture: Material is null.\n");
-        return;
-    }
-
-    if (index >= material->TextureCount) {
-        printf("Warning: Material Texture index out of range. Discarding texture.\n");
-        return;
-    }
-
-    Texture* texture = NULL;
-    FindTexture(alias, &texture);
-
-    if (!texture) {
-        printf("Error setting Material Texture: \"%s\" At index: %d. The texture could not be found.\n", alias, index);
-        return;
-    }
-
-    // If a texture already exists in that slot, try to delete it.
-    if (material->Textures[index]) {
-        DeleteTexture(material->Textures[index]->alias);
-    }
-
-    material->Textures[index] = texture;
-    texture->references++;
-}
-
-
-void BindMaterial(const Material* material){
+Shader* Material_bind (const Material* material) {
     /* Set up the material for rendering. */
 
     if (!material) {
         return;
     }
 
+    Shader* shader = Shader_get_String(material->ShaderAlias);
+
+    if (!shader) {
+        return NULL;
+    }
+
     // Set the shader program and get the uniform from the shader.
-    glUseProgram(material->ShaderProgram->program);
+    glUseProgram(shader->program);
     glCullFace(material->CullFunction);
     glDepthFunc(material->DepthFunction);
 
     // Set the active texture for each texture in the material.
     for (u32 i = 0; i < material->TextureCount; i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-        if (material->Textures[i]) {
-            glBindTexture(material->Textures[i]->type, material->Textures[i]->ID);
+        Texture* texture;
+        Texture_get_String(material->TextureAliases[i], &texture);
+        if (texture) {
+            glBindTexture(texture->Type, texture->ID);
+        }
+        else {
+            printf("Missing Texture at index %u\n",i);
         }
     }
+    return shader;
 }
 

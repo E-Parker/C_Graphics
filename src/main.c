@@ -18,30 +18,66 @@ int main(void) {
 
     
     // Initialize the window to the starting size and set the header.
-    if (!Engine_initialize(320, 200, "Delta Render"));
+    if (!Engine_initialize(640, 400, "Delta Render"));
     InitShaders();
     InitTextures();
 
     // Add termination functions to be executed at the end of the program.
     //Engine_add_termination_function(DereferenceFonts);
-    Engine_add_termination_function(DereferenceTextures);
     Engine_add_termination_function(DereferenceShaders);
-
-    // Load Missing Textures:
-    CreateTexture("./assets/defaultAssets/defaultTexture.png", "defaultTexture", GL_RGBA, false, false, false, GL_LINEAR);
-    CreateTexture("./assets/defaultAssets/test.png", "testTexture", GL_RGBA, false, false, false, GL_LINEAR);
-    CreateTexture("./assets/defaultAssets/missingTexture.png", "MissingTexture", GL_RGBA, false, false, false, GL_NEAREST);
-    CreateTexture("./assets/defaultAssets/missingNormal.png", "missingNormal", GL_RGB, false, false, false, GL_LINEAR);
+    Engine_add_termination_function(DereferenceTextures);
 
     // Load Textures:
-    CreateTexture("./assets/textures/Mushroom.png", "mushroomBody", GL_RGBA, false, false, false, GL_LINEAR);
-    CreateTexture("./assets/textures/MushroomGlow.png", "mushroomGlow", GL_RGB, false, false, false, GL_LINEAR);
-    CreateTexture("./assets/defaultAssets/missingSpecular.png", "Specular", GL_RGB, false, false, false, GL_LINEAR);
+    Texture_create("defaultTexture", (TextureDescriptor) { 
+        .textureType = GL_TEXTURE_2D, 
+        .filterType = GL_NEAREST, 
+        .format = GL_RGBA,
+        .paths = (char* []){ "./assets/defaultAssets/defaultTexture.png", }
+    });
+    
+    Texture_create("missingTexture", (TextureDescriptor) {
+        .textureType = GL_TEXTURE_2D,
+            .filterType = GL_NEAREST,
+            .format = GL_RGBA,
+            .paths = (char* []){ "./assets/defaultAssets/missingTexture.png", }
+    });
 
+    Texture_create("Specular", (TextureDescriptor) {
+        .textureType = GL_TEXTURE_2D,
+        .filterType = GL_LINEAR,
+        .format = GL_RGB,
+        .paths = (char* []){ "./assets/defaultAssets/missingSpecular.png", }
+    });
+
+    Texture_create("missingNormal", (TextureDescriptor) {
+        .textureType = GL_TEXTURE_2D,
+        .filterType = GL_LINEAR,
+        .format = GL_RGB,
+        .paths = (char* []){ "./assets/defaultAssets/missingNormal.png", }
+    });
+
+    Texture_create("WaterNormal", (TextureDescriptor) {
+        .textureType = GL_TEXTURE_2D,
+            .filterType = GL_LINEAR,
+            .format = GL_RGB,
+            .paths = (char* []){ "./assets/textures/WaterNormal.png", }
+    });
+
+    Texture_create("MushroomBody", (TextureDescriptor) {
+        .textureType = GL_TEXTURE_2D,
+            .filterType = GL_LINEAR,
+            .format = GL_RGBA,
+            .paths = (char* []){ "./assets/textures/Mushroom.png", }
+    });
 
     // Create shaders:
+    Shader_create("NormalShader",
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
+    );
+
     Shader_create("DefaultShader",
-        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER}, 
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER},
         { .path = "./assets/shaders/default.frag", .type = GL_FRAGMENT_SHADER }
     );
 
@@ -49,38 +85,34 @@ int main(void) {
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/dithered_alpha.frag", .type = GL_FRAGMENT_SHADER }
     );
-
+    
     Shader_create("TCoordShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/tcoord_color.frag", .type = GL_FRAGMENT_SHADER }
     );
 
-    Shader_create("NormalShader",
-        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
-        { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
-    );
-
     // Create Materials:
-    Material* Mat0 = Material_create(Shader_get("DefaultShader"), 4, GL_BACK, GL_LESS);
-    Material* Mat1 = Material_create(Shader_get("DefaultShader"), 4, GL_BACK, GL_LESS);
-    Material* Dither = Material_create(Shader_get("DitherShader"), 1, GL_BACK, GL_LESS);
-    Material* TCoords = Material_create(Shader_get("TCoordShader"), 0, GL_BACK, GL_LESS);
-    Material* Normals = Material_create(Shader_get("NormalShader"), 0, GL_BACK, GL_LESS);
+    Material* Mat0 = Material_create((MaterialDescriptor) { .alias = "DefaultShader",
+        .cullFunction = GL_BACK,
+        .depthFunction = GL_LESS,
+        .textureCount = 4,
+        .textures = (char* []){ "missingTexture", "Specular", "WaterNormal", "Specular", }
+    });
 
-    // Set Material Textures:
-    SetTextureFromAlias(Mat0, "Specular", 0);
-    SetTextureFromAlias(Mat0, "defaultTexture", 1);
-    SetTextureFromAlias(Mat0, "missingNormal", 2);
-    SetTextureFromAlias(Mat0, "Specular", 3);
+    Material* Mat1 = Material_create((MaterialDescriptor) {
+        .alias = "DefaultShader",
+            .cullFunction = GL_BACK,
+            .depthFunction = GL_LESS,
+            .textureCount = 4,
+            .textures = (char* []){ "MushroomBody", "Specular", "missingNormal", "Specular", }
+    });
 
-    SetTextureFromAlias(Mat1, "mushroomBody", 0);
-    SetTextureFromAlias(Mat1, "mushroomGlow", 1);
-    SetTextureFromAlias(Mat1, "missingNormal", 2);
-    SetTextureFromAlias(Mat1, "Specular", 3);
-
-    SetTextureFromAlias(Dither, "mushroomBody", 0);
-
-
+    Material* Normals = Material_create((MaterialDescriptor) {
+        .alias = "NormalShader",
+        .cullFunction = GL_BACK,
+        .depthFunction = GL_LESS,
+    });
+    
     Camera* mainCamera = Object_Camera_create();
     StaticMesh* groundMesh = Object_StaticMesh_create("./assets/meshes/ground.bin", NULL);
     StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
@@ -93,10 +125,10 @@ int main(void) {
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
 
     Object_StaticMesh_set_Material(mesh0, 0, Mat1);
-    Object_StaticMesh_set_Material(mesh1, 0, Normals);
-    Object_StaticMesh_set_Material(mesh2, 0, TCoords);
-    Object_StaticMesh_set_Material(mesh3, 0, Dither);
-    Object_StaticMesh_set_Material(lightVis, 0, Mat0);
+    Object_StaticMesh_set_Material(mesh1, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh2, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh3, 0, Mat1);
+    Object_StaticMesh_set_Material(lightVis, 0, Normals);
     Object_StaticMesh_set_Material(groundMesh, 0, Mat0);
     
     vec3 mesh0Translate = { 1.0f, 0.0f, 1.0f };
@@ -122,20 +154,24 @@ int main(void) {
 
     vec3 lightPos = { 0.0f, 2.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
-    vec3 lightColor = { 2.0f, 2.0f, 2.0f };
-    vec3 AmbientColor = { 0.2f, 0.2f, 0.2f };
+    vec3 lightColor = { 1.0f, 1.0f, 1.0f };
+    vec3 AmbientColor = { 0.5f, 0.5f, 0.5f };
     float lightRadius = 25.0f;
     
+    vec3 lightPos2 = { 0.0f, 1.0f, 0.0f };
+    vec3 lightDir2 = { 1.0f, 0.0f, 0.0f };
+    vec3 lightColor2 = { 1.0f, 1.0f, 1.0f };
+    float lightRadius2 = 50.0f;
+
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
-
     UniformBuffer_set_Global("LightData", "u_activeLights", &activeLights);
     UniformBuffer_set_Global("LightData", "u_ambientColor", &AmbientColor);
 
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 0, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos2);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 0, &lightDir2);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 0, &lightColor);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 0, &lightRadius);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 0, &lightRadius2);
 
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
     UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 1, &lightDir);
@@ -162,7 +198,7 @@ int main(void) {
         mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
         mat4_inverse(lightVis->Transform, lightVis->Transform);
 
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos);
+        //UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
 
         mainCamera->Tick(mainCamera, DeltaTime());
 
@@ -174,8 +210,18 @@ int main(void) {
  
         GLfloat time = Time();
 
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, lightPos);
-        UniformBuffer_set_Global    ("FrameData", "u_time", &time);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos2);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 0, &lightDir2);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 0, &lightColor2);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 0, &lightRadius2);
+
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 1, &lightDir);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
+
+        //UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, lightPos);
+        UniformBuffer_set_Global("FrameData", "u_time", &time);
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
@@ -201,12 +247,13 @@ int main(void) {
     lightVis->Destroy(lightVis);
 
     Material_destroy(&Mat0); 
-    Material_destroy(&Mat1); 
-    Material_destroy(&Dither);
+    //Material_destroy(&Mat1); 
+    //Material_destroy(&Dither);
     Material_destroy(&Normals);
-    Material_destroy(&TCoords);
+    //Material_destroy(&TCoords);
     
     Engine_terminate();
+
     return 0;
 }
 

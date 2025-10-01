@@ -57,9 +57,8 @@ StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* paren
 
     staticMesh = Object_StaticMesh_create_empty(parent);
     MeshRender mesh = { .materialIndex = 0 };
+    UploadMesh(&mesh, indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, indexSize, vertexSize);
     List_push_back(&staticMesh->meshRenders, mesh);
-
-    UploadMesh((MeshRender*)List_at(&staticMesh->meshRenders, 0), indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, indexSize, vertexSize);
 
 DestroyBuffersAndReturnMesh:
     free(indexBuffer);

@@ -4,6 +4,52 @@
 #include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 
+#define USE_CSTR_REDUNDANCY
+
+void String_create_dirty(String* source, String* destination) {
+
+    if (!source->end || !source->start) {
+        return;
+    }
+
+#ifdef USE_CSTR_REDUNDANCY
+    destination->start = (char*)calloc(String_length(*source) + 1, sizeof(char));
+#else
+    destination->start = (char*)malloc(String_length(*source));
+#endif
+    String_clone(*source, *destination);
+    --destination->end;
+}
+
+void String_free_dirty(String* str) {
+    if (!str->start) return;
+    free(str->start);
+    str->start = NULL;
+    str->end = NULL;
+}
+
+#include "stdio.h"
+
+bool internal_String_equal(String* left, String* right) {
+    if (!left || !right) {
+        return false;
+    }
+
+    if (String_length(*left) != String_length(*right)) {
+        return false;
+    }
+    
+    char* l = left->start;
+    char* r = right->start;
+
+    for (; l < left->end; ++l, ++r) {
+        if ((*l - *r)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end) {
     assert(start < end);
@@ -40,11 +86,14 @@ void String_clone_to_String (String* source, String* destination) {
 }
 
 
-void internal_String_clone_to_buffer (String* string, char* destination) {
-    for (char* src = string->start; src <= string->end; ++src, ++destination) {
-        *destination = *src;
+void internal_String_clone_to_chars (String* string, char* destination) {
+    char* dst = destination;
+    char* src = string->start;
+    for (; src <= string->end; ++src, ++dst) {
+        *dst = *src;
     }
-    *++destination = '\0';
+    ++dst;
+    *dst = '\0';
 }
 
 char* internal_String_first (String* string, char pattern) {

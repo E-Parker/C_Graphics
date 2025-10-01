@@ -120,7 +120,7 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, u16 segmentCount, String* se
             return SEGMENT_TOO_LARGE;
         }
 
-        String_clone_to_buffer(segments[i], *buffer);
+        String_clone_to_chars(segments[i], *buffer);
 
 
 

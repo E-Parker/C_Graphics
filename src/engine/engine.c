@@ -94,6 +94,10 @@ void internal_Engine_clear_mouse_data () {
 }
 
 bool Engine_initialize(const int width, const int height, const char* tittle) {
+
+    Engine_validate(sizeof(char) == 1, -1);
+
+
     if (!glfwInit()) {
         goto InitFail;
     }
@@ -284,4 +288,14 @@ void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsign
     case GL_DEBUG_SEVERITY_NOTIFICATION: printf("Severity: notification");
     } 
     printf("\n"); 
+}
+
+void Engine_exit_forced(int errorcode) {
+    exit(errorcode);
+}
+
+void internal_Engine_validate(bool check, int errorcode) {
+    if (check) {
+        Engine_exit_forced(errorcode);
+    }
 }

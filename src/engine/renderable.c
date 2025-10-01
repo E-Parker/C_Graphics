@@ -138,14 +138,19 @@ void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray
 
 }
 
+#include "stdio.h"
 
 void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform) {
     // Bind the material's shader program and textures.
 
-    BindMaterial(material);
+    Shader* shader = Material_bind(material);
+
+    if (!shader) {
+        return;
+    }
 
     // Get the uniform from the shader.
-    GLint u_mvp = glGetUniformLocation(material->ShaderProgram->program, "u_mvp");
+    GLint u_mvp = glGetUniformLocation(shader->program, "u_mvp");
 
     // Bind the VAO and draw the elements.
     glBindVertexArray(mesh->VertexAttributeObject);
@@ -154,5 +159,4 @@ void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4
 
     // unbind the VAO.
     glBindVertexArray(GL_NONE);
-
 }

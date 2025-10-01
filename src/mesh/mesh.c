@@ -62,7 +62,7 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
     String fileExtentionPackedBytes = String_from_chars(fileExtentionPacked);
     String fileExtention = String_from_ptr(ext);
         
-    String_clone_substring(fileExtention, fileExtentionPackedBytes, 0, String_length(fileExtention) - 1);
+    String_clone_substring(fileExtention, fileExtentionPackedBytes, 0, String_length(fileExtention));
     String_as_lower(fileExtentionPackedBytes);
     
     switch (fileExtentionPacked) {

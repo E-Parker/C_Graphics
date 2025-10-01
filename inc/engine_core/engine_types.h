@@ -3,6 +3,7 @@
 
 // TODO: FIX THIS MORONIC BS! Fucking horrible idea to include this here but it should fix issues with missing malloc and free definitions.
 #include "stdlib.h"
+#include "errno.h"
 
 //#define ENGINE_USE_STDDEF
 
@@ -53,3 +54,13 @@ typedef void	(*Function_Void_TwoParam)	(void*, void*);
 typedef void	(*Function_Void_ThreeParam) (void*, void*, void*);
 typedef void	(*Function_Void_FourParam)  (void*, void*, void*, void*);
 
+// Similar to assert(value) function. Forces the engine to exit with an error code. 
+// See errno.h for generic codes, and engine_error.h for engine specific errors.
+#define Engine_validate(check, errorcode) internal_Engine_validate((!(check))? true : false, errorcode);
+extern void internal_Engine_validate(bool check, int errorcode);
+
+// Attempt graceful shutdown of the engine.
+extern void Engine_exit(int errorcode);
+
+// Forcefully exit the program. use in cases where memory allocation fails, or where a safe exit isn't possible.
+extern void Engine_exit_forced(int errorcode);

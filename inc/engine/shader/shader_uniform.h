@@ -9,20 +9,19 @@ typedef struct HashTable HashTable;
 #define Uniform_alias_end(uniform) (uniform->Alias + uniform->AliasLength + 1)
 
 // using #define here to keep it the same as OpenGL.
-#define UNIFORM_TYPE_GENERIC 0x0001
-#define UNIFORM_TYPE_SINGLE 0x0002
-#define UNIFORM_TYPE_SHARED 0x0003
-#define UNIFORM_TYPE_STRUCT 0x0004
-#define UNIFORM_TYPE_BUFFER 0x0005
-#define UNIFORM_TYPE_SAMPLER 0x0006
+#define UNIFORM_TYPE_GENERIC 1
+#define UNIFORM_TYPE_SINGLE 2
+#define UNIFORM_TYPE_SHARED 3
+#define UNIFORM_TYPE_STRUCT 4
+#define UNIFORM_TYPE_BUFFER 5
+#define UNIFORM_TYPE_SAMPLER 6
 
 typedef struct UniformGeneric {
     // Template body for any uniform type
     #define UNIFORM_BODY()\
-    char* Alias;\
-    u16 AliasLength;\
-    u16 UniformType;\
+    String Alias;\
     GLint Location;\
+    u8 UniformType;\
     
     UNIFORM_BODY()
 
@@ -73,7 +72,7 @@ typedef struct UniformStruct {
     void* Data;
 } UniformStruct;
 
-UniformStruct* internal_UniformStruct_create(char* alias, const u16 aliasLength, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared);
+UniformStruct* internal_UniformStruct_create(String alias, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared);
 
 void UniformStruct_get_member(UniformStruct* uniformStruct, const char* alias, Uniform** outVal);
 void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, u64 i, void* data);
@@ -93,9 +92,10 @@ typedef struct UniformBuffer {
     u32 ChangesMade;
     HashTable* Uniforms;
     HashTable* UniformStructs;
+    u8* buffer;
 } UniformBuffer;
 
-void UniformBuffer_destroy(UniformBuffer** buffer);
+void UniformBuffer_deinitialize(UniformBuffer* buffer);
 void internal_UniformBuffer_set_region(const UniformBuffer* buffer, const u64 byteIndex, const u64 regionSizeInBytes, const void* data);
 void internal_UniformBuffer_set_all(const UniformBuffer* buffer, const void* data);
 void internal_UniformBuffer_set(UniformBuffer* buffer, const char* alias, void* data);
@@ -105,12 +105,11 @@ void UniformBuffer_get_Uniform(const UniformBuffer* buffer, const char* alias, U
 void UniformBuffer_get_Struct(const UniformBuffer* buffer, const char* alias, UniformStruct** outVal);
 
 void internal_UniformBuffer_set_Struct(UniformBuffer* buffer, const char* alias, const char* memberAlias, void* data);
-void internal_UniformBuffer_set_Struct_at(UniformBuffer* buffer, const char* alias, const char* memberAlias, int i, void* data);
+void internal_UniformBuffer_set_Struct_at(UniformBuffer* buffer, const char* alias, const char* memberAlias, u64 i, void* data);
 
 UniformBuffer* UniformBuffer_get_self(const char* alias);
 void UniformBuffer_update_all();
 
-#define UniformBuffer_get_shared(buffer) ((void*)((u8*)buffer + sizeof(UniformBuffer)))
 #define UniformBuffer_set(buffer, alias, Value) (internal_UniformBuffer_set(buffer, alias, (void*)Value))
 #define UniformBuffer_set_Global(bufferAlias, alias, Value) (UniformBuffer_set(UniformBuffer_get_self(bufferAlias), alias, Value))
 #define UniformBuffer_set_Struct_Global(bufferAlias, structAlias, memberAlias, Value) (internal_UniformBuffer_set_Struct(UniformBuffer_get_self(bufferAlias), structAlias, memberAlias, Value))

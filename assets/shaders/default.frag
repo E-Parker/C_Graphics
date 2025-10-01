@@ -73,10 +73,10 @@ vec3 vec3_CubeLerp(vec3 v0, vec3 v1, vec3 t) {
     return vec3_Lerp(v0, v1, vec3_Lerp(t1, t2, t));
 }
 
-vec3 point_light(Light light, vec3 texNormal, float ambientFactor, float diffuseFactor, float specularPower, vec3 ambientColor) {
-    vec3 lighting = phong(v_position, light.position, light.color, texNormal, ambientFactor, diffuseFactor, specularPower);
-    float attenuation = clamp(light.attenuation / length(light.position - v_position), 0.0, 1.0);
-    lighting = vec3_Lerp(ambientColor, lighting, attenuation.xxx);
+vec4 point_light(Light light, vec3 texNormal, float ambientFactor, float diffuseFactor, float specularPower) {
+    vec4 lighting = vec4(phong(v_position, light.position, light.color, texNormal, ambientFactor, diffuseFactor, specularPower).xyz, 0.0);
+    float attenuation = 1.0 - clamp(light.attenuation / length(light.position - v_position), 0.0, 1.0);
+    lighting = vec4(lighting.xyz, attenuation);
     return lighting;
 }
 
@@ -92,11 +92,14 @@ void main() {
         discard;
     }
 
+    vec4 lightingCalc = vec4(0.0);
     vec3 lighting = vec3(0.0);
 
     for(int i = 0; i < u_activeLights && i < 128; i++) {
-        lighting += point_light(u_Lights[i], textureNormal, 0.2, 0.8, textureSpecular, u_ambientColor);
+        lightingCalc += point_light(u_Lights[i], textureNormal, 0.2, 0.8, textureSpecular);
     }
+
+    lighting = vec3_Lerp(lightingCalc.xyz, u_ambientColor, lightingCalc.www);
 
     //vec4 finalLighting;
     //finalLighting = textureEmissive.xyzx;// vec4(vec3_CubeLerp(lighting, textureEmissive * textureEmissive * textureEmissive, textureEmissive), 1.0);

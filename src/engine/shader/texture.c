@@ -13,52 +13,97 @@
 HashTable TextureTable;
 
 
-#define internal_Texture_create(texture, gl_type, filter_type)\
-texture = (Texture*)calloc(1, sizeof(Texture));\
-if(!texture) return NULL;\
-texture->ID = GL_NONE;\
-texture->type = gl_type;\
-texture->filterType = filter_type;\
-
-
-bool FindTexture(const char* alias, Texture** outValue) {
-    return HashTable_find(&TextureTable, alias, outValue);
+bool Texture_get(const char* alias, Texture** outVal) {
+    return HashTable_find_reference(&TextureTable, (String) String_from_ptr(alias), outVal);
 }
 
+bool Texture_get_String(String alias, Texture** outVal) {
+    return HashTable_find_reference(&TextureTable, alias, outVal);
+}
+
+
 void InitTextures() {
+    stbi_set_flip_vertically_on_load(true); // For some reason, if you flip the order, it corrupts TextureTable. EVIL. BAD. BAD FUNCTION. 
     HashTable_initialize(Texture, &TextureTable, 512);
 }
 
-void InternalUploadTexture(Texture* texture, u8* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
-    
-    if (texture->ID == GL_NONE) {
-        glGenTextures(1, &(texture->ID));
+void DereferenceTextures() {
+    // Call this function at the end of your program to ensure all tracked textures are properly cleaned up.
+    for (HashTable_array_iterator(&TextureTable)) {
+        Texture* texture = HashTable_array_at(Texture, &TextureTable, i);
+        if (texture->ID != GL_NONE) {
+            glDeleteTextures(1, &(texture->ID));
+        }
     }
-
-    glBindTexture(texture->type, texture->ID);
-    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(texture->ID, GL_TEXTURE_MIN_FILTER, texture->filterType);
-    glTextureParameteri(texture->ID, GL_TEXTURE_MAG_FILTER, texture->filterType);
-    glTexImage2D(uploadType, 0, internalFormat, texture->width, texture->height, 0, format, GL_UNSIGNED_BYTE, data);
+    HashTable_deinitialize(&TextureTable);
 }
 
-void InternalUploadTextureMimmap(Texture* texture, u8* data, GLenum internalFormat, GLenum format, GLenum uploadType) {
-    
-    if (texture->ID == GL_NONE) {
-        glGenTextures(1, &texture->ID);
+
+void internal_Texture_extend_alias(const char* alias, String* out) {
+    String aliasAsString = String_from_ptr(alias);
+    u64 aliasLength = String_length(aliasAsString);
+    char* extendedAliasBuffer = (char*)calloc(aliasLength + 65, 1);
+    Engine_validate(extendedAliasBuffer, ENOMEM);
+    String_clone_to_ptr(aliasAsString, extendedAliasBuffer);
+
+    aliasAsString.start = extendedAliasBuffer;
+    aliasAsString.end = extendedAliasBuffer + aliasLength;
+    char* extendedAlias = extendedAliasBuffer + aliasLength;
+
+    Texture texture;
+    Texture* textureptr = &texture;
+    u64 count = 0;
+    while (HashTable_find(&TextureTable, aliasAsString, texture)) {
+        count++;
+        sprintf(extendedAlias, "(%u)\0", count);
+        aliasAsString.end = FindBufferEnd(aliasAsString.start) - 1;
     }
 
-    glBindTexture(texture->type, texture->ID);
-    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTextureParameteri(texture->ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTextureParameteri(texture->ID, GL_TEXTURE_MAG_FILTER, texture->filterType);
-    glTexImage2D(uploadType, 0, internalFormat, texture->width, texture->height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(texture->type);
+    out->start = aliasAsString.start;
+    out->end = aliasAsString.end;
 }
 
-void InternalDeleteTexture(Texture* texture) {
+void Texture_create(const char* alias, const TextureDescriptor descriptor) {
+    // If only one texture is specified, no need to specify a path count. This way, if you forget at least something will happen.
+    u64 pathCount = descriptor.pathCount;
+    if (!pathCount && descriptor.paths) {
+        pathCount = 1;
+    }
+
+    // Create and upload the textures.
+    int width, height, channels;
+    Texture texture = { .Type = descriptor.textureType, .ID = GL_NONE, .references = 0 };
+    String aliasString;
+    internal_Texture_extend_alias(alias, &aliasString);
+
+    for (u64 i = 0; i < pathCount; ++i) {
+        void* data = stbi_load(descriptor.paths[i], &width, &height, &channels, 0);
+
+        if (!data) {
+            String_free_dirty(&aliasString);
+            return;
+        }
+
+        Internal_Texture_upload(&texture, descriptor, width, height, channels, pathCount, data);
+        stbi_image_free(data);
+    }
+    HashTable_insert(&TextureTable, aliasString, &texture);
+    String_free_dirty(&aliasString);
+}
+
+
+void Texture_delete(const char* alias) {
+    Texture_delete_String((String) String_from_ptr(alias));
+}
+
+void Texture_delete_String(String alias) {
+    Texture* texture;
+
+    if (!HashTable_find_reference(&TextureTable, alias, &texture)) {
+        printf("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias.start);
+        return;
+    }
+
     if (texture->references > 1) {
         texture->references--;
         return;
@@ -67,163 +112,52 @@ void InternalDeleteTexture(Texture* texture) {
     if (texture->ID != GL_NONE) {
         glDeleteTextures(1, &(texture->ID));
     }
+
     texture->ID = GL_NONE;
-    HashTable_remove(&TextureTable, texture->alias);
-
+    HashTable_remove(&TextureTable, alias);
 }
 
 
-void InternalCreateTexture(Texture* texture, const bool isManaged, const char* alias, const GLenum internalFormat, const GLenum format, u8* data, bool useMipmap) {
-    /* Internal function for creating managed textures. */
-
-    if (useMipmap) {
-        InternalUploadTextureMimmap(texture, data, internalFormat, format, GL_TEXTURE_2D);
+void Internal_Texture_upload (Texture* texture, const TextureDescriptor descriptor, int width, int height, int channels, u64 pathCount, void* data) {
+    switch (descriptor.textureType) {
+        case GL_TEXTURE_BUFFER: return;
+        case GL_TEXTURE_RECTANGLE: return;
+        case GL_TEXTURE_2D_MULTISAMPLE: return;
+        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: return;
+        case GL_TEXTURE_3D: return;
     }
-    else {
-        InternalUploadTexture(texture, data, internalFormat, format, GL_TEXTURE_2D);
+
+    if (texture->ID == GL_NONE) {
+        glGenTextures(pathCount, &(texture->ID));
     }
 
-    texture->alias = HashTable_insert(&TextureTable, alias, texture);
+    glBindTexture(descriptor.textureType, texture->ID);
+    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_S, descriptor.wrapHorizontalType ? descriptor.wrapHorizontalType : GL_REPEAT);
+    glTextureParameteri(texture->ID, GL_TEXTURE_WRAP_T, descriptor.wrapVerticalType ? descriptor.wrapVerticalType : GL_REPEAT);
+    glTextureParameteri(texture->ID, GL_TEXTURE_MIN_FILTER, descriptor.filterType ? descriptor.filterType : GL_LINEAR);
+    glTextureParameteri(texture->ID, GL_TEXTURE_MAG_FILTER, descriptor.filterType ? descriptor.filterType : GL_LINEAR);
     
-    texture->references++;
+    GLint externalFormat = GL_RGB;
+    switch (channels) {
+        case 1: externalFormat = GL_RED; break;
+        case 2: externalFormat = GL_RG; break;
+        case 3: externalFormat = GL_RGB; break;
+        case 4: externalFormat = GL_RGBA; break;
+    }
+
+    switch (descriptor.textureType) {
+        case GL_TEXTURE_1D:             glTexImage1D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+        case GL_TEXTURE_1D_ARRAY:       glTexImage1D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+        case GL_TEXTURE_2D:             glTexImage2D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+        case GL_TEXTURE_2D_ARRAY:       glTexImage2D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+        case GL_TEXTURE_CUBE_MAP:       glTexImage2D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+        case GL_TEXTURE_CUBE_MAP_ARRAY: glTexImage2D(descriptor.textureType, descriptor.mipLevel, descriptor.format, width, height, 0, externalFormat, GL_UNSIGNED_BYTE, data); break;
+    }
+
+
+    if (descriptor.filterType == GL_NEAREST_MIPMAP_LINEAR || descriptor.filterType == GL_NEAREST_MIPMAP_NEAREST) {
+        glGenerateMipmap(descriptor.textureType);
+    }
 
 }
 
-
-void CreateRawTexture(const char* path, Texture* texture, GLenum internalFormat, GLenum format, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType) {
-    /* This function creates a new, unmanaged texture from the file path and the alias. if the texture already exists in memory, the returned value will be that one. */
-
-    texture->filterType = filterType;
-
-    stbi_set_flip_vertically_on_load(true);
-    u8* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
-
-    if (!data) {
-        printf("Error creating raw Texture from: \" %s \". The texture will be discarded.\n", path);
-        return;
-    }
-
-    // Create the managed texture and upload the texture to the GPU.
-    InternalCreateTexture(texture, true, path, internalFormat, format, data, useMipmaps);
-
-    // Free the data generated by stb_image.
-    stbi_image_free(data);
-
-}
-
-Texture* CreateTexture(const char* path, const char* alias, GLenum internalFormat, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType) {
-    /* This function creates a new texture from the file path and the alias. if the texture already exists in memory, the returned value will be that one.
-    This will hopefully save delectably scrumptious graphics memory mmmhh. If an alias is not provided, the texture will use it's path as an alias. */
-
-    char* aliasUsed;
-    Texture* texture = NULL;
-
-    // If the alias is empty, use the path instead.
-    if (!strcmp(alias, "")) { aliasUsed = (char*)path; }
-    else { aliasUsed = (char*)alias; }
-
-    // try to find the texture in the table.
-    HashTable_find(&TextureTable, aliasUsed, &texture);
-
-    // if it is found in the table, return it instead of making a new one.
-    if (texture) {
-        return texture;
-    }
-
-    internal_Texture_create(texture, GL_TEXTURE_2D, filterType);
-
-    stbi_set_flip_vertically_on_load(true);
-    u8* data = stbi_load(path, &texture->width, &texture->height, &texture->channels, 0);
-
-    if (!data) {
-        printf("Error creating Texture: \"%s\" From: \"%s\". The Texture will be discarded.\n", aliasUsed, path);
-        return NULL;
-    }
-
-    GLenum format = GL_NONE;
-
-    switch (texture->channels) {
-        case 1: format = GL_RED; break;
-        case 2: format = GL_RG; break;
-        case 3: format = GL_RGB; break;
-        case 4: format = GL_RGBA; break;
-    }
-
-    // Create the managed texture and upload the texture to the GPU.
-    InternalCreateTexture(texture, false, aliasUsed, internalFormat, format, data, useMipmaps);
-
-    // Free the data generated by stb_image.
-    stbi_image_free(data);
-
-    return texture;
-}
-
-
-Texture* CreateCubemapTexture(const char* texturePaths[6], const char* alias, GLenum internalFormat, bool flipVertical, bool flipHorizontal, bool useMipmaps, int filterType) {
-
-    Texture* texture = NULL;
-    HashTable_find(&TextureTable, alias, &texture);
-
-    // if the texture doesn't already exist, make a new one, and return that instead.
-    if (texture) {
-        return texture;
-    }
-    
-    internal_Texture_create(texture, GL_TEXTURE_CUBE_MAP, filterType);
-
-    for (u8 i = 0; i < 6; i++) {
-
-        stbi_set_flip_vertically_on_load(true);
-        u8* data = stbi_load(texturePaths[i], &texture->width, &texture->height, &texture->channels, 0);
-        
-        if (!data) {
-            printf("Error creating Cube Map Texture: \"%s\" At index, %d, From: \"%s\". The texture will be discarded.\n", alias, i, texturePaths[i]);
-            return NULL;
-        }
-
-        GLenum format = GL_NONE;
-
-        switch (texture->channels) {
-            case 1: format = GL_RED; break;
-            case 2: format = GL_RG; break;
-            case 3: format = GL_RGB; break;
-            case 4: format = GL_RGBA; break;
-        }
-
-        InternalUploadTexture(texture, data, internalFormat, format, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
-        stbi_image_free(data);
-    }
-
-    return texture;
-}
-
-
-void DeleteTexture(const char* alias) {
-   // delete a texture from the table. The texture will be deleted from graphics memory if it isn't referenced anywhere else.
-
-    if (!alias) return;
-
-    Texture* texture = NULL;
-
-    HashTable_find(&TextureTable, alias, &texture);
-
-    if (!texture) {
-        printf("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias);
-        return;
-    }
-
-    InternalDeleteTexture(texture);
-}
-
-
-void DereferenceTextures() {
-    // Call this function at the end of your program to ensure all tracked textures are properly cleaned up.
-
-    for (HashTable_array_iterator(&TextureTable)) {
-        Texture* texture = HashTable_array_at(Texture, &TextureTable, i);
-        texture->references = 0;
-        InternalDeleteTexture(texture);
-    }
-
-    HashTable_deinitialize(&TextureTable);
-}

@@ -71,4 +71,7 @@ void APIENTRY internal_Engine_scroll_callback (GLFWwindow* window, double xoffse
 void APIENTRY internal_Engine_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods);
 void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
 
+void Engine_exit_forced(int errorcode);
+void internal_Engine_validate(bool check, int errorcode);
+
 // TODO: implement error handling.
