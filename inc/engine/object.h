@@ -32,11 +32,11 @@ typedef struct Object {
     //  
     #define OBJECT_BODY() \
     char Alias[OBJECT_ALIAS_SIZE];          /* <----- These will be the same for any object.                        */ \
-    union {u8 Type;                    /*     _- Only use the lower 8 bits, the first 8 represent type.        */ \
-    u32 Flags;} Data;                  /* <--+-- General purpose bit flags. useful for keeping object state.   */ \
+    union {u8 Type;                         /*     _- Only use the lower 8 bits, the first 8 represent type.        */ \
+    u32 Flags;} Data;                       /* <--+-- General purpose bit flags. useful for keeping object state.   */ \
     mat4 Transform;                         /* <----- 4 * 4 matrix, represents the position & rotation.             */ \
     List Children;                          /* <----- list of child objects.                                        */ \
-    u64 internal_IndexOf;              /* <----- Index of the object in it's parent's children list.           */ \
+    u64 internal_IndexOf;                   /* <----- Index of the object in it's parent's children list.           */ \
     Object* Parent;                         /* <----- pointer to the parent node. If NULL, assumed to be a root.    */ \
     Function_Tick Tick;                     /* <----- function to update the object.                                */ \
     Function_Void_OneParam Draw;            /* <----- function to draw the object.                                  */ \

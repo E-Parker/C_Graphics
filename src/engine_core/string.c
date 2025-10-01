@@ -18,7 +18,6 @@ void String_create_dirty(String* source, String* destination) {
     destination->start = (char*)malloc(String_length(*source));
 #endif
     String_clone(*source, *destination);
-    --destination->end;
 }
 
 void String_free_dirty(String* str) {

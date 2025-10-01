@@ -15,7 +15,6 @@
 
 
 int main(void) {
-
     
     // Initialize the window to the starting size and set the header.
     if (!Engine_initialize(640, 400, "Delta Render"));
@@ -150,7 +149,7 @@ int main(void) {
     mat4_multiply(scale, mesh2->Transform, mesh2->Transform);
     mat4_multiply(scale, mesh3->Transform, mesh3->Transform);
 
-    GLint activeLights = 2;
+    GLint activeLights = 5;
 
     vec3 lightPos = { 0.0f, 2.0f, 0.0f };
     vec3 lightDir = { 1.0f, 0.0f, 0.0f };
@@ -158,28 +157,50 @@ int main(void) {
     vec3 AmbientColor = { 0.5f, 0.5f, 0.5f };
     float lightRadius = 25.0f;
     
-    vec3 lightPos2 = { 0.0f, 1.0f, 0.0f };
-    vec3 lightDir2 = { 1.0f, 0.0f, 0.0f };
-    vec3 lightColor2 = { 1.0f, 1.0f, 1.0f };
-    float lightRadius2 = 50.0f;
+    vec3 lightPos1 = { 2.0f, 2.0f, 0.0f };
+    vec3 lightColor1 = { 1.0f, 0.0f, 0.0f };
+
+    vec3 lightPos4 = { 0.0f, 1.0f, 0.0f };
+    vec3 lightColor4 = { 1.0f, 1.0f, 1.0f };
+    float lightRadius4 = 50.0f;
+
+    vec3 lightPos2 = { -2.0f, 2.0f, 0.0f };
+    vec3 lightColor2 = { 0.0f, 1.0f, 0.0f };
+
+    vec3 lightPos3 = { 0.0f, 2.0f, 2.0f };
+    vec3 lightColor3 = { 0.0f, 0.0f, 1.0f };
 
     Engine_set_ambient_color(AmbientColor[0], AmbientColor[1], AmbientColor[2]);
     
     UniformBuffer_set_Global("LightData", "u_activeLights", &activeLights);
     UniformBuffer_set_Global("LightData", "u_ambientColor", &AmbientColor);
 
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos2);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 0, &lightDir2);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 0, &lightColor);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 0, &lightRadius2);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     0, &lightPos4);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    0, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        0, &lightColor);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  0, &lightRadius4);
 
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 1, &lightDir);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
-    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     1, &lightPos);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    1, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        1, &lightColor);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  1, &lightRadius);
+
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     2, &lightPos1);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    2, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        2, &lightColor1);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  2, &lightRadius);
+
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     3, &lightPos2);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    3, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        3, &lightColor2);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  3, &lightRadius);
+
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     4, &lightPos3);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    4, &lightDir);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        4, &lightColor3);
+    UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  4, &lightRadius);
 
     UniformBuffer_update_all();
-
 
     bool captureCursor = true;
     SetCaptureCursor(captureCursor);
@@ -210,15 +231,15 @@ int main(void) {
  
         GLfloat time = Time();
 
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 0, &lightPos2);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 0, &lightDir2);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 0, &lightColor2);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 0, &lightRadius2);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     0, &lightPos4);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    0, &lightDir);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        0, &lightColor4);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  0, &lightRadius4);
 
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction", 1, &lightDir);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color", 1, &lightColor);
-        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation", 1, &lightRadius);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     1, &lightPos);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    1, &lightDir);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        1, &lightColor);
+        UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  1, &lightRadius);
 
         //UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, lightPos);
         UniformBuffer_set_Global("FrameData", "u_time", &time);

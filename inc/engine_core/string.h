@@ -36,13 +36,13 @@ void String_free_dirty(String* str);
 #define String_invalid(string) (!(string).start || !(string).end || (string).start == (string).end)
 
 #define String_length(string) ((u64)((string).end - (string).start))
-#define String_as_lower(string) for (char* c = (string).start; c <= (string).end; ++c) { *c = char_as_lower(*c); }
-#define String_as_upper(string) for (char* c = (string).start; c <= (string).end; ++c) { *c = char_as_upper(*c); }
+#define String_as_lower(string) for (char* c = (string).start; c < (string).end; ++c) { *c = char_as_lower(*c); }
+#define String_as_upper(string) for (char* c = (string).start; c < (string).end; ++c) { *c = char_as_upper(*c); }
 
 #define String_first(string, pattern) internal_String_first(&(string), pattern);
 #define String_last(string, pattern) internal_String_last(&(string), pattern);
 
-#define String_clone(source, destination) (destination).end = (destination).start; for (char* c = (source).start; c <= (source).end; ++c, ++(destination).end) { *((destination).end) = *c; }  
+#define String_clone(source, destination) (destination).end = (destination).start; for (char* c = (source).start; c < (source).end; ++c, ++(destination).end) { *((destination).end) = *c; }  
 #define String_substring(source, start, end) { .start = (source).start + (u64)start, .end = (source).start + (u64)end }
 #define String_clone_substring(source, destination, start, end) internal_String_clone_substring (&source, &destination, (u64)start, (u64)end)
 

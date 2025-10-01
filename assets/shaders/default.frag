@@ -104,5 +104,8 @@ void main() {
     //vec4 finalLighting;
     //finalLighting = textureEmissive.xyzx;// vec4(vec3_CubeLerp(lighting, textureEmissive * textureEmissive * textureEmissive, textureEmissive), 1.0);
     
-    FragColor = textureAlbedo * vec4(lighting, 1.0);
+    vec4 fragColor = textureAlbedo * vec4(lighting, 1.0);
+    
+    float gamma = 2.2;
+    FragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }
