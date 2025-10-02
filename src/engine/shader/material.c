@@ -27,7 +27,7 @@ Material* Material_create (const MaterialDescriptor descriptor) {
     newMaterial->DepthFunction = descriptor.depthFunction;
     
     if(newMaterial->TextureCount != 0) {
-        newMaterial->TextureAliases = (Texture**)calloc(descriptor.textureCount, sizeof(String));
+        newMaterial->TextureAliases = (String*)calloc(descriptor.textureCount, sizeof(String));
         for (u64 i = 0; i < newMaterial->TextureCount; ++i) {
             String currentAlias = String_from_ptr(descriptor.textures[i]);
             String_create_dirty(&currentAlias, &newMaterial->TextureAliases[i]);
@@ -73,7 +73,7 @@ Shader* Material_bind (const Material* material) {
     /* Set up the material for rendering. */
 
     if (!material) {
-        return;
+        return NULL;
     }
 
     Shader* shader = Shader_get_String(material->ShaderAlias);
