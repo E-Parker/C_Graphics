@@ -41,6 +41,8 @@ void internal_ReadShaderProgramSource(const char* path) {
     u64 bufferSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
+    printf("size: %u\n", bufferSize);
+
     // Return early if the buffer isn't big enough to fit the file.
     if (bufferSize >= GL_SHADER_SOURCE_BUFFER_SIZE) {
         printf("Shader load error: source file \"%s\" was too large to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_BUFFER_SIZE);
@@ -48,12 +50,20 @@ void internal_ReadShaderProgramSource(const char* path) {
         return;
     }
 
-    memset(&srcBuffer, '\0', GL_SHADER_SOURCE_BUFFER_SIZE);
-    fread((char*)&srcBuffer, 1, bufferSize, file);
+    // Clear the buffer, and read to it 256 bytes at a time. fread breaks otherwise, especially with files larger than 4kb.
+    memset(srcBuffer, '\0', GL_SHADER_SOURCE_BUFFER_SIZE);
+    char* buffer = (char*)srcBuffer;
+
+    for (u64 i = 0; i < bufferSize; i += GL_BUFFER_READ_STEP, buffer += GL_BUFFER_READ_STEP) {
+        fread(buffer, 1, GL_BUFFER_READ_STEP, file);
+        fflush(file);
+    }
+
+   
     int errorCode = ferror(file);
     fclose(file);
     
-    
+
 
     // Return the error if there was an stdio error reading the file.
     if (errorCode) {
@@ -154,7 +164,7 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     int s_success;
 
     int dummyLength;
-    char log[GL_ERROR_LOG_SIZE] = {'\0'};
+    char log[GL_ERROR_LOG_SIZE] = {'\0',};
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     
     // No errors, delete all the temp shaders and return the program. 

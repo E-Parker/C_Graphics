@@ -3,10 +3,11 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#define GL_SHADER_MAX_DESCRIPTORS 0x40 
-#define GL_ERROR_LOG_SIZE 0x1000
-#define GL_SHADER_PATH_SIZE 0x80 
+#define GL_SHADER_MAX_DESCRIPTORS 0x200 
+#define GL_ERROR_LOG_SIZE 0x400
+#define GL_SHADER_PATH_SIZE 0x100 
 #define GL_SHADER_SOURCE_BUFFER_SIZE 0x8000
+#define GL_BUFFER_READ_STEP 0x100
 
 typedef struct ShaderDescriptor {
     const char* path;

@@ -249,7 +249,6 @@ int main(void) {
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
         UniformBuffer_set_Global("FrameData", "u_resolution", res);
         UniformBuffer_set_Global("FrameData", "u_time", &time);
-
         UniformBuffer_update_all();
 
         groundMesh->Draw(groundMesh);

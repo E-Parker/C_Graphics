@@ -39,8 +39,8 @@ void main() {
 	//vec3 rand_v3 = hash32(seed);
 	//float poly_rand = rand_v3.r * rand_v3.g;// * rand_v3.b;
     
-    int x = int(mod(gl_FragCoord.x, 8.0));
-	int y = int(mod(gl_FragCoord.y, 8.0));
+    int x = int(mod(gl_FragCoord.x + (v_time * 2.0), 8.0));
+	int y = int(mod(gl_FragCoord.y + (v_time * 2.0), 8.0));
 
 	float limit = (float(dither_table[x + y * 8]) + 1) / 64.0;
 	if(clipDepth < limit || color.a < limit) {
