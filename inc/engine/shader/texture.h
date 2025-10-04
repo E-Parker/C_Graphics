@@ -8,7 +8,7 @@ typedef struct Texture {
     // Struct to hold graphics data for a texture. Avoid using this manually since the system cannot track it.
     GLuint  ID;
     GLenum  Type;
-    u64     references;    
+    u64     references;
 } Texture;
 
 typedef struct TextureDescriptor {

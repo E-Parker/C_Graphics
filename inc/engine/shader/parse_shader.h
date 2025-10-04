@@ -6,7 +6,7 @@
 #define GL_SHADER_MAX_DESCRIPTORS 0x40 
 #define GL_ERROR_LOG_SIZE 0x1000
 #define GL_SHADER_PATH_SIZE 0x80 
-#define GL_SHADER_SOURCE_BUFFER_SIZE 0x4000
+#define GL_SHADER_SOURCE_BUFFER_SIZE 0x8000
 
 typedef struct ShaderDescriptor {
     const char* path;

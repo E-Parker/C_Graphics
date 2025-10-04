@@ -14,6 +14,11 @@
 
 Material* Material_create (const MaterialDescriptor descriptor) {
     Shader* shader = Shader_get(descriptor.alias);
+
+    if (!shader) {
+        return NULL;
+    }
+
     Material* newMaterial = (Material*)malloc(sizeof(Material));
     Engine_validate(newMaterial, ENOMEM);
 
@@ -89,7 +94,8 @@ Shader* Material_bind (const Material* material) {
 
     // Set the active texture for each texture in the material.
     for (u32 i = 0; i < material->TextureCount; i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
+        //TODO: Rework shader handling because this is bad. We don't know ahead of time what the binding index is, there might be data that isn't textures at the start.
+        glActiveTexture(i + GL_TEXTURE0);
         Texture* texture;
         Texture_get_String(material->TextureAliases[i], &texture);
         if (texture) {

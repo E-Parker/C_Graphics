@@ -8,19 +8,19 @@ typedef struct Texture Texture;
 typedef struct Shader Shader;
 
 typedef struct Material {
+    u64         TextureCount;
     String*     TextureAliases;
     String      ShaderAlias;
-    u64         TextureCount;
     GLenum      CullFunction;
     GLenum      DepthFunction;
 } Material;
 
 typedef struct MaterialDescriptor {
-    GLenum      cullFunction;
-    GLenum      depthFunction;
-    u64         textureCount;
-    char*       alias;
-    char**      textures;
+    GLenum  cullFunction;
+    GLenum  depthFunction;
+    u64     textureCount;
+    char*   alias;
+    char**  textures;
 } MaterialDescriptor;
 
 Material* Material_create (const MaterialDescriptor descriptor);

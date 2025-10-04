@@ -399,7 +399,7 @@ void* List_at(const List* list, const u32 index) {
 }
 
 
-void List_remove_at(List* list, const u32 index) {
+void List_remove_at(List* list, const u64 index) {
     // Remove item from a specific index.
     //
     //
@@ -412,7 +412,7 @@ void List_remove_at(List* list, const u32 index) {
     void* currentIndex = List_at(list, index);
     void* nextIndex = NULL;
 
-    for (u32 i = index; i < list->capacity - 1; i++) {
+    for (u64 i = index; i < list->capacity - 1; i++) {
         nextIndex = List_at(list, i + 1);                               // Get the address of the next item.
         internal_list_copy(currentIndex, nextIndex, list->itemSize);    // Using internal_list_copy here since we don't know the type stored, only how many bytes it is. 
         currentIndex = nextIndex;

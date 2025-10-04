@@ -7,15 +7,20 @@ struct Light {
     float attenuation;    // 4    48
 };
 
+layout(binding = 0) uniform sampler2D albedo;
+layout(binding = 1) uniform sampler2D emissive;
+layout(binding = 2) uniform sampler2D normal;
+layout(binding = 3) uniform sampler2D specular;
 
-layout (std140, binding = 0) uniform FrameData {
+layout (std140, binding = 4) uniform FrameData {
     mat4 u_view;
     vec3 u_position;
     vec3 u_direction;
+    vec2 u_resolution;
     float u_time;
 };
 
-layout (std140, binding = 1) uniform LightData {
+layout (std140, binding = 5) uniform LightData {
     int u_activeLights;
     vec3 u_ambientColor;
     Light u_Lights[128];
@@ -25,10 +30,6 @@ in vec3 v_position;
 in vec3 v_normal;
 in vec2 v_tcoord;
 
-uniform sampler2D albedo;
-uniform sampler2D emissive;
-uniform sampler2D normal;
-uniform sampler2D specular;
 
 out vec4 FragColor;
 
@@ -81,9 +82,8 @@ vec4 point_light(Light light, vec3 texNormal, float ambientFactor, float diffuse
 }
 
 void main() {
-
     vec4 textureAlbedo = texture(albedo, v_tcoord);
-    vec3 textureNormal = texture(normal, v_tcoord).rgb * 0.5 + 0.5;
+    vec3 textureNormal = texture(normal, v_tcoord).rgb;
     vec3 textureEmissive = texture(emissive, v_tcoord).rgb;
     float textureSpecular = texture(specular, v_tcoord).r;
     float textureMetallic = texture(specular, v_tcoord).g;
@@ -100,12 +100,6 @@ void main() {
     }
 
     lighting = vec3_Lerp(lightingCalc.xyz, u_ambientColor, lightingCalc.www);
-
-    //vec4 finalLighting;
-    //finalLighting = textureEmissive.xyzx;// vec4(vec3_CubeLerp(lighting, textureEmissive * textureEmissive * textureEmissive, textureEmissive), 1.0);
-    
-    vec4 fragColor = textureAlbedo * vec4(lighting, 1.0);
-    
-    float gamma = 2.2;
-    FragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
+    vec4 finalLighting = vec4(vec3_CubeLerp(lighting, textureEmissive * textureEmissive * textureEmissive, textureEmissive), 1.0);    
+    FragColor = textureAlbedo * finalLighting;
 }

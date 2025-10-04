@@ -397,7 +397,6 @@ void mat4_transpose (const mat4 m, mat4 out) {
         m[2], m[6], m[10], m[14],
         m[3], m[7], m[11], m[15]
     };
-
     mat4_copy(result, out);
 }
 

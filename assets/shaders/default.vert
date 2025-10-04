@@ -11,10 +11,11 @@ struct Light {
   float attenuation;    // 4    48
 };
 
-layout (std140, binding = 0) uniform FrameData {
+layout (std140, binding = 4) uniform FrameData {
     mat4 u_view;
     vec3 u_position;
     vec3 u_direction;
+    vec2 u_resolution;
     float u_time;
 };
 
@@ -23,6 +24,7 @@ uniform mat4 u_mvp;
 out vec3 v_position;
 out vec3 v_normal;    
 out vec2 v_tcoord;
+out vec2 v_resolution;
 out float v_time;
 
 void main() {
@@ -30,5 +32,6 @@ void main() {
   v_normal = aNormal;
   v_tcoord = aTcoord;
   v_time = u_time;
+  v_resolution = u_resolution;
   gl_Position = u_view * u_mvp * vec4(aPosition, 1.0);
 }

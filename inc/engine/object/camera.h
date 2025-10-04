@@ -8,7 +8,6 @@ typedef struct Camera {
     mat4 ViewMatrix;
     quaternion Rotation;
     vec3 Velocity;
-
     double DragCoefficient;
     double MoveSpeed;
     double Fov;
@@ -17,7 +16,6 @@ typedef struct Camera {
     double Sensitivity;
 
 } Camera;
-
 
 Camera* Object_Camera_create();
 void Object_Camera_destroy(void* camera);

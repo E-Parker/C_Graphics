@@ -394,6 +394,11 @@ void UniformStruct_set_member(UniformStruct* uniformStruct, const char* alias, v
 
 
 void internal_Shader_create(const GLuint program, const char* alias) {
+    
+    if (program == GL_NONE) {
+        return;
+    }
+    
     String shaderAlias = String_from_ptr(alias);
     Shader shader;
     Shader* shaderReference;

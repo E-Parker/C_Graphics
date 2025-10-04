@@ -42,7 +42,7 @@ void internal_ReadShaderProgramSource(const char* path) {
     fseek(file, 0, SEEK_SET);
 
     // Return early if the buffer isn't big enough to fit the file.
-    if (bufferSize > GL_SHADER_SOURCE_BUFFER_SIZE) {
+    if (bufferSize >= GL_SHADER_SOURCE_BUFFER_SIZE) {
         printf("Shader load error: source file \"%s\" was too large to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_BUFFER_SIZE);
         fclose(file);
         return;

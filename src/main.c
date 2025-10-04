@@ -31,14 +31,14 @@ int main(void) {
         .textureType = GL_TEXTURE_2D, 
         .filterType = GL_NEAREST, 
         .format = GL_RGBA,
-        .paths = (char* []){ "./assets/defaultAssets/defaultTexture.png", }
+        .paths = (char* []){ "./assets/defaultAssets/nullTexture.png", }
     });
     
     Texture_create("missingTexture", (TextureDescriptor) {
         .textureType = GL_TEXTURE_2D,
-            .filterType = GL_NEAREST,
-            .format = GL_RGBA,
-            .paths = (char* []){ "./assets/defaultAssets/missingTexture.png", }
+        .filterType = GL_NEAREST,
+        .format = GL_RGBA,
+        .paths = (char* []){ "./assets/defaultAssets/missingTexture.png", }
     });
 
     Texture_create("Specular", (TextureDescriptor) {
@@ -57,16 +57,16 @@ int main(void) {
 
     Texture_create("WaterNormal", (TextureDescriptor) {
         .textureType = GL_TEXTURE_2D,
-            .filterType = GL_LINEAR,
-            .format = GL_RGB,
-            .paths = (char* []){ "./assets/textures/WaterNormal.png", }
+        .filterType = GL_LINEAR,
+        .format = GL_RGB,
+        .paths = (char* []){ "./assets/textures/WaterNormal.png", }
     });
 
     Texture_create("MushroomBody", (TextureDescriptor) {
         .textureType = GL_TEXTURE_2D,
-            .filterType = GL_LINEAR,
-            .format = GL_RGBA,
-            .paths = (char* []){ "./assets/textures/Mushroom.png", }
+        .filterType = GL_LINEAR,
+        .format = GL_RGBA,
+        .paths = (char* []){ "./assets/textures/Mushroom.png", }
     });
 
     // Create shaders:
@@ -77,7 +77,7 @@ int main(void) {
 
     Shader_create("DefaultShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER},
-        { .path = "./assets/shaders/default.frag", .type = GL_FRAGMENT_SHADER }
+        { .path = "./assets/shaders/default_dithered.frag", .type = GL_FRAGMENT_SHADER }
     );
 
     Shader_create("DitherShader",
@@ -89,27 +89,29 @@ int main(void) {
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/tcoord_color.frag", .type = GL_FRAGMENT_SHADER }
     );
-
+    
     // Create Materials:
     Material* Mat0 = Material_create((MaterialDescriptor) { .alias = "DefaultShader",
         .cullFunction = GL_BACK,
         .depthFunction = GL_LESS,
         .textureCount = 4,
-        .textures = (char* []){ "missingTexture", "Specular", "WaterNormal", "Specular", }
+        .textures = (char* []){ "missingTexture", "defaultTexture", "WaterNormal", "Specular", }
     });
 
     Material* Mat1 = Material_create((MaterialDescriptor) {
         .alias = "DefaultShader",
-            .cullFunction = GL_BACK,
-            .depthFunction = GL_LESS,
-            .textureCount = 4,
-            .textures = (char* []){ "MushroomBody", "Specular", "missingNormal", "Specular", }
-    });
-
-    Material* Normals = Material_create((MaterialDescriptor) {
-        .alias = "NormalShader",
         .cullFunction = GL_BACK,
         .depthFunction = GL_LESS,
+        .textureCount = 4,
+        .textures = (char* []){ "MushroomBody", "Specular", "missingNormal", "Specular", }
+    });
+
+    Material* Dither = Material_create((MaterialDescriptor) {
+        .alias = "DitherShader",
+        .cullFunction = GL_BACK,
+        .depthFunction = GL_LESS,
+        .textureCount = 1,
+        .textures = (char* []) { "MushroomBody", }
     });
     
     Camera* mainCamera = Object_Camera_create();
@@ -123,11 +125,11 @@ int main(void) {
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
 
-    Object_StaticMesh_set_Material(mesh0, 0, Mat1);
+    Object_StaticMesh_set_Material(mesh0, 0, Dither);
     Object_StaticMesh_set_Material(mesh1, 0, Mat1);
     Object_StaticMesh_set_Material(mesh2, 0, Mat1);
     Object_StaticMesh_set_Material(mesh3, 0, Mat1);
-    Object_StaticMesh_set_Material(lightVis, 0, Normals);
+    Object_StaticMesh_set_Material(lightVis, 0, Mat0);
     Object_StaticMesh_set_Material(groundMesh, 0, Mat0);
     
     vec3 mesh0Translate = { 1.0f, 0.0f, 1.0f };
@@ -212,9 +214,9 @@ int main(void) {
             SetCaptureCursor(captureCursor);
         }
 
-        lightPos[0] = sinf(Time() * 1.3f) * 2.0f;
-        lightPos[1] = (sinf(Time() * 0.7f) * 0.2f) + 1.0f;
-        lightPos[2] = cosf(Time() * 1.3f) * 2.0f;
+        lightPos[0] = sinf((float)Time() * 1.3f) * 2.0f;
+        lightPos[1] = (sinf((float)Time() * 0.7f) * 0.2f) + 1.0f;
+        lightPos[2] = cosf((float)Time() * 1.3f) * 2.0f;
 
         mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
         mat4_inverse(lightVis->Transform, lightVis->Transform);
@@ -229,7 +231,8 @@ int main(void) {
         mat4_get_translation(mainCamera->Transform, cameraPos);
         vec3_rotate(cameraDir, mainCamera->Rotation, cameraDir);
  
-        GLfloat time = Time();
+        GLfloat time = (GLfloat)Time();
+        vec2 res = { (float)WindowWidth(), (float)WindowHeight() };
 
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     0, &lightPos4);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    0, &lightDir);
@@ -241,11 +244,11 @@ int main(void) {
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        1, &lightColor);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  1, &lightRadius);
 
-        //UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, lightPos);
-        UniformBuffer_set_Global("FrameData", "u_time", &time);
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
+        UniformBuffer_set_Global("FrameData", "u_resolution", res);
+        UniformBuffer_set_Global("FrameData", "u_time", &time);
 
         UniformBuffer_update_all();
 
@@ -268,9 +271,9 @@ int main(void) {
     lightVis->Destroy(lightVis);
 
     Material_destroy(&Mat0); 
-    //Material_destroy(&Mat1); 
-    //Material_destroy(&Dither);
-    Material_destroy(&Normals);
+    Material_destroy(&Mat1); 
+    Material_destroy(&Dither);
+    //Material_destroy(&Normals);
     //Material_destroy(&TCoords);
     
     Engine_terminate();

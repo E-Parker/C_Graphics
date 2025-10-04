@@ -126,6 +126,7 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, u16 segmentCount, String* se
 
 
     }
+    return 0;
 }
 
 int ParseLine (ObjParser* parser) {
