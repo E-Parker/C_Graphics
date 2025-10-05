@@ -96,7 +96,7 @@ u8 Object_Camera_update_noclip(void* object, const double deltaTime) {
     }
 
     vec3_normalize(movement);
-    vec3_scale(movement, camera->MoveSpeed * deltaTime);
+    vec3_scale(movement, (float)(camera->MoveSpeed * deltaTime));
 
     quaternion rotation = vec4_def_copy(camera->Rotation);
     

@@ -27,7 +27,7 @@ void InitTextures() {
     HashTable_initialize(Texture, &TextureTable, 512);
 }
 
-void DereferenceTextures() {
+ecode DereferenceTextures() {
     // Call this function at the end of your program to ensure all tracked textures are properly cleaned up.
     for (HashTable_array_iterator(&TextureTable)) {
         Texture* texture = HashTable_array_at(Texture, &TextureTable, i);
@@ -36,6 +36,7 @@ void DereferenceTextures() {
         }
     }
     HashTable_deinitialize(&TextureTable);
+    return 0;
 }
 
 
@@ -55,7 +56,7 @@ void internal_Texture_extend_alias(const char* alias, String* out) {
     u64 count = 0;
     while (HashTable_find(&TextureTable, aliasAsString, texture)) {
         count++;
-        sprintf(extendedAlias, "(%u)\0", count);
+        sprintf(extendedAlias, "(%llu)\0", count);
         aliasAsString.end = FindBufferEnd(aliasAsString.start) - 1;
     }
 
@@ -65,7 +66,7 @@ void internal_Texture_extend_alias(const char* alias, String* out) {
 
 void Texture_create(const char* alias, const TextureDescriptor descriptor) {
     // If only one texture is specified, no need to specify a path count. This way, if you forget at least something will happen.
-    u64 pathCount = descriptor.pathCount;
+    u32 pathCount = descriptor.pathCount;
     if (!pathCount && descriptor.paths) {
         pathCount = 1;
     }
@@ -118,7 +119,7 @@ void Texture_delete_String(String alias) {
 }
 
 
-void Internal_Texture_upload (Texture* texture, const TextureDescriptor descriptor, int width, int height, int channels, u64 pathCount, void* data) {
+void Internal_Texture_upload (Texture* texture, const TextureDescriptor descriptor, int width, int height, int channels, u32 pathCount, void* data) {
     switch (descriptor.textureType) {
         case GL_TEXTURE_BUFFER: return;
         case GL_TEXTURE_RECTANGLE: return;

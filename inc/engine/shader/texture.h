@@ -20,20 +20,20 @@ typedef struct TextureDescriptor {
     GLenum format;
     GLenum wrapHorizontalType;
     GLenum wrapVerticalType;
-    u64 pathCount;
+    u32 pathCount;
     char** paths;
 } TextureDescriptor;
 
 
-void InitTextures ();
-void DereferenceTextures ();
+void    InitTextures ();
+ecode   DereferenceTextures ();
 
-void Texture_create(const char* alias, const TextureDescriptor descriptor);
-void Texture_delete(const char* alias);
-void Texture_delete_String(String alias);
+void    Texture_create(const char* alias, const TextureDescriptor descriptor);
+void    Texture_delete(const char* alias);
+void    Texture_delete_String(String alias);
 
-void internal_Texture_extend_alias (const char* alias, String* out);
-void Internal_Texture_upload (Texture* texture, const TextureDescriptor descriptor, int width, int height, int channels, u64 pathCount, void* data);
+void    internal_Texture_extend_alias (const char* alias, String* out);
+void    Internal_Texture_upload (Texture* texture, const TextureDescriptor descriptor, int width, int height, int channels, u32 pathCount, void* data);
 
-bool Texture_get(const char* alias, Texture** outVal);
-bool Texture_get_String(String alias, Texture** outVal);
+bool    Texture_get(const char* alias, Texture** outVal);
+bool    Texture_get_String(String alias, Texture** outVal);

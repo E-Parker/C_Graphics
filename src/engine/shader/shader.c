@@ -27,7 +27,7 @@ void InitShaders() {
     // TextureTable = HashTable_create(Texture, 512);
 }
 
-void DereferenceShaders() {
+ecode DereferenceShaders() {
     // Function to de-reference all shaders and shader objects. 
     // After this is called, all functions will fail until InitShaders() is called again.
     //
@@ -59,7 +59,7 @@ void DereferenceShaders() {
     // Now destroy the tables which store them. 
     HashTable_destroy(&UniformBufferTable);
     HashTable_destroy(&ShaderProgramTable);
-
+    return 0;
 }
 
 void UniformBuffer_deinitialize(UniformBuffer* buffer) {
@@ -275,7 +275,7 @@ Uniform* internal_Uniform_create(const UniformInformation* info) {
     return newUniform;
 }
 
-void internal_Uniform_set_at(Uniform* uniform, int i, void* data) {
+void internal_Uniform_set_at(Uniform* uniform, u32 i, void* data) {
     // set the value of a particular index in a uniform.
 
     if (i < 0 || i >= uniform->Elements) {
@@ -283,11 +283,8 @@ void internal_Uniform_set_at(Uniform* uniform, int i, void* data) {
         return;
     }
 
-    u8* elementAddress;
-    u8* dataAddress;
-
-    elementAddress = (u8*)uniform->Data;
-    dataAddress = (u8*)data + (i * uniform->Size);
+    u8* elementAddress = (u8*)uniform->Data;
+    u8* dataAddress = (u8*)data + (i * uniform->Size);
     memcpy(elementAddress, dataAddress, uniform->Size);
     
     //printf("Name:\t%s\tStride:\t%04X\tOffset:\t%04X\n",uniform->Alias, (int)(i * uniform->Stride), (int)uniform->Offset);
@@ -301,8 +298,8 @@ void internal_Uniform_set_data(Uniform* uniform, void* data) {
         return;
     }
 
-    u8* elementAddress;
-    u8* dataAddress;
+    u8* elementAddress = NULL;
+    u8* dataAddress = NULL;
 
     for (u32 i = 0; i < uniform->Elements; i++) {
         elementAddress = (u8*)uniform->Data;
@@ -367,8 +364,8 @@ void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias
         printf("Error UniformStruct_set_member\t: could not find Uniform in Structure \"%s\" named \"%s\"\n", uniformStruct->Alias.start, alias);
         return;
     }
-    u8* elementAddress;
-    u8* dataAddress;
+    u8* elementAddress = NULL;
+    u8* dataAddress = NULL;
 
     elementAddress = (u8*)uniformStruct->Data + (i * uniform->Stride) + uniform->Offset;
     memcpy(elementAddress, data, uniform->Size);

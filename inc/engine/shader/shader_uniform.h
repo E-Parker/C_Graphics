@@ -54,7 +54,7 @@ Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sh
 Uniform* internal_Uniform_create(const UniformInformation* info);
 
 void internal_Uniform_set_data(Uniform* uniform, void* data);
-void internal_Uniform_set_at(Uniform* uniform, int i, void* data);
+void internal_Uniform_set_at(Uniform* uniform, u32 i, void* data);
 
 #define Uniform_exec_if_type(UniformType, ...) ( if((Uniform*)uniform->UniformType == UniformType){ __VA_ARGS__ })
 #define internal_Uniform_get_data(T, uniform) ((T*)((Uniform*)uniform->Data))

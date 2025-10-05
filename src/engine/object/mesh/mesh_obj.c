@@ -131,8 +131,8 @@ int parseFaceIndicies(List* vi, List* ti, List* ni, u16 segmentCount, String* se
 
 int ParseLine (ObjParser* parser) {
 
-    String segments[SEGMENT_COUNT];
-    char buffer[BUFFER_SIZE];
+    String segments[SEGMENT_COUNT] = { {NULL, NULL}, };
+    char buffer[BUFFER_SIZE] = { '\0', };
 
     int errorcode = parseSplits(parser->buffer, SEGMENT_COUNT, (String*)&segments);
 

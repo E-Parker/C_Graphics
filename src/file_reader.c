@@ -18,7 +18,7 @@ int Reader_Deinitialize(Reader* reader) {
 
 
 char internal_Reader_at(Reader* reader, u64 index) {
-	u32 blockContainingIndex = index / READER_BUFFER_SIZE;
+	u64 blockContainingIndex = index / READER_BUFFER_SIZE;
 	
     // if the block containing the character we're after is before the current position, 
 	// we need to reset to the start of the line.
@@ -27,11 +27,11 @@ char internal_Reader_at(Reader* reader, u64 index) {
 		reader->currentBlock = 0;
 	}
 
-	u32 blocksToContaining = blockContainingIndex - reader->currentBlock;
+	u64 blocksToContaining = blockContainingIndex - reader->currentBlock;
 	u16 blockIndex = index % READER_BUFFER_SIZE;
 
 	// request blocks until we're in the correct block.
-	for (u32 i = 0; i < blocksToContaining; ++i) {
+	for (u64 i = 0; i < blocksToContaining; ++i) {
 		fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);
 	}
 
@@ -45,7 +45,7 @@ bool internal_Reader_FindLineEnd(Reader* reader) {
 	// Set buffer end to max u32 so when buffer overrun occurs, we can detect if the line is too big to fit in the buffer.
 	reader->bufferEnd = ~0;
 	
-    // request size of buffer +1 so that the first byte of bufferEnd is overwriten.
+    // request size of buffer +1 so that the first byte of bufferEnd is overwritten.
     fgets(internal_Reader_buffer(reader), READER_BUFFER_SIZE + 1, reader->fileDesc);	
 	
     // line is less than the length of the buffer:

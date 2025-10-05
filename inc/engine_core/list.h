@@ -86,6 +86,8 @@ void internal_List_set(List* list, void* template, const u32 count);
 
 void* List_create_array(List* list);
 
+List* List_create_subset(List* list, const u32 start, const u32 end);
+
 u32 List_count(const List* list);
 u32 List_byte_count(const List* list);
 bool List_contains_item(const List* list, void* item, u64* out);
@@ -109,7 +111,7 @@ List* internal_List_create(const u32 ItemSize, const u32 Capacity) {
 }
 
 
-List* List_create_subset(List* list, u32 start, u32 end) {
+List* List_create_subset(List* list, const u32 start, const u32 end) {
     // Creates a new list as a subset of another list.
     // Returns NULL if the subset cannot be created.
     //
@@ -291,16 +293,16 @@ void List_realloc(List* list, u32 Capacity) {
     // if the head is behind the tail, list is split in two:
     if (list->head < list->tail) {
         // Copy first half.
-        u32 bytesToCopyFromTail = internal_List_end(u8, list) - list->tail;
+        u64 bytesToCopyFromTail = internal_List_end(u8, list) - list->tail;
         internal_list_copy(newData, list->tail, bytesToCopyFromTail);
 
         // Copy the second half.
-        u32 bytesToCopyFromHead = list->head - internal_List_start(u8, list);
+        u64 bytesToCopyFromHead = list->head - internal_List_start(u8, list);
         internal_list_copy(newData + bytesToCopyFromTail, internal_List_start(u8, list), bytesToCopyFromHead);
     }
     // list is continuous, and so only one internal_list_copy is needed:
     else {
-        u32 bytesToCopy = (u32)(list->head - list->tail);
+        u64 bytesToCopy = (list->head - list->tail);
         internal_list_copy(newData, list->tail, bytesToCopy);
     }
 
@@ -508,5 +510,4 @@ void List_append(List* dst, List* src) {
     dst->head += sourceByteCount;
     free(srcArray);
 }
-
 #endif

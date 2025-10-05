@@ -43,7 +43,7 @@ typedef struct FrameData {
 
 bool    Engine_initialize(const int width, const int height, const char* tittle);
 void    Engine_terminate ();
-void    Engine_add_termination_function (Function_i32_NoParam function);
+void    Engine_add_termination_function (Function_Errorcode_NoParam function);
 
 bool    Engine_execute_tick ();
 void    Engine_set_ambient_color (float r, float g, float b);

@@ -19,7 +19,7 @@ typedef struct Shader {
 } Shader;
 
 void InitShaders();
-void DereferenceShaders();
+ecode DereferenceShaders();
 
 void Shader_use(const Shader* shader);
 

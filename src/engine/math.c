@@ -256,8 +256,8 @@ void quaternion_from_axis(const vec3 axis, const  double angle, quaternion out) 
     vec3 axisNormalized = vec3_def_copy(axis);
     vec3_normalize(axisNormalized);
 
-    double sinAngle = sin(angle);
-    double cosAngle = cos(angle);
+    float sinAngle = sinf(angle);
+    float cosAngle = cosf(angle);
     
     quaternion result = { axisNormalized[0] * sinAngle, axisNormalized[1] * sinAngle, axisNormalized[2] * sinAngle, cosAngle };
     
@@ -491,9 +491,9 @@ void mat4_projection_perspective (const double fovy, const double aspect, const 
 }
 
 void mat4_projection_frustum (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
-    double RightToLeft = right - left;
-    double TopToBottom = top - bottom;
-    double FarToNear = far - near;
+    float RightToLeft = (float)(right - left);
+    float TopToBottom = (float)(top - bottom);
+    float FarToNear = (float)(far - near);
 
     mat4 result = {
         ((float)near * 2.0f) / RightToLeft, 0.0f, 0.0f, 0.0f,
