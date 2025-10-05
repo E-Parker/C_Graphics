@@ -8,7 +8,7 @@
 #include "engine_core/string.h"
 #include "engine_core/list.h"
 
-#include "engine/shader/parse_shader.h"
+#include "engine/shader/shader_compile.h"
 
 // Shader descriptor buffer for run-time shader compiling.
 ShaderDescriptor descriptorBuffer[GL_SHADER_MAX_DESCRIPTORS]; 

@@ -8,10 +8,10 @@
 
 typedef struct Reader {
     char buffer[READER_BUFFER_SIZE];    // Internal use only, raw data. 
-    u32 bufferEnd;                 // Internal use only, padding for the buffer.
-    u32 currentBlock;              // Internal use only, current "block" of READER_BUFFER_SIZE stored in buffer.
+    u32 bufferEnd;                      // Internal use only, padding for the buffer.
+    u32 currentBlock;                   // Internal use only, current "block" of READER_BUFFER_SIZE stored in buffer.
     fpos_t fileLinePos;                 // Internal use only, Position of current line in file.
-    u64 length;                    // Length of the segment currently in the buffer. May be larger than the size of the buffer.
+    u64 length;                         // Length of the segment currently in the buffer. May be larger than the size of the buffer.
     FILE* fileDesc;                     // File handler associated with this reader.
 } Reader;
 

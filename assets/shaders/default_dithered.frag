@@ -115,8 +115,6 @@ void main() {
         discard; 
     }
 
-     vec4 textureAlbedo = texture(albedo, v_tcoord);
-
     vec4 lightingCalc = vec4(0.0);
     vec3 lighting = vec3(0.0);
 

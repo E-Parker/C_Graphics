@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-#include "engine/shader/parse_shader.h"
+#include "engine/shader/shader_compile.h"
 
 #include "engine_core/string.h"
 
