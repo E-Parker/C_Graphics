@@ -3,7 +3,7 @@
 #include "engine_core/string.h"
 #include "engine/object/mesh.h"
 
-#include "engine_core/renderable.h"
+#include "engine/shader/renderable.h"
 
 #define PackByte_uint16(a, b) ( ((u16)b << 8) | (u16)a )
 #define PackByte_uint32(a, b, c, d) ( ((u32)d << 24) | ((u32)c << 16) | ((u32)b << 8) | (u32)a )

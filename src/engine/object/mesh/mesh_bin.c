@@ -6,7 +6,7 @@
 #include "engine_core/list.h"
 #include "engine/object/mesh.h"
 
-#include "engine_core/renderable.h"
+#include "engine/shader/renderable.h"
 
 
 StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* parent) {

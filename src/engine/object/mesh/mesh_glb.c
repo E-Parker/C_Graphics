@@ -4,7 +4,7 @@
 #include "engine_core/list.h"
 #include "engine/object/mesh.h"
 
-#include "engine_core/renderable.h"
+#include "engine/shader/renderable.h"
 
 StaticMesh* Object_StaticMesh_create_from_graphics_library_binary_transmission_format(const char* Path, void* parent) {
     return NULL;

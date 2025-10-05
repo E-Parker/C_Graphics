@@ -148,8 +148,8 @@ void UniformBuffer_get_Struct(const UniformBuffer* buffer, const char* alias, Un
 
 void internal_UniformBuffer_set_Struct(UniformBuffer* buffer, const char* alias, const char* memberAlias, void* data) {
     // upload data to the uniform struct.
-    UniformStruct* uniformStruct;
-    Uniform* uniform;
+    UniformStruct* uniformStruct = NULL;
+    Uniform* uniform = NULL;
     String aliasString = String_from_ptr(alias);
     HashTable_find_reference(buffer->UniformStructs, aliasString, &uniformStruct);
     

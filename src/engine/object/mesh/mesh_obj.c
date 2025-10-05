@@ -4,7 +4,7 @@
 #include "engine_core/list.h"
 #include "engine/object/mesh.h"
 
-#include "engine_core/renderable.h"
+#include "engine/shader/renderable.h"
 
 #define BUFFER_SIZE 0x1000
 #define SEGMENT_COUNT 16
