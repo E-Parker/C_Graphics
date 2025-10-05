@@ -9,12 +9,6 @@
 // Standard Buffer Size is the maximum size any alias can be.
 #define OBJECT_ALIAS_SIZE 116
 
-// Object function return messages:
-#define ERRORCODE_OBJECT_SUCCESS          0x00
-#define ERRORCODE_OBJECT_MISSING_PARENT   0x01
-#define ERRORCODE_OBJECT_SELF_PARENT      0x02
-#define ERRORCODE_OBJECT_NULL_OBJECT      0x03
-
 
 // Type Definitions:
 // 
@@ -46,16 +40,18 @@ typedef struct Object {
 
 } Object;
 
+ecode InitObjects();
+
 #define OBJECT_CREATE_BODY(T, parent, type) T* object = (T*)malloc(sizeof(T)); if(!object) { return NULL; } internal_Object_Initialize((void*)object, (void*)parent, type);
 #define OBJECT_DESTROY_BODY(object) internal_Object_Deinitialize((void*)object);
 #define OBJECT_TICK_BODY(object) 
 
 #define Object_IsType(object, Type) ((*((Object*)object)->Type) == Type)
 
-u8 internal_Object_Initialize (void* objectPtr, void* parentPtr, const u8 type);
+ecode   internal_Object_Initialize (void* objectPtr, void* parentPtr, const u8 type);
 void    internal_Object_Deinitialize (void* objectPtr);
 void    internal_Object_DestroyDefault (void* objectPtr);
-u8 internal_Object_TickDefault (void* objectPtr, const double deltaTime);
+ecode   internal_Object_TickDefault (void* objectPtr, const double deltaTime);
 
 void Object_get_world_space_transform (void* objectPtr, mat4 out);
 void Object_set_parent (void* objectPtr, void* parentPtr);

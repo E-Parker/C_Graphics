@@ -1,23 +1,35 @@
 #include "engine_core/engine_types.h"
+#include "engine_core/engine_error.h"
 #include "engine_core/list.h"
 
 #include "engine/math.h"
 #include "engine/object.h"
 
-u8 internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type) {
+List ObjectList;
+//List ObjectList_FreeIndicies;
+List ObjectDrawList;
+//List ObjectDrawList_FreeIndicies;
+
+ecode InitObjects() {
+    List_initialize(Object*, &ObjectList, 0x400);
+    List_initialize(Object*, &ObjectDrawList, 0x400);
+    return 0;
+}
+
+ecode internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type) {
 
     // Perform blind cast to object. All object types have the same header alignment so this is safe, assuming an object is passed in here.
     Object* object = (Object*)objectPtr;
     Object* parent = (Object*)parentPtr;
-    u8 errorCode = ERRORCODE_OBJECT_SUCCESS;
+    ecode errorCode = 0;
 
     if (objectPtr == parentPtr) {
-        errorCode = ERRORCODE_OBJECT_SELF_PARENT;
+        errorCode = ERROR_OBJECT_SELF_PARENT;
         goto ObjectInitFail;
     }
 
     if (!objectPtr) {
-        errorCode = ERRORCODE_OBJECT_NULL_OBJECT;
+        errorCode = ERROR_OBJECT_NULL_OBJECT;
         goto ObjectInitFail;
     }
 
@@ -39,7 +51,16 @@ u8 internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type) {
 
     object->Tick = internal_Object_TickDefault;
     object->Destroy = internal_Object_DestroyDefault;
+    object->Draw = NULL;
 
+    List_push_front(&ObjectList, object);
+
+    if (type > Object_TypeDrawable) {
+        List_push_front(&ObjectDrawList, object);
+    }
+
+    Engine_log_errorcode(errorCode);
+    
 ObjectInitFail:
     return errorCode;
 }
@@ -56,23 +77,31 @@ void internal_Object_Deinitialize(void* objectPtr) {
         List_pop_front(&object->Children, childObject);
         childObject->Destroy(childObject);
     }
+
+    u64 indexof = 0;
+    for (List_iterator(Object*, &ObjectList)) {
+        if (*it == object) {
+            break;
+        }
+        indexof++;
+    }
 }
 
 
-void internal_Object_DestroyDefault(void* objectPtr) {
+void internal_Object_DestroyDefault (void* objectPtr) {
     Object* object = (Object*)objectPtr;
     internal_Object_Deinitialize(objectPtr);
     free(objectPtr);
 }
 
 
-u8 internal_Object_TickDefault(void* ptr, const double deltaTime) {
+ecode internal_Object_TickDefault (void* ptr, const double deltaTime) {
     OBJECT_TICK_BODY(ptr)
-    return ERRORCODE_OBJECT_SUCCESS;
+    return 0;
 }
 
 
-void Object_set_alias(void* objectPtr, const char* string) {
+void Object_set_alias (void* objectPtr, const char* string) {
     char* gameObjectAlias = (char*)objectPtr;
     char* currentCharacter = (char*)string;
     
@@ -89,14 +118,14 @@ void Object_set_alias(void* objectPtr, const char* string) {
 }
 
 
-void Object_get_world_space_transform(void* objectPtr, mat4 out) {
+void Object_get_world_space_transform (void* objectPtr, mat4 out) {
     Object* object = (Object*)objectPtr;
     Object* currentNode = object;
 
     List hiarachy;
     mat4 result;
 
-    List_initialize(GLfloat*, &hiarachy, 128);
+    List_initialize(GLfloat*, &hiarachy, 0x40);
     mat4_copy(MAT4_IDENTITY, result);
 
     while (currentNode->Parent) {
@@ -111,7 +140,7 @@ void Object_get_world_space_transform(void* objectPtr, mat4 out) {
 }
 
 
-void Object_set_parent(void* objectPtr, void* parentPtr) {
+void Object_set_parent (void* objectPtr, void* parentPtr) {
     Object* object = (Object*)objectPtr;
     Object* newParent = (Object*)parentPtr;
     Object* parent = object->Parent;
@@ -138,17 +167,17 @@ void Object_set_parent(void* objectPtr, void* parentPtr) {
 }
 
 
-bool Object_flag_compare(u32 data, u32 mask) {
+bool Object_flag_compare (u32 data, u32 mask) {
     data |= 0xff000000;
     mask |= 0xff000000;
     return ((data & mask) == mask) & 1;
 }
 
-void Object_flag_set(u32* data, u32 mask) {
+void Object_flag_set (u32* data, u32 mask) {
     *data |= mask;
 }
 
-void Object_flag_unset(u32* data, u32 mask) {
+void Object_flag_unset (u32* data, u32 mask) {
     mask &= 0x00ffffff;
     *data &= ~mask;
 }

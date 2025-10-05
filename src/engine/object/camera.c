@@ -11,7 +11,6 @@
 #include "engine/math.h"
 
 
-
 Camera* Object_Camera_create() {
     OBJECT_CREATE_BODY(Camera, NULL, Object_TypeCamera);
 

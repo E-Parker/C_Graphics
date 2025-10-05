@@ -41,10 +41,11 @@ typedef struct HashTable HashTable;
 typedef struct Object Object;
 
 extern const u8 Object_TypeNone;
+extern const u8 Object_TypeCamera;
+extern const u8 Object_TypeDrawable;	// All objects which have a draw function have type greater than this.
 extern const u8 Object_TypeStaticMesh;
 extern const u8 Object_TypeSkinnedMesh;
 extern const u8 Object_TypeText;
-extern const u8 Object_TypeCamera;
 
 typedef ecode	(*Function_Errorcode_NoParam)	();
 typedef u8		(*Function_Tick)				(void*, const double);

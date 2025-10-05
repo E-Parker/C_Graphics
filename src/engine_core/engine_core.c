@@ -11,7 +11,8 @@
 #include "engine_core/engine_types.h"
 
 const u8 Object_TypeNone = 0x01;
-const u8 Object_TypeStaticMesh = 0x02;
-const u8 Object_TypeSkinnedMesh = 0x03;
-const u8 Object_TypeText = 0x04;
-const u8 Object_TypeCamera = 0x05;
+const u8 Object_TypeCamera = 0x02;
+const u8 Object_TypeDrawable = 0xF0;
+const u8 Object_TypeStaticMesh = 0xF1;
+const u8 Object_TypeSkinnedMesh = 0xF2;
+const u8 Object_TypeText = 0xF3;
