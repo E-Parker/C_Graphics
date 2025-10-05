@@ -232,7 +232,7 @@ Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sh
         return NULL;
     }
 
-    String_create_dirty(&info->Alias, &newUniform->Alias);
+    String_create_dirty((String*)&info->Alias, &newUniform->Alias);
 
     newUniform->Data = (void*)(((u8*)sharedBuffer) + info->BlockOffset);
     newUniform->UniformType = UNIFORM_TYPE_SHARED;
@@ -261,7 +261,7 @@ Uniform* internal_Uniform_create(const UniformInformation* info) {
         return NULL;
     }
 
-    String_create_dirty(&info->Alias, &newUniform->Alias);
+    String_create_dirty((String*)&info->Alias, &newUniform->Alias);
 
     newUniform->Data = calloc(size,info->Elements);
     newUniform->UniformType = UNIFORM_TYPE_SINGLE;
@@ -714,7 +714,7 @@ void internal_program_uniformStruct_parse(const GLuint program, const u16 unifor
         structIdent = strchr(buffer, '.');
 
         char* nameEnd = ArrayIdent ? ArrayIdent : structIdent;
-        u16 structNameLength = ArrayIdent ? ArrayIdent - buffer + 1 : structIdent - buffer + 1;
+        u64 structNameLength = ArrayIdent ? ArrayIdent - buffer + 1 : structIdent - buffer + 1;
 
         if (!structIdent) {
             continue;

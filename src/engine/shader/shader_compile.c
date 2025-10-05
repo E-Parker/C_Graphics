@@ -1,10 +1,12 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#include "stdio.h"
 #include "string.h"
 
+#include "engine_core/configuation.h"
 #include "engine_core/engine_types.h"
+#include "engine_core/engine_error.h"
+#include "engine_core/engine_io.h"
 #include "engine_core/string.h"
 #include "engine_core/list.h"
 
@@ -20,59 +22,43 @@ const GLchar* gl_srcBuffer = (GLchar*)srcBuffer;
 
 
 void internal_ReadShaderProgramSource(const char* path) {
-   
-    // Check that the last call to this function was handled correctly
     if (srcBufferWall) {
-        printf("Shader load warning: Last source file was not handled / received correctly.");
-        srcBufferWall = false;
+        printf("Shader load warning: Last source file was not handled / received correctly.\n");
     }
     
     FILE* file = fopen(path, "r");
-    
-    // Return if the file could not be found.
-    if (!file) {
-        printf("Shader load error: source file \"%s\" not found or inaccessible.", path);
-        srcBufferWall = false;
-        return;
-    }
-    
-    // Get the size of the file.
-    fseek(file, 0, SEEK_END);
-    u64 bufferSize = ftell(file);
-    fseek(file, 0, SEEK_SET);
 
-    printf("size: %u\n", bufferSize);
+    ecode errorCode = Engine_read((IODescriptor) {
+        .file = file,
+        .buffer = srcBuffer,
+        .bufferSize = sizeof(srcBuffer) / sizeof(char),
+        .flags = ENGINE_IO_ZERO_BUFFER | ENGINE_IO_ADD_NULL_TERMINATOR
+    });
 
-    // Return early if the buffer isn't big enough to fit the file.
-    if (bufferSize >= GL_SHADER_SOURCE_BUFFER_SIZE) {
-        printf("Shader load error: source file \"%s\" was too large to fit in a buffer. (%u),", path, GL_SHADER_SOURCE_BUFFER_SIZE);
+    if (file) {
         fclose(file);
+    }
+    
+    if (!errorCode) {
+        srcBufferWall = true;
         return;
     }
 
-    // Clear the buffer, and read to it 256 bytes at a time. fread breaks otherwise, especially with files larger than 4kb.
-    memset(srcBuffer, '\0', GL_SHADER_SOURCE_BUFFER_SIZE);
-    char* buffer = (char*)srcBuffer;
-
-    for (u64 i = 0; i < bufferSize; i += GL_BUFFER_READ_STEP, buffer += GL_BUFFER_READ_STEP) {
-        fread(buffer, 1, GL_BUFFER_READ_STEP, file);
-        fflush(file);
-    }
-
-   
-    int errorCode = ferror(file);
-    fclose(file);
+    srcBufferWall = false;
+    switch (errorCode) {
+    case ERROR_BADPOINTER: 
+        printf("Shader load error: source file \"%s\" not found or inaccessible.\n", path);
+        break;
     
+    case ERROR_IO_FILETOBIG:
+        printf("Shader load error: source file \"%s\" was too large to fit in a buffer.\n", path);
+        break;
 
-
-    // Return the error if there was an stdio error reading the file.
-    if (errorCode) {
-        printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader. Error code was, (%d)", path, errorCode);
-        return;
+    default:
+        printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader.\n", path);
+        Engine_log_errorcode(errorCode);
+        break;
     }
-    
-    // Only give the rest of the program the go-ahead if the shader was loaded correctly.
-    srcBufferWall = true;
 }
 
 
@@ -85,7 +71,7 @@ void internal_CompileShaderProgram(GLuint* shader, GLint type, const char* path)
     
     // if reading the shader failed, return early.
     if (!srcBufferWall) {
-        shader = GL_NONE;
+        *shader = GL_NONE;
         return;
     }
 
@@ -101,17 +87,16 @@ void internal_CompileShaderProgram(GLuint* shader, GLint type, const char* path)
 
 bool ShaderProgram_CompileProgramValidate(ShaderDescriptor* args) {
     // Step through args until the max descriptors is hit, or until the end of the list is found.
-    
-    for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
+    for (u64 i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; ++i) {
         if((args[i]).path[0] == '\0') {
             return true;  
         }
     }
     
-    // Create a log that is big enough to hold the longest possible file path for all descriptors. 
+    // Create a log that is big enough to hold the longest possible file path for all descriptors.
     char log[(GL_SHADER_MAX_DESCRIPTORS * (GL_SHADER_PATH_SIZE + 1)) + 1];
     
-    for (int i = 0; i <= GL_SHADER_MAX_DESCRIPTORS; i++) {
+    for (u64 i = 0; i < GL_SHADER_MAX_DESCRIPTORS; ++i) {
         strcat(log, (args[i]).path);
         strcat(log, "\n");
     }
@@ -141,7 +126,7 @@ GLuint ShaderProgram_CompileProgramDynamic(ShaderDescriptor* args, int argsCount
     return internal_ShaderProgram_CompileProgram((ShaderDescriptor*)&descriptorBuffer);
 }
 
-// TODO: remove this function. it has literally one caller. See two lines up ^^^ 
+
 GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     // Expects an array of arguments with a null terminated end. 
     
@@ -154,15 +139,14 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     // Iterate until end of args. Compile and attach each shader.
     for (ShaderDescriptor* it = args; it->path[0] != '\0'; it++) {
         internal_CompileShaderProgram(&it->shader, it->type, it->path);
+        if (it->shader == GL_NONE) continue;
         glAttachShader(program, it->shader);
     }
 
-    glLinkProgram(program);             // Run the linking step.
+    glLinkProgram(program);
 
-    // Find out if there were errors linking the shader program.
     int success;
     int s_success;
-
     int dummyLength;
     char log[GL_ERROR_LOG_SIZE] = {'\0',};
     glGetProgramiv(program, GL_LINK_STATUS, &success);
@@ -170,6 +154,7 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     // No errors, delete all the temp shaders and return the program. 
     if (success) {
         for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
+            if (it->shader == GL_NONE) continue;
             glDeleteShader(it->shader);
         }
         return program;
@@ -185,6 +170,12 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     
     // Debug the individual shaders.
     for (ShaderDescriptor* it = (ShaderDescriptor*)args; it->path[0] != '\0'; it++) {
+
+        // Shader failed to load.
+        if (it->shader == GL_NONE) {
+            continue;
+        }
+        
         glGetShaderiv(it->shader, GL_COMPILE_STATUS, &s_success);
         
         // If this shader passed, free it and continue loop early.
@@ -193,11 +184,12 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
             continue;
         }
 
-        // Otherwise, clear the log, get the log from OpenGL and write it to the output. 
-        memset(&log, '\0', GL_ERROR_LOG_SIZE);
+        // Otherwise, get the log from OpenGL and write it to the output. 
         glGetShaderInfoLog(it->shader, GL_ERROR_LOG_SIZE, &dummyLength, log);
         
         // Display the shader path, type, and error log for the shader which failed.
+        PrintLog:
+        memset(&log, '\0', GL_ERROR_LOG_SIZE);
         printf("Shader Path:\n%s\n", it->path);
 
         switch (it->type) {

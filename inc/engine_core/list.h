@@ -93,8 +93,8 @@ bool List_contains_item(const List* list, void* item, u64* out);
 void List_realloc(List* list, u32 Capacity);
 void List_reorder(List* list);
 
-void List_remove_at(List* list, const u32 index);
-void* List_at(const List* list, const u32 index);
+void List_remove_at(List* list, const u64 index);
+void* List_at(const List* list, const u64 index);
 
 void List_append(List* dst, List* src);
 
@@ -372,7 +372,7 @@ bool List_contains_item(const List* list, void* item, u64* out) {
 }
 
 
-void* List_at(const List* list, const u32 index) {
+void* List_at(const List* list, const u64 index) {
     // Returns the item at a particular index.
     //
     //

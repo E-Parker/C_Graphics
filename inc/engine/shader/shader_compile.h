@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#define GL_SHADER_MAX_DESCRIPTORS 0x200 
+#define GL_SHADER_MAX_DESCRIPTORS 0x10 
 #define GL_ERROR_LOG_SIZE 0x400
 #define GL_SHADER_PATH_SIZE 0x100 
 #define GL_SHADER_SOURCE_BUFFER_SIZE 0x8000
@@ -12,7 +12,7 @@
 typedef struct ShaderDescriptor {
     const char* path;
     GLint type;
-    GLuint shader; // TODO: See about getting rid of this. it's a temp value that is overwritten by the compile process.
+    GLuint shader;  // internal temp value. Overwritten in compile step.
 } ShaderDescriptor;
 
 // Macro to compile and link any number of shaders. Use this for compile-time constant since this guarantees there is no size miss-match.

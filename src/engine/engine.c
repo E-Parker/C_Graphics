@@ -3,9 +3,11 @@
 
 #include "stdio.h"
 
+#include "engine_core/configuation.h"
+#include "engine_core/engine_error.h"
 #include "engine/engine.h"
 
-#define ENGINE_DEBUG
+
 
 FrameData frame;
 
@@ -119,7 +121,7 @@ bool Engine_initialize(const int width, const int height, const char* tittle) {
     glEnable(GL_DEPTH_TEST);
     glFrontFace(GL_CCW);
 
-    List_initialize(Function_Void_NoParam, &(frame.TerminationFunctions), 16);
+    List_initialize(Function_Errorcode_NoParam, &(frame.TerminationFunctions), 16);
 
     frame.rawInputAvailable = glfwRawMouseMotionSupported();
 
@@ -136,13 +138,14 @@ InitFail:
 }
 
 
-void Engine_add_termination_function(Function_Void_NoParam function) {
+void Engine_add_termination_function(Function_Errorcode_NoParam function) {
     List_push_back(&(frame.TerminationFunctions), function);
 }
 
 void Engine_terminate () {
-    for (List_iterator(Function_Void_NoParam, &(frame.TerminationFunctions))) {
-        (*it)();
+    for (List_iterator(Function_Errorcode_NoParam, &(frame.TerminationFunctions))) {
+        ecode errorcode = (*it)();
+
     }
 
     List_deinitialize(&(frame.TerminationFunctions));
@@ -242,6 +245,7 @@ void APIENTRY internal_Engine_key_callback(GLFWwindow* window, int key, int scan
     }
 }
 
+#ifdef ENGINE_DEBUG
 void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam) {
 
     // ignore non-significant error/warning codes
@@ -285,13 +289,29 @@ void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsign
     } 
     printf("\n"); 
 }
+#endif
 
-void Engine_exit_forced(int errorcode) {
+void Engine_exit(ecode errorcode) {
+#ifdef ENGINE_DEBUG
+    Engine_log_errorcode(errorcode);
+#endif
+    Engine_terminate();
     exit(errorcode);
 }
 
-void internal_Engine_validate(bool check, int errorcode) {
+
+void Engine_exit_forced(ecode errorcode) {
+#ifdef ENGINE_DEBUG
+    Engine_log_errorcode(errorcode);
+#endif
+    exit(errorcode);
+}
+
+void internal_Engine_validate(bool check, ecode errorcode) {
     if (check) {
+#ifdef ENGINE_DEBUG
+        Engine_log_errorcode(errorcode);
+#endif
         Engine_exit_forced(errorcode);
     }
 }

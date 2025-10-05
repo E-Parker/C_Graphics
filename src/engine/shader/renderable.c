@@ -138,8 +138,6 @@ void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray
 
 }
 
-#include "stdio.h"
-
 void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform) {
     // Bind the material's shader program and textures.
 

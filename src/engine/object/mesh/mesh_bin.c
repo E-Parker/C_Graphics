@@ -44,7 +44,7 @@ StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* paren
     GLfloat* normalBuffer = (GLfloat*)malloc(bufferSizes[2]);
     GLfloat* tCoordBuffer = (GLfloat*)malloc(bufferSizes[3]);
 
-    u64 errorCode;
+    u64 errorCode = 0;
 
     fread(indexBuffer, sizeof(u32), indexSize, file);
     fread(vertexBuffer, sizeof(vec3), vertexSize, file);

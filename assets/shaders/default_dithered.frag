@@ -51,6 +51,15 @@ const int[256] dither_table = int[](
     255, 127, 223, 95, 247, 119, 215, 87, 253, 125, 221, 93, 245, 117, 213, 85
 );
 
+vec3 hash32(vec2 p) {
+	vec3 p3 = vec3(p.xyx) * vec3(443.8975, 397.2973, 491.1871);
+	p3 = p3 - floor(p3);
+    p3 += dot(p3, p3.yxz + 19.19);
+	vec3 r3 = vec3((p3.x + p3.y) * p3.z, (p3.x + p3.z) * p3.y, (p3.y + p3.z) * p3.x);
+	r3 = r3 - floor(r3);
+	return r3;
+}
+
 vec3 phong(vec3 surfacePosition, vec3 lightPosition, vec3 color, vec3 texNormal, float ambientFactor, float diffuseFactor, float specularPower) {
     
     vec3 surfaceNormal = normalize(v_normal);//normalize(v_normal + texNormal);
@@ -106,8 +115,13 @@ void main() {
     float textureSpecular = texture(specular, v_tcoord).r;
     float textureMetallic = texture(specular, v_tcoord).g;
 
-    int x = int(mod(gl_FragCoord.x + (v_time * 4.0), 16.0));
-	int y = int(mod(gl_FragCoord.y + (v_time * 4.0), 16.0));
+    int roundedTime = int(v_time * 8.0);
+
+    vec2 hashInput = vec2(float(roundedTime) * 7.0, float(roundedTime) * 11.0);
+    vec3 offset = hash32(hashInput) * 16.0; 
+
+    int x = int(mod(gl_FragCoord.x + offset.x, 16.0));
+	int y = int(mod(gl_FragCoord.y + offset.y, 16.0));
 
 	float limit = (float(dither_table[x + y * 16] + 1.)) / 256.0;
     

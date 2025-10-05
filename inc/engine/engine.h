@@ -43,7 +43,7 @@ typedef struct FrameData {
 
 bool    Engine_initialize(const int width, const int height, const char* tittle);
 void    Engine_terminate ();
-void    Engine_add_termination_function (Function_Void_NoParam function);
+void    Engine_add_termination_function (Function_i32_NoParam function);
 
 bool    Engine_execute_tick ();
 void    Engine_set_ambient_color (float r, float g, float b);
@@ -69,9 +69,11 @@ void    GetCursorPosition (double* xPos, double* yPos);
 void APIENTRY internal_Engine_mouse_callback (GLFWwindow* window, double xPos, double yPos);
 void APIENTRY internal_Engine_scroll_callback (GLFWwindow* window, double xoffset, double yoffset);
 void APIENTRY internal_Engine_key_callback (GLFWwindow* window, int key, int scancode, int action, int mods);
+
+#ifdef ENGINE_DEBUG
 void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
+#endif
 
-void Engine_exit_forced(int errorcode);
-void internal_Engine_validate(bool check, int errorcode);
-
-// TODO: implement error handling.
+void Engine_exit(ecode errorcode);
+void Engine_exit_forced(ecode errorcode);
+void internal_Engine_validate(bool check, ecode errorcode);
