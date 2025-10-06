@@ -239,6 +239,8 @@ ItemNotFound:
     // TODO: implement some system to handle correcting other items after one is removed since all colliding items have to move.
     // Explore items after this item, checking that it has the same hash. Keep iterating until you find the last hash that is colliding, 
     // replace the removed item with this hash, then zero its original spot.
+    //
+    // Actually wait this is dumb af. might have to just do this with Separate Chaining. That way I could allocate it as a single block.
 ItemFound:
     String_free_dirty(&table->keys[hash]);
 
