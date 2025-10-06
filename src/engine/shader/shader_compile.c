@@ -50,7 +50,7 @@ void internal_ReadShaderProgramSource(const char* path) {
         printf("Shader load error: source file \"%s\" not found or inaccessible.\n", path);
         break;
     
-    case ERROR_IO_FILETOBIG:
+    case ERROR_IO_FILETOOBIG:
         printf("Shader load error: source file \"%s\" was too large to fit in a buffer.\n", path);
         break;
 

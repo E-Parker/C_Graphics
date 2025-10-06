@@ -27,7 +27,7 @@ ecode Engine_read(const IODescriptor iodesc) {
     }
 
     if (fileSize > bufferSize) {
-        return ERROR_IO_FILETOBIG;
+        return ERROR_IO_FILETOOBIG;
     }
 
     char* buffer = (char*)iodesc.buffer;

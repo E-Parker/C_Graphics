@@ -17,7 +17,7 @@
 #define BlendFile 0x620020646E656C62    // .blend   - Blender project file
 #define U3dFile 0x7500202020643375      // .u3d     - Universal 3D
 #define UsdFile 0x7500202020647375      // .usd     - Universal Scene Descriptor
-#define FbxFile 0x6600202020786266      // .fbx     - "Filmbox" format, Maya version.
+#define FbxFile 0x6600202020786266      // .fbx     - Film-box format, Maya version.
 
 
 void Object_StaticMesh_destroy(void* object) {

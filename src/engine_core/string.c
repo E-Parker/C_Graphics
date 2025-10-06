@@ -1,10 +1,7 @@
-
-#include "assert.h"
-
+#include "engine_core/configuation.h"
 #include "engine_core/engine_types.h"
+#include "engine_core/engine_error.h"
 #include "engine_core/string.h"
-
-#define USE_CSTR_REDUNDANCY
 
 void String_create_dirty(String* source, String* destination) {
 
@@ -12,11 +9,12 @@ void String_create_dirty(String* source, String* destination) {
         return;
     }
 
-#ifdef USE_CSTR_REDUNDANCY
+#ifdef STRING_USE_CSTR_REDUNDANCY
     destination->start = (char*)calloc(String_length(*source) + 1, sizeof(char));
 #else
     destination->start = (char*)malloc(String_length(*source));
 #endif
+    Engine_validate(destination->start, ENOMEM);
     String_clone(*source, *destination);
 }
 
@@ -27,7 +25,6 @@ void String_free_dirty(String* str) {
     str->end = NULL;
 }
 
-#include "stdio.h"
 
 bool internal_String_equal(String* left, String* right) {
     if (!left || !right) {
@@ -51,8 +48,8 @@ bool internal_String_equal(String* left, String* right) {
 }
 
 void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end) {
-    assert(start < end);
-    assert(end <= String_length(*destination) && start < String_length(*destination));
+    Engine_validate(start < end, ERROR_STRING_INVALIDSIZE);
+    Engine_validate(end <= String_length(*destination) && start < String_length(*destination), ERROR_STRING_DSTTOOSMALL);
 
     char* dst = destination->start;
     char* src = source->start + start;

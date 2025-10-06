@@ -33,7 +33,7 @@ void HashTable_deinitialize(HashTable* table);
 
 // Insert a new value, or overwrite an existing one.
 void HashTable_insert(HashTable* table, const String key, void* value);
-void HashTable_remove(HashTable* table, const String key);
+bool HashTable_remove(HashTable* table, const String key);
 void HashTable_resize(HashTable* table, const u64 capacity);
 
 // Get the value of what's stored in the HashTable by value.
@@ -216,36 +216,42 @@ WriteValue:
 }
 
 
-void HashTable_remove (HashTable* table, const String key) {
+bool HashTable_remove (HashTable* table, const String key) {
     u64 hash = fnvHash64(key.start, key.end) % table->capacity;
     u64 originalHash = hash;
 
-    // TODO: implement some system to handle correcting other items after one is removed since all colliding items have to move.
-
     while (table->keys[hash].start) {
         if (String_equal(key, table->keys[hash])) {
-            String_free_dirty(&table->keys[hash]);
-            
-            u64 i = 0;
-            for (; i < table->slotsUsed; i++) {
-                if (table->activeIndicies[i] == hash) break;
-            }
-
-            for (u64 k = i + 1; k < table->slotsUsed; k++) {
-                table->activeIndicies[k - 1] = table->activeIndicies[k];
-            }
-
-            table->slotsUsed--;
-            return;
+            goto ItemFound;
         }
 
         hash++;
         hash %= table->capacity;
 
         if (originalHash == hash) {
-            return;
+            goto ItemNotFound;
         }
     }
+
+ItemNotFound:
+    return false;
+    
+    // TODO: implement some system to handle correcting other items after one is removed since all colliding items have to move.
+
+ItemFound:
+    String_free_dirty(&table->keys[hash]);
+
+    u64 i = 0;
+    for (; i < table->slotsUsed; i++) {
+        if (table->activeIndicies[i] == hash) break;
+    }
+
+    for (u64 k = i + 1; k < table->slotsUsed; k++) {
+        table->activeIndicies[k - 1] = table->activeIndicies[k];
+    }
+
+    table->slotsUsed--;
+    return true;
 }
 
 

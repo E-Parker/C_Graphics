@@ -76,4 +76,6 @@ void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsign
 
 void Engine_exit(ecode errorcode);
 void Engine_exit_forced(ecode errorcode);
+#ifdef ENGINE_DEBUG
 void internal_Engine_validate(bool check, ecode errorcode);
+#endif

@@ -1,18 +1,15 @@
 #include "engine_core/engine_types.h"
 #include "engine_core/engine_error.h"
 #include "engine_core/list.h"
+#include "engine_core/string.h"
 
 #include "engine/math.h"
 #include "engine/object.h"
 
-List ObjectList;
-//List ObjectList_FreeIndicies;
-List ObjectDrawList;
-//List ObjectDrawList_FreeIndicies;
+List RootObjectList;
 
 ecode InitObjects() {
-    List_initialize(Object*, &ObjectList, 0x400);
-    List_initialize(Object*, &ObjectDrawList, 0x400);
+    List_initialize(Object*, &RootObjectList, 0x40);
     return 0;
 }
 
@@ -53,12 +50,6 @@ ecode internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type
     object->Destroy = internal_Object_DestroyDefault;
     object->Draw = NULL;
 
-    List_push_front(&ObjectList, object);
-
-    if (type > Object_TypeDrawable) {
-        List_push_front(&ObjectDrawList, object);
-    }
-
     Engine_log_errorcode(errorCode);
     
 ObjectInitFail:
@@ -76,14 +67,6 @@ void internal_Object_Deinitialize(void* objectPtr) {
         Object* childObject;
         List_pop_front(&object->Children, childObject);
         childObject->Destroy(childObject);
-    }
-
-    u64 indexof = 0;
-    for (List_iterator(Object*, &ObjectList)) {
-        if (*it == object) {
-            break;
-        }
-        indexof++;
     }
 }
 
@@ -103,18 +86,16 @@ ecode internal_Object_TickDefault (void* ptr, const double deltaTime) {
 
 void Object_set_alias (void* objectPtr, const char* string) {
     char* gameObjectAlias = (char*)objectPtr;
-    char* currentCharacter = (char*)string;
+   
+    String aliasString = String_from_ptr_size(gameObjectAlias, OBJECT_ALIAS_SIZE);
+    String newAliasString = String_from_ptr(string);
     
-    for(u8 i = 0; i < OBJECT_ALIAS_SIZE; i++) {
-        if(*currentCharacter == '\0') {
-            gameObjectAlias[i] = '\0';
-        }
-
-        else {
-            gameObjectAlias[i] = string[i];
-            currentCharacter++;
-        }
+    if (String_length(newAliasString) >= OBJECT_ALIAS_SIZE) {
+        Engine_log_errorcode(ERROR_OBJECT_NAMETOBIG);
+        return;
     }
+
+    String_clone(newAliasString, aliasString);
 }
 
 
@@ -135,6 +116,8 @@ void Object_get_world_space_transform (void* objectPtr, mat4 out) {
     for (List_iterator(GLfloat*, &hiarachy)) {
         mat4_multiply(result, *it, result);
     }
+
+    List_deinitialize(&hiarachy);
 
     mat4_copy(result, out);
 }

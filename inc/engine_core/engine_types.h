@@ -60,10 +60,15 @@ typedef void	(*Function_Void_TwoParam)		(void*, void*);
 typedef void	(*Function_Void_ThreeParam)		(void*, void*, void*);
 typedef void	(*Function_Void_FourParam)		(void*, void*, void*, void*);
 
+#ifdef ENGINE_DEBUG
 // Similar to assert(value) function. Forces the engine to exit with an error code. 
-// See errno.h for generic codes, and engine_error.h for engine specific errors.
 #define Engine_validate(check, errorcode) internal_Engine_validate((!(check))? true : false, errorcode);
 extern void internal_Engine_validate(bool check, ecode errorcode);
+#else
+// Similar to assert(value) function. Forces the engine to exit with an error code. 
+// Build configuration has debug disabled. See engine_error.h for engine specific errors.
+#define Engine_validate(check, errorcode) do { if (!(check)) { Engine_exit_forced(errorcode); } } while(0)
+#endif
 
 // Attempt graceful shutdown of the engine.
 extern void Engine_exit(ecode errorcode);

@@ -8,7 +8,6 @@
 #include "engine/engine.h"
 
 
-
 FrameData frame;
 
 
@@ -97,8 +96,7 @@ void internal_Engine_clear_mouse_data () {
 
 bool Engine_initialize(const int width, const int height, const char* tittle) {
 
-    Engine_validate(sizeof(char) == 1, -1);
-
+    Engine_validate(sizeof(char) == 1, ERROR_GENERIC);
 
     if (!glfwInit()) {
         goto InitFail;
@@ -292,26 +290,21 @@ void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsign
 #endif
 
 void Engine_exit(ecode errorcode) {
-#ifdef ENGINE_DEBUG
     Engine_log_errorcode(errorcode);
-#endif
     Engine_terminate();
     exit(errorcode);
 }
 
-
 void Engine_exit_forced(ecode errorcode) {
-#ifdef ENGINE_DEBUG
     Engine_log_errorcode(errorcode);
-#endif
     exit(errorcode);
 }
 
-void internal_Engine_validate(bool check, ecode errorcode) {
-    if (check) {
 #ifdef ENGINE_DEBUG
-        Engine_log_errorcode(errorcode);
-#endif
-        Engine_exit_forced(errorcode);
+void internal_Engine_validate(bool check, ecode errorcode) {
+    if (!check) {
+        return;
     }
+    Engine_exit_forced(errorcode);
 }
+#endif
