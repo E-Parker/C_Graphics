@@ -237,7 +237,8 @@ ItemNotFound:
     return false;
     
     // TODO: implement some system to handle correcting other items after one is removed since all colliding items have to move.
-
+    // Explore items after this item, checking that it has the same hash. Keep iterating until you find the last hash that is colliding, 
+    // replace the removed item with this hash, then zero its original spot.
 ItemFound:
     String_free_dirty(&table->keys[hash]);
 
