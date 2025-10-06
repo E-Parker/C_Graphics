@@ -41,7 +41,8 @@ void HashTable_resize(HashTable* table, const u64 capacity);
 bool internal_HashTable_find(const HashTable* table, const String key, void* out);
 
 // Get the value of what's stored in the HashTable by reference. These values should be only used temporarily, as the pointer will change if the table is reallocated.
-bool HashTable_find_reference(const HashTable* table, const String key, void** outVal);
+#define HashTable_find_reference(table, key, outVal) internal_HashTable_find_reference(table, key, (void**)(outVal))  
+bool internal_HashTable_find_reference(const HashTable* table, const String key, void** outVal);
 
 #define HashTable_array_iterator(table) u64 i = 0; i < (table)->slotsUsed; i++
 #define HashTable_array_at(T, table, i) (T*)(&(table)->values[(table)->activeIndicies[i] * ((table)->itemSize)])
@@ -50,6 +51,7 @@ bool HashTable_find_reference(const HashTable* table, const String key, void** o
 //#define HASH_TABLE_IMPLEMENTATION
 #ifdef HASH_TABLE_IMPLEMENTATION
 
+#include "engine_core/engine_error.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -332,7 +334,7 @@ bool internal_HashTable_find (const HashTable* table, const String key, void* ou
     return true;
 }
 
-bool HashTable_find_reference (const HashTable* table, const String key, void** outVal) {
+bool internal_HashTable_find_reference (const HashTable* table, const String key, void** outVal) {
     u64 hash = fnvHash64(key.start, key.end) % table->capacity;
     u64 originalHash = hash;
 

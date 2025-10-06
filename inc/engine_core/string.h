@@ -13,7 +13,7 @@ typedef struct String {
 } String;
 
 // Create a copy of a string on the heap. This is outside the normal use-cases for this string implementation. Use at your own risk!
-void String_create_dirty(String* source, String* destination);
+void String_create_dirty(const String* source, String* destination);
 
 // Only use to free strings created on the heap with the String_create_dirty method.
 void String_free_dirty(String* str);
@@ -46,13 +46,13 @@ void String_free_dirty(String* str);
 #define String_substring(source, start, end) { .start = (source).start + (u64)start, .end = (source).start + (u64)end }
 #define String_clone_substring(source, destination, start, end) internal_String_clone_substring (&source, &destination, (u64)start, (u64)end)
 
-bool internal_String_equal(String* left, String* right);
+bool internal_String_equal(const String* left, const String* right);
 
-void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end);
-void internal_String_clone_to_chars (String* string, char* destination);
+void internal_String_clone_substring (const String* source, String* destination, u64 start, u64 end);
+void internal_String_clone_to_chars (const String* string, char* destination);
 
-char* internal_String_first (String* string, char pattern);
-char* internal_String_last (String* string, char pattern);
+char* internal_String_first (const String* string, const char pattern);
+char* internal_String_last (const String* string, const char pattern);
 
 u64 fnvHash64 (const char* buffer, const char* const bufferEnd);
 char* FindBufferEnd (const char* buffer);

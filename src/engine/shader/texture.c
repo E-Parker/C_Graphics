@@ -3,9 +3,10 @@
 #include "stb_image.h"
 
 #include "stdio.h"
-#include "stdbool.h"
 #include "string.h"
 
+#include "engine_core/engine_types.h"
+#include "engine_core/engine_error.h"
 #include "engine_core/hash_table.h"
 #include "engine/shader/texture.h"
 

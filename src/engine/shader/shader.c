@@ -7,6 +7,7 @@
 #include "stdbool.h"
 #include "string.h"
 
+#include "engine_core/engine_error.h"
 #include "engine_core/hash_table.h"
 #include "engine_core/string.h"
 #include "engine/math.h"
@@ -18,7 +19,7 @@
 
 HashTable* UniformBufferTable = NULL;
 HashTable* ShaderProgramTable = NULL;
-HashTable* TextureTable = NULL;
+//HashTable* TextureTable = NULL;
 HashTable* ShaderCompilationTable = NULL;
 
 void InitShaders() {
@@ -495,7 +496,6 @@ void Shader_debug(const GLuint program) {
     int bufferLength = 0;
     glGetShaderInfoLog(program, 512, &bufferLength, buffer);
     printf(buffer);
-    free(buffer);
 }
 
 void Shader_set_uniform(const Shader* shader, const char* alias, void* data) {

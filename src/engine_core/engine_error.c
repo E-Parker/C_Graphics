@@ -2,8 +2,6 @@
 #ifdef ENGINE_DEBUG
 #include "stdio.h"
 
-#define case(e, str) case e: c = str; break;
-
 void internal_Engine_log_errorcode(ecode errorcode) {
 
 	// Zero value means no error.
@@ -16,96 +14,96 @@ void internal_Engine_log_errorcode(ecode errorcode) {
 	switch (errorcode) {
 	// Standard Errors:
 
-	case(EPERM,					"Operation not permitted.")
-	case(ENOENT,				"No such file or directory.")
-	case(ESRCH,					"No such process.")
-	case(EINTR,					"Interrupted system call.")
-	case(EIO,					"Input/output error.")
-	case(ENXIO,					"No such device or address.")
-	case(E2BIG,					"Argument list too long.")
-	case(ENOEXEC,				"Exec format error.")
-	case(EBADF,					"Bad file descriptor.")
-	case(ECHILD,				"No child processes.")
-	case(EAGAIN,				"Resource temporarily unavailable.")
-	case(ENOMEM,				"Cannot allocate memory.")
-	case(EACCES,				"Permission denied.")
-	case(EFAULT,				"Bad address.")
-	case(EBUSY,					"Device or resource busy.")
-	case(EEXIST,				"File exists.")
-	case(EXDEV,					"Invalid cross-device link.")
-	case(ENODEV,				"No such device.")
-	case(ENOTDIR,				"Not a directory.")
-	case(EISDIR,				"Is a directory.")
-	case(EINVAL,				"Invalid argument.")
-	case(ENFILE,				"Too many open files in system.")
-	case(EMFILE,				"Too many open files.")
-	case(ENOTTY,				"Inappropriate ioctl for device.")
-	case(ETXTBSY,				"Text file busy.")
-	case(EFBIG,					"File too large.")
-	case(ENOSPC,				"No space left on device.")
-	case(ESPIPE,				"Illegal seek.")
-	case(EROFS,					"Read-only file system.")
-	case(EMLINK,				"Too many links.")
-	case(EPIPE,					"Broken pipe.")
-	case(EDOM,					"Numerical argument out of domain.")
-	case(ERANGE,				"Numerical result out of range.")
-	case(EDEADLK,				"Resource deadlock avoided.")
-	case(ENAMETOOLONG,			"File name too long.")
-	case(ENOLCK,				"No locks available.")
-	case(ENOSYS,				"Function not implemented.")
-	case(ENOTEMPTY,				"Directory not empty.")
-	case(ELOOP	,				"Too many levels of symbolic links.")
-	case(ENOMSG,				"No message of desired type.")
-	case(EIDRM	,				"Identifier removed.")
-	case(ENOSTR,				"Device not a stream.")
-	case(ENODATA,				"No data available.")
-	case(ETIME	,				"Timer expired.")
-	case(ENOSR	,				"Out of streams resources.")
-	case(ENOLINK,				"Link has been severed.")
-	case(EPROTO,				"Protocol error.")
-	case(EBADMSG,				"Bad message.")
-	case(EOVERFLOW,				"Value too large for defined data type.")
-	case(EILSEQ,				"Invalid or incomplete multi-byte or wide character.")
-	case(ENOTSOCK,				"Socket operation on non-socket.")
-	case(EDESTADDRREQ,			"Destination address required.")
-	case(EMSGSIZE,				"Message too long.")
-	case(EPROTOTYPE,			"Protocol wrong type for socket.")
-	case(ENOPROTOOPT,			"Protocol not available.")
-	case(EPROTONOSUPPORT,		"Protocol not supported.")
-	case(EOPNOTSUPP,			"Operation not supported.")
-	case(EAFNOSUPPORT,			"Address family not supported by protocol.")
-	case(EADDRINUSE,			"Address already in use.")
-	case(EADDRNOTAVAIL,			"Cannot assign requested address.")
-	case(ENETDOWN,				"Network is down.")
-	case(ENETUNREACH,			"Network is unreachable.")
-	case(ENETRESET,				"Network dropped connection on reset.")
-	case(ECONNABORTED,			"Software caused connection abort.")
-	case(ECONNRESET,			"Connection reset by peer.")
-	case(ENOBUFS,				"No buffer space available.")
-	case(EISCONN,				"Transport endpoint is already connected.")
-	case(ENOTCONN,				"Transport endpoint is not connected.")
-	case(ETIMEDOUT,				"Connection timed out.")
-	case(ECONNREFUSED,			"Connection refused.")
-	case(EHOSTUNREACH,			"No route to host.")
-	case(EALREADY,				"Operation already in progress.")
-	case(EINPROGRESS,			"Operation now in progress.")
-	case(ECANCELED,				"Operation canceled.")
-	case(EOWNERDEAD,			"Owner died.")
-	case(ENOTRECOVERABLE,		"State not recoverable.")
-	case(ENOTSUP,				"Not supported parameter or option.")
+	case EPERM:					"Operation not permitted."; break;
+	case ENOENT:				"No such file or directory."; break;
+	case ESRCH:					"No such process."; break;
+	case EINTR:					"Interrupted system call."; break;
+	case EIO:					"Input/output error."; break;
+	case ENXIO:					"No such device or address."; break;
+	case E2BIG:					"Argument list too long."; break;
+	case ENOEXEC:				"Exec format error."; break;
+	case EBADF:					"Bad file descriptor."; break;
+	case ECHILD:				"No child processes."; break;
+	case EAGAIN:				"Resource temporarily unavailable."; break;
+	case ENOMEM:				"Cannot allocate memory."; break;
+	case EACCES:				"Permission denied."; break;
+	case EFAULT:				"Bad address."; break;
+	case EBUSY:					"Device or resource busy."; break;
+	case EEXIST:				"File exists."; break;
+	case EXDEV:					"Invalid cross-device link."; break;
+	case ENODEV:				"No such device."; break;
+	case ENOTDIR:				"Not a directory."; break;
+	case EISDIR:				"Is a directory."; break;
+	case EINVAL:				"Invalid argument."; break;
+	case ENFILE:				"Too many open files in system."; break;
+	case EMFILE:				"Too many open files."; break;
+	case ENOTTY:				"Inappropriate ioctl for device."; break;
+	case ETXTBSY:				"Text file busy."; break;
+	case EFBIG:					"File too large."; break;
+	case ENOSPC:				"No space left on device."; break;
+	case ESPIPE:				"Illegal seek."; break;
+	case EROFS:					"Read-only file system."; break;
+	case EMLINK:				"Too many links."; break;
+	case EPIPE:					"Broken pipe."; break;
+	case EDOM:					"Numerical argument out of domain."; break;
+	case ERANGE:				"Numerical result out of range."; break;
+	case EDEADLK:				"Resource deadlock avoided."; break;
+	case ENAMETOOLONG:			"File name too long."; break;
+	case ENOLCK:				"No locks available."; break;
+	case ENOSYS:				"Function not implemented."; break;
+	case ENOTEMPTY:				"Directory not empty."; break;
+	case ELOOP	:				"Too many levels of symbolic links."; break;
+	case ENOMSG:				"No message of desired type."; break;
+	case EIDRM	:				"Identifier removed."; break;
+	case ENOSTR:				"Device not a stream."; break;
+	case ENODATA:				"No data available."; break;
+	case ETIME	:				"Timer expired."; break;
+	case ENOSR	:				"Out of streams resources."; break;
+	case ENOLINK:				"Link has been severed."; break;
+	case EPROTO:				"Protocol error."; break;
+	case EBADMSG:				"Bad message."; break;
+	case EOVERFLOW:				"Value too large for defined data type."; break;
+	case EILSEQ:				"Invalid or incomplete multi-byte or wide character."; break;
+	case ENOTSOCK:				"Socket operation on non-socket."; break;
+	case EDESTADDRREQ:			"Destination address required."; break;
+	case EMSGSIZE:				"Message too long."; break;
+	case EPROTOTYPE:			"Protocol wrong type for socket."; break;
+	case ENOPROTOOPT:			"Protocol not available."; break;
+	case EPROTONOSUPPORT:		"Protocol not supported."; break;
+	//case EOPNOTSUPP:			"Operation not supported."; break;
+	case EAFNOSUPPORT:			"Address family not supported by protocol."; break;
+	case EADDRINUSE:			"Address already in use."; break;
+	case EADDRNOTAVAIL:			"Cannot assign requested address."; break;
+	case ENETDOWN:				"Network is down."; break;
+	case ENETUNREACH:			"Network is unreachable."; break;
+	case ENETRESET:				"Network dropped connection on reset."; break;
+	case ECONNABORTED:			"Software caused connection abort."; break;
+	case ECONNRESET:			"Connection reset by peer."; break;
+	case ENOBUFS:				"No buffer space available."; break;
+	case EISCONN:				"Transport endpoint is already connected."; break;
+	case ENOTCONN:				"Transport endpoint is not connected."; break;
+	case ETIMEDOUT:				"Connection timed out."; break;
+	case ECONNREFUSED:			"Connection refused."; break;
+	case EHOSTUNREACH:			"No route to host."; break;
+	case EALREADY:				"Operation already in progress."; break;
+	case EINPROGRESS:			"Operation now in progress."; break;
+	case ECANCELED:				"Operation canceled."; break;
+	case EOWNERDEAD:			"Owner died."; break;
+	case ENOTRECOVERABLE:		"State not recoverable."; break;
+	case ENOTSUP:				"Not supported parameter or option."; break;
 	// Engine Errors:
 	// 	   
 	//
-	case(ERROR_GENERIC,						"Generic program failure encountered.")
-	case(ERROR_BADPOINTER,					"Null pointer was encountered where it should have had a value.")
-	case(ERROR_BADVALUE,					"Encountered a nonsensical value.")
-	case(ERROR_IO_FILETOOBIG,				"Encountered error while reading file. File was too big to fit within buffer.")
-	case(ERROR_OBJECT_MISSING_PARENT,		"Object was initialized without a parent.")
-	case(ERROR_OBJECT_SELF_PARENT,			"Object was initialized to be parented to itself. Object will be discarded.")
-	case(ERROR_OBJECT_NULL_OBJECT,			"Object was null while initializing.")
-	case(ERROR_OBJECT_NAMETOBIG,			"Object name was too big to fit in the object header.")
-	case(ERROR_STRING_INVALIDSIZE,			"Tried to initialize a String with invalid size.")
-	case(ERROR_STRING_DSTTOOSMALL,			"Tried writing to a String which is too small to fit the contents.")
+	case ERROR_GENERIC:						"Generic program failure encountered."; break;
+	case ERROR_BADPOINTER:					"Null pointer was encountered where it should have had a value."; break;
+	case ERROR_BADVALUE:					"Encountered a nonsensical value."; break;
+	case ERROR_IO_FILETOOBIG:				"Encountered error while reading file. File was too big to fit within buffer."; break;
+	case ERROR_OBJECT_MISSING_PARENT:		"Object was initialized without a parent."; break;
+	case ERROR_OBJECT_SELF_PARENT:			"Object was initialized to be parented to itself. Object will be discarded."; break;
+	case ERROR_OBJECT_NULL_OBJECT:			"Object was null while initializing."; break;
+	case ERROR_OBJECT_NAMETOBIG:			"Object name was too big to fit in the object header."; break;
+	case ERROR_STRING_INVALIDSIZE:			"Tried to initialize a String with invalid size."; break;
+	case ERROR_STRING_DSTTOOSMALL:			"Tried writing to a String which is too small to fit the contents."; break;
 	
 	default: c = " ..."; break;
 	}
@@ -114,4 +112,4 @@ void internal_Engine_log_errorcode(ecode errorcode) {
 }
 #endif
 
-#undef case
+#undef Case

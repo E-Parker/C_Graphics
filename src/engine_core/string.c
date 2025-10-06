@@ -3,7 +3,7 @@
 #include "engine_core/engine_error.h"
 #include "engine_core/string.h"
 
-void String_create_dirty(String* source, String* destination) {
+void String_create_dirty(const String* source, String* destination) {
 
     if (!source->end || !source->start) {
         return;
@@ -26,7 +26,7 @@ void String_free_dirty(String* str) {
 }
 
 
-bool internal_String_equal(String* left, String* right) {
+bool internal_String_equal(const String* left, const String* right) {
     if (!left || !right) {
         return false;
     }
@@ -35,8 +35,8 @@ bool internal_String_equal(String* left, String* right) {
         return false;
     }
     
-    char* l = left->start;
-    char* r = right->start;
+    char* l = (char*)left->start;
+    char* r = (char*)right->start;
 
     for (; l < left->end; ++l, ++r) {
         if ((*l - *r)) {
@@ -47,7 +47,7 @@ bool internal_String_equal(String* left, String* right) {
     return true;
 }
 
-void internal_String_clone_substring (String* source, String* destination, u64 start, u64 end) {
+void internal_String_clone_substring (const String* source, String* destination, u64 start, u64 end) {
     Engine_validate(start < end, ERROR_STRING_INVALIDSIZE);
     Engine_validate(end <= String_length(*destination) && start < String_length(*destination), ERROR_STRING_DSTTOOSMALL);
 
@@ -62,7 +62,7 @@ void internal_String_clone_substring (String* source, String* destination, u64 s
 }
 
 
-void String_clone_to_String (String* source, String* destination) {
+void String_clone_to_String (const String* source, String* destination) {
     if (source == destination) {
         return;
     }
@@ -82,7 +82,7 @@ void String_clone_to_String (String* source, String* destination) {
 }
 
 
-void internal_String_clone_to_chars (String* string, char* destination) {
+void internal_String_clone_to_chars (const String* string, char* destination) {
     char* dst = destination;
     char* src = string->start;
     for (; src <= string->end; ++src, ++dst) {
@@ -92,7 +92,7 @@ void internal_String_clone_to_chars (String* string, char* destination) {
     *dst = '\0';
 }
 
-char* internal_String_first (String* string, char pattern) {
+char* internal_String_first (const String* string, const char pattern) {
     char* buffer = string->start;
     while (buffer != string->end) {
         if (*buffer == pattern) {
@@ -104,7 +104,7 @@ char* internal_String_first (String* string, char pattern) {
 }
 
 
-char* internal_String_last (String* string, char pattern) {
+char* internal_String_last (const String* string, const char pattern) {
     char* buffer = string->start;
     char* match = NULL;
     while (buffer != string->end) {

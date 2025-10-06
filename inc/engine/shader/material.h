@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdint.h"
+#include "engine_core/engine_types.h"
 
 // Forward Declarations
 typedef struct HashTable HashTable;

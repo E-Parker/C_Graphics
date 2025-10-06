@@ -48,7 +48,7 @@ extern const u8 Object_TypeSkinnedMesh;
 extern const u8 Object_TypeText;
 
 typedef ecode	(*Function_Errorcode_NoParam)	();
-typedef u8		(*Function_Tick)				(void*, const double);
+typedef ecode	(*Function_Tick)				(void*, const double);
 typedef i32		(*Function_i32_NoParam)			();
 typedef i64		(*Function_i64_NoParam)			();
 typedef u32		(*Function_u32_NoParam)			();

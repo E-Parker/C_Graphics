@@ -1,10 +1,11 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
 
+#include "engine_core/engine_types.h"
+#include "engine_core/engine_error.h"
 #include "engine_core/hash_table.h"
 #include "engine_core/engine_shader.h"
 
@@ -33,6 +34,7 @@ Material* Material_create (const MaterialDescriptor descriptor) {
     
     if(newMaterial->TextureCount != 0) {
         newMaterial->TextureAliases = (String*)calloc(descriptor.textureCount, sizeof(String));
+        Engine_validate(newMaterial->TextureAliases, ENOMEM);
         for (u64 i = 0; i < newMaterial->TextureCount; ++i) {
             String currentAlias = String_from_ptr(descriptor.textures[i]);
             String_create_dirty(&currentAlias, &newMaterial->TextureAliases[i]);

@@ -63,7 +63,7 @@ void Object_Camera_recalulate_view(Camera* camera) {
 
 }
 
-u8 Object_Camera_update_noclip(void* object, const double deltaTime) {
+ecode Object_Camera_update_noclip(void* object, const double deltaTime) {
 
     Camera* camera = (Camera*)object;
 
