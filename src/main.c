@@ -15,7 +15,6 @@
 
 
 int main(void) {
-    
     // Initialize the window to the starting size and set the header.
     if (!Engine_initialize(640, 400, "Delta Render"));
     InitShaders();

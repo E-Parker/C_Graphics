@@ -95,8 +95,11 @@ void internal_Engine_clear_mouse_data () {
 }
 
 bool Engine_initialize(const int width, const int height, const char* tittle) {
-
-    Engine_validate(sizeof(char) == 1, ERROR_GENERIC);
+    
+    Engine_validate(sizeof(i8) == sizeof(u8) && sizeof(u8) == 1, ERROR_INTSIZE);
+    Engine_validate(sizeof(i16) == sizeof(u16) && sizeof(u16) == 2, ERROR_INTSIZE);
+    Engine_validate(sizeof(i32) == sizeof(u32) && sizeof(u32) == 4, ERROR_INTSIZE);
+    Engine_validate(sizeof(i64) == sizeof(u64) && sizeof(u64) == 8, ERROR_INTSIZE);
 
     if (!glfwInit()) {
         goto InitFail;
