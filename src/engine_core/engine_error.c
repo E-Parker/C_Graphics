@@ -112,5 +112,3 @@ void internal_Engine_log_errorcode(ecode errorcode) {
 	printf("ERROR: %s\n", c);
 }
 #endif
-
-#undef Case
