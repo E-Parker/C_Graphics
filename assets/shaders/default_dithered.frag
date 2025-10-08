@@ -118,14 +118,15 @@ void main() {
     int roundedTime = int(v_time * 8.0);
 
     vec2 hashInput = vec2(float(roundedTime) * 7.0, float(roundedTime) * 11.0);
-    vec3 offset = hash32(hashInput) * 16.0; 
+    vec3 hashOutput = hash32(hashInput + (gl_FragCoord.xy * 0.1)); 
+    float offset = ((hashOutput.x * hashOutput.y * hashOutput.z) * 0.2) + 0.8;
 
-    int x = int(mod(gl_FragCoord.x + offset.x, 16.0));
-	int y = int(mod(gl_FragCoord.y + offset.y, 16.0));
+    int x = int(mod(gl_FragCoord.x, 16.0));
+	int y = int(mod(gl_FragCoord.y, 16.0));
 
 	float limit = (float(dither_table[x + y * 16] + 1.)) / 256.0;
     
-    if (textureAlbedo.a < limit) {
+    if ((textureAlbedo.a) < limit * offset) {
         discard; 
     }
 
