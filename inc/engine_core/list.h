@@ -62,9 +62,9 @@ List* List_create_subset(List* list, u32 start, u32 end);
 // Creates T* variable, it, which is the current item in the loop. This will be a little faster than using List_at().
 // If you are using function pointers, de-reference it before calling.
 #define List_iterator(T, list) T* it = (T*)(list)->tail; (u8*)it != (list)->head; internal_List_getNextPtr(T, list, it)
-//#define List_iterator_to(T, list, end) T* it = (T*)(list)->head; (void*)it != List_at(list, (u32)end); internal_List_getPrevPtr(T, list, it)
-//#define List_iterator_from(T, list, start) T* it = (T*)List_at(list, start); (u8*)it != (list)->tail; internal_List_getPrevPtr(T, list, it)
-//#define List_iterator_range(T, list, start, end) T* it = (T*)List_at(list, start); (void*)it != List_at(list, (u32)end); internal_List_getPrevPtr(T, list, it) 
+#define List_iterator_to(T, list, end) T* it = (T*)(list)->head; (void*)it != List_at(list, (u32)end); internal_List_getNextPtr(T, list, it)
+#define List_iterator_from(T, list, start) T* it = (T*)List_at(list, start); (u8*)it != (list)->tail; internal_List_getNextPtr(T, list, it)
+#define List_iterator_range(T, list, start, end) T* it = (T*)List_at(list, start); (void*)it != List_at(list, (u32)end); internal_List_getNextPtr(T, list, it) 
 
 #define List_push_front(list, Data) internal_List_push_front((list), (void*)&Data)
 #define List_push_back(list, Data) internal_List_push_back((list), (void*)&Data)
@@ -407,14 +407,15 @@ void List_remove_at(List* list, const u64 index) {
     //
 
     // Check that i is valid.
-    if (index > List_count(list)) {
+    u64 count = List_count(list);
+    if (index > count) {
         return;
     }
 
     void* currentIndex = List_at(list, index);
     void* nextIndex = NULL;
 
-    for (u64 i = index; i < list->capacity - 1; i++) {
+    for (u64 i = index; i < count - 1; i++) {
         nextIndex = List_at(list, i + 1);                               // Get the address of the next item.
         internal_list_copy(currentIndex, nextIndex, list->itemSize);    // Using internal_list_copy here since we don't know the type stored, only how many bytes it is. 
         currentIndex = nextIndex;

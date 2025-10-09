@@ -31,6 +31,8 @@ void Object_StaticMesh_destroy(void* object) {
 
     List_deinitialize(&mesh->meshRenders);
     List_deinitialize(&mesh->materials);    // Materials are managed externally.
+
+    free(mesh);
 }
 
 
@@ -84,6 +86,8 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
 void Object_StaticMesh_Draw(void* object) {
     StaticMesh* staticMesh = (StaticMesh*)object;
     for (List_iterator(MeshRender, &staticMesh->meshRenders)) {
+        //mat4 Transform;
+        //Object_get_world_space_transform(object, Transform); 
         DrawRenderable(it, *(Material**)List_at(&staticMesh->materials, it->materialIndex), staticMesh->Transform);
     }
 }

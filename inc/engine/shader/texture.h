@@ -1,5 +1,8 @@
 #pragma once
 
+#include "glad/glad.h"
+
+#include "engine_core/engine_types.h"
 #include "engine_core/string.h"
 
 typedef struct HashTable Hashtable;

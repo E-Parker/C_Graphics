@@ -32,7 +32,7 @@ void internal_program_uniformStruct_parse(const GLuint program, const u16 unifor
 
 #define Shader_create(alias, ...)  do { ShaderDescriptor args[] = { __VA_ARGS__, {"", 0, 0} }; internal_Shader_create(internal_ShaderProgram_CompileProgram(args), alias); } while(false) 
 
-void internal_Shader_create(const GLuint program, const char* alias);
+void internal_Shader_create (const GLuint program, const char* alias);
 void Shader_delete (const char* alias);
 void Shader_delete_String (String alias);
 

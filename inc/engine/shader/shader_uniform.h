@@ -50,8 +50,8 @@ typedef struct Uniform {
     void* Data;
 } Uniform;
 
-Uniform* internal_Uniform_create_shared(const UniformInformation* info, void* sharedBuffer);
-Uniform* internal_Uniform_create(const UniformInformation* info);
+Uniform* internal_Uniform_create_shared(const UniformInformation info, void* sharedBuffer);
+Uniform* internal_Uniform_create(const UniformInformation info);
 
 void internal_Uniform_set_data(Uniform* uniform, void* data);
 void internal_Uniform_set_at(Uniform* uniform, u32 i, void* data);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "glad/glad.h"
-#include "GLFW/glfw3.h"
 
 #define GL_SHADER_MAX_DESCRIPTORS 0x10 
 #define GL_ERROR_LOG_SIZE 0x400

@@ -68,7 +68,7 @@ void Material_destroy (Material** material) {
         free((*material)->TextureAliases);
     }
     
-    Shader_delete_String((*material)->ShaderAlias);
+    //Shader_delete_String((*material)->ShaderAlias);
     String_free_dirty(&(*material)->ShaderAlias);
 
     free(*material);

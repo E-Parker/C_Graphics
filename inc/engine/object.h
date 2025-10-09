@@ -48,6 +48,8 @@ ecode InitObjects();
 
 #define Object_IsType(object, Type) ((*((Object*)object)->Type) == Type)
 
+Object* Object_create(void* parent);
+
 ecode   internal_Object_Initialize (void* objectPtr, void* parentPtr, const u8 type);
 void    internal_Object_Deinitialize (void* objectPtr);
 void    internal_Object_DestroyDefault (void* objectPtr);

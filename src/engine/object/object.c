@@ -13,6 +13,11 @@ ecode InitObjects() {
     return 0;
 }
 
+Object* Object_create(void* parent) {
+    OBJECT_CREATE_BODY(Object, parent, Object_TypeNone);
+    return object;
+}
+
 ecode internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type) {
 
     // Perform blind cast to object. All object types have the same header alignment so this is safe, assuming an object is passed in here.
@@ -42,6 +47,10 @@ ecode internal_Object_Initialize(void* objectPtr, void* parentPtr, const u8 type
     
     if (parent) {
         List_push_back(&parent->Children, object);
+        object->internal_IndexOf = List_count(&parent->Children);
+    }
+    else {
+        object->internal_IndexOf = 0;
     }
 
     List_initialize(Object*, &object->Children, 16);
@@ -56,24 +65,26 @@ ObjectInitFail:
     return errorCode;
 }
 
-
 void internal_Object_Deinitialize(void* objectPtr) {
     Object* object = (Object*)objectPtr;
     
+
     // TODO: come up with a better solution.
     // This is okay, but maybe sort of bad because recursion. 
     // Could potentially blow up the stack.
-    for(u64 i = 0; i < List_count(&object->Children); i++) {
+    u64 childCount = List_count(&object->Children);
+    for(u64 i = 0; i < childCount; i++) {
         Object* childObject;
-        List_pop_front(&object->Children, childObject);
+        List_peak_front(&object->Children, childObject);
         childObject->Destroy(childObject);
     }
+
+    Object_set_parent(objectPtr, NULL);
 }
 
 
 void internal_Object_DestroyDefault (void* objectPtr) {
-    Object* object = (Object*)objectPtr;
-    internal_Object_Deinitialize(objectPtr);
+    OBJECT_DESTROY_BODY(objectPtr)
     free(objectPtr);
 }
 

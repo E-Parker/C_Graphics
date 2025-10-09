@@ -69,21 +69,21 @@ int main(void) {
     });
 
     // Create shaders:
-    Shader_create("NormalShader",
-        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
-        { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
-    );
-
     Shader_create("DefaultShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER},
         { .path = "./assets/shaders/default_dithered.frag", .type = GL_FRAGMENT_SHADER }
+    );
+   
+    Shader_create("NormalShader",
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
+        { .path = "./assets/shaders/normal_color.frag", .type = GL_FRAGMENT_SHADER }
     );
 
     Shader_create("DitherShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/dithered_alpha.frag", .type = GL_FRAGMENT_SHADER }
     );
-    
+
     Shader_create("TCoordShader",
         { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/tcoord_color.frag", .type = GL_FRAGMENT_SHADER }
@@ -114,16 +114,17 @@ int main(void) {
     });
     
     Camera* mainCamera = Object_Camera_create();
-    StaticMesh* groundMesh = Object_StaticMesh_create("./assets/meshes/ground.bin", NULL);
-    StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
-    StaticMesh* mesh1 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
-    StaticMesh* mesh2 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
-    StaticMesh* mesh3 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", NULL);
-    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/arrow.bin", NULL);
-    
     vec3 cameraDefaultPos = { 0.0f, -1.0f, -1.0f };
     mat4_translate(cameraDefaultPos, mainCamera->Transform);
 
+    Object* root = Object_create(NULL);
+    StaticMesh* groundMesh = Object_StaticMesh_create("./assets/meshes/ground.bin", root);
+    StaticMesh* mesh0 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", root);
+    StaticMesh* mesh1 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", root);
+    StaticMesh* mesh2 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", root);
+    StaticMesh* mesh3 = Object_StaticMesh_create("./assets/meshes/mushroom.bin", root);
+    StaticMesh* lightVis = Object_StaticMesh_create("./assets/meshes/arrow.bin", root);
+    
     Object_StaticMesh_set_Material(mesh0, 0, Dither);
     Object_StaticMesh_set_Material(mesh1, 0, Mat1);
     Object_StaticMesh_set_Material(mesh2, 0, Mat1);
@@ -220,8 +221,6 @@ int main(void) {
         mat4_lookat(lightPos, V3_ZERO, V3_UP, lightVis->Transform);
         mat4_inverse(lightVis->Transform, lightVis->Transform);
 
-        //UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position", 1, &lightPos);
-
         mainCamera->Tick(mainCamera, DeltaTime());
 
         vec3 cameraPos;
@@ -237,12 +236,12 @@ int main(void) {
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    0, &lightDir);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        0, &lightColor4);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  0, &lightRadius4);
-
+        
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "position",     1, &lightPos);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "direction",    1, &lightDir);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "color",        1, &lightColor);
         UniformBuffer_set_Struct_at_Global("LightData", "u_Lights", "attenuation",  1, &lightRadius);
-
+        
         UniformBuffer_set_Global("FrameData", "u_view", mainCamera->ViewMatrix);
         UniformBuffer_set_Global("FrameData", "u_position", cameraPos);
         UniformBuffer_set_Global("FrameData", "u_direction", cameraDir);
@@ -259,14 +258,14 @@ int main(void) {
        
         //SetText(testText,"This is a test.", x, y, static_cast<float>(WindowWidth()), static_cast<float>(WindowHeight()), 2.0f);
         //DrawTextMesh(testText, mainCamera, AspectRatio());
+        //groundMesh->Destroy(groundMesh);
+        //groundMesh = Object_StaticMesh_create("./assets/meshes/ground.bin", root);
+        //Object_StaticMesh_set_Material(groundMesh, 0, Mat0);
+
     }
-    
+
     mainCamera->Destroy(mainCamera);
-    mesh0->Destroy(mesh0);
-    mesh1->Destroy(mesh1);
-    mesh2->Destroy(mesh2);
-    mesh3->Destroy(mesh3);
-    lightVis->Destroy(lightVis);
+    root->Destroy(root);
 
     Material_destroy(&Mat0); 
     Material_destroy(&Mat1); 

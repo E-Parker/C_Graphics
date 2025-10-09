@@ -157,4 +157,5 @@ void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4
 
     // unbind the VAO.
     glBindVertexArray(GL_NONE);
+    glUseProgram(GL_NONE);
 }

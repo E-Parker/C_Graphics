@@ -44,7 +44,7 @@ bool internal_HashTable_find(const HashTable* table, const String key, void* out
 #define HashTable_find_reference(table, key, outVal) internal_HashTable_find_reference(table, key, (void**)(outVal))  
 bool internal_HashTable_find_reference(const HashTable* table, const String key, void** outVal);
 
-#define HashTable_array_iterator(table) u64 i = 0; i < (table)->slotsUsed; i++
+#define HashTable_array_iterator(table) u64 i = 0; i < (table)->slotsUsed; ++i
 #define HashTable_array_at(T, table, i) (T*)(&(table)->values[(table)->activeIndicies[i] * ((table)->itemSize)])
 #define HashTable_array_key_at(table, i) (&(table)->keys[(table)->activeIndicies[i]])
 
@@ -176,7 +176,6 @@ void HashTable_deinitialize (HashTable* table) {
     free(table->values);
 }
 
-//#include "stdio.h"
 
 void HashTable_insert (HashTable* table, const String key, void* value) {
     // if out of space, increase size by 1.5.
@@ -187,11 +186,9 @@ void HashTable_insert (HashTable* table, const String key, void* value) {
     u64 hash = fnvHash64(key.start, key.end) % table->capacity;
     u64 originalHash = hash;
 
-    //printf("insert\t c %u h %u, l %u, %s \n", table->capacity, hash, String_length(key), key.start);
-
     // Check for collisions. Insert at the next free location.
-    while (table->keys[hash].start) {
-
+    // TODO: come up with something less retarded. Using max 64 bit unsigned int to check for collisions.
+    while (table->keys[hash].start && table->keys[hash].start != ~0) {
         // index already exists. Overwrite.
         if (String_equal(key, table->keys[hash])) {
             goto WriteValue;
@@ -204,7 +201,7 @@ void HashTable_insert (HashTable* table, const String key, void* value) {
             Engine_exit_forced(-1);
         }
     }
-    
+
     // Allocate and copy the string across.
     String_create_dirty(&key, &(table->keys[hash]));
 
@@ -238,13 +235,9 @@ bool HashTable_remove (HashTable* table, const String key) {
 ItemNotFound:
     return false;
     
-    // TODO: implement some system to handle correcting other items after one is removed since all colliding items have to move.
-    // Explore items after this item, checking that it has the same hash. Keep iterating until you find the last hash that is colliding, 
-    // replace the removed item with this hash, then zero its original spot.
-    //
-    // Actually wait this is dumb af. might have to just do this with Separate Chaining. That way I could allocate it as a single block.
 ItemFound:
     String_free_dirty(&table->keys[hash]);
+    table->keys[hash].start = ~0;   // TODO: come up with something less retarded. Using max 64 bit unsigned int to check for collisions.
 
     u64 i = 0;
     for (; i < table->slotsUsed; i++) {
@@ -258,7 +251,6 @@ ItemFound:
     table->slotsUsed--;
     return true;
 }
-
 
 void HashTable_resize (HashTable* table, const u64 size) {
     // Resize a hash table to the nearest power of 2 to the size provided. (values less than 16 will be rounded up to 16).
@@ -283,9 +275,8 @@ void HashTable_resize (HashTable* table, const u64 size) {
     for (HashTable_array_iterator(table)) {
         void* value = HashTable_array_at(void, table, i);
         String* key = HashTable_array_key_at(table, i);
-
         u64 hash = fnvHash64(key->start, key->end) % capacity;
-        u64 oldHash = fnvHash64(key->start, key->end) % table->capacity;
+        u64 oldHash = table->activeIndicies[i];
         u64 originalHash = hash;
 
         while (keys[hash].start) {
@@ -338,9 +329,7 @@ bool internal_HashTable_find_reference (const HashTable* table, const String key
     u64 hash = fnvHash64(key.start, key.end) % table->capacity;
     u64 originalHash = hash;
 
-    //printf("find\t c %u h %u, l %u, %s \n", table->capacity, hash, String_length(key), key.start);
-
-    if (String_invalid(table->keys[hash])) {
+    if (!table->keys[hash].start) {
         goto ItemNotFound;
     }
 
@@ -362,7 +351,7 @@ ItemNotFound:
     return false;
 
 ItemFound:
-    if (outVal) *outVal = (void*)(&table->values[hash * table->itemSize]);
+    if (outVal) *outVal = (void*)(&(table->values[hash * table->itemSize]));
     return true;
 }
 
