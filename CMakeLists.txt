@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.6)
 
 # Set the project name
-project(OpenGL_Build)
+project(OpenGL_Build C)
 
 # Specify the C standard
-set(CMAKE_C_STANDARD 17)
-set(CMAKE_C_STANDARD_REQUIRED TRUE)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Add the cmake directory to the module path
@@ -48,6 +48,12 @@ set_property( DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJEC
 
 # Add source files to the executable so that the linker knows where to look for them
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    C_STANDARD 99
+    C_STANDARD_REQUIRED ON
+    C_EXTENSIONS OFF
+)
 
 # Link together the external libraries and make it accessible to the compiler
 target_link_libraries(

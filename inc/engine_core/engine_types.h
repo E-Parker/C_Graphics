@@ -19,9 +19,11 @@ typedef uint32_t			u32;
 typedef uint64_t			u64;
 typedef uint8_t				u8;
 #else
+
 #define bool _Bool
 #define true 1
 #define false 0
+
 // Windows 32 but or 64 bit:
 #ifdef _WIN32
 typedef signed char			i8;
@@ -34,6 +36,7 @@ typedef unsigned short		u16;
 typedef unsigned long		u32;
 typedef unsigned long long	u64;
 #else
+
 // Linux / Unix / Mac / BSD
 typedef signed char			i8;
 typedef short				ecode;
@@ -45,6 +48,7 @@ typedef unsigned short		u16;
 typedef unsigned int		u32;
 typedef unsigned long 	    u64;
 #endif
+
 #endif
 
 typedef struct List List;
