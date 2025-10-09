@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine_core/configuation.h"
 #include "engine_core/engine_types.h"
 #include "errno.h"
 
@@ -20,12 +19,11 @@
 #define ERROR_STRING_INVALIDSIZE    0x0095 
 #define ERROR_STRING_DSTTOOSMALL    0x0096	
 
-
 #ifdef ENGINE_DEBUG
 // Log to the standard output an error message associated with the error code given. Does nothing if error code is 0.
 #define Engine_log_errorcode(errorcode) internal_Engine_log_errorcode((ecode)errorcode)
 void internal_Engine_log_errorcode(ecode errorcode);
 #else
-// Build configuration has debug disabled. All calls to this function will be removed. 
-#define Engine_log_errorcode(errorcode) do {} while(0)
+// Build configuration has debug disabled. Calls to this function will be removed. 
+#define Engine_log_errorcode(errorcode) 
 #endif

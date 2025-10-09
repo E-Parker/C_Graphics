@@ -23,7 +23,7 @@ const GLchar* gl_srcBuffer = (GLchar*)srcBuffer;
 
 void internal_ReadShaderProgramSource(const char* path) {
     if (srcBufferWall) {
-        printf("Shader load warning: Last source file was not handled / received correctly.\n");
+        Engine_log("Shader load warning: Last source file was not handled / received correctly.\n");
     }
     
     FILE* file = fopen(path, "r");
@@ -47,15 +47,15 @@ void internal_ReadShaderProgramSource(const char* path) {
     srcBufferWall = false;
     switch (errorCode) {
     case ERROR_BADPOINTER: 
-        printf("Shader load error: source file \"%s\" not found or inaccessible.\n", path);
+        Engine_log("Shader load error: source file \"%s\" not found or inaccessible.\n", path);
         break;
     
     case ERROR_IO_FILETOOBIG:
-        printf("Shader load error: source file \"%s\" was too large to fit in a buffer.\n", path);
+        Engine_log("Shader load error: source file \"%s\" was too large to fit in a buffer.\n", path);
         break;
 
     default:
-        printf("Shader load error: Something went wrong reading file, \"%s\". Discarding shader.\n", path);
+        Engine_log("Shader load error: Something went wrong reading file, \"%s\". Discarding shader.\n", path);
         Engine_log_errorcode(errorCode);
         break;
     }
@@ -101,7 +101,7 @@ bool ShaderProgram_CompileProgramValidate(ShaderDescriptor* args) {
         strcat(log, "\n");
     }
     
-    printf("\n======================= START OF LOG =======================\n\
+    Engine_log("\n======================= START OF LOG =======================\n\
             Shader compile error: A ShaderDiscriptor list was too large or malformed!\n\
             The args provided were:\n%s\
             \n======================== END OF LOG ========================\n\
@@ -163,7 +163,7 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
     // Shader program compile / link failed for some reason, clear the program and log the error.
     glGetProgramInfoLog(program, GL_ERROR_LOG_SIZE, &dummyLength, log);
 
-    printf("\n======================= START OF LOG =======================\n\
+    Engine_log("\n======================= START OF LOG =======================\n\
             Shader compile error: Could not link shader program.\n%s\n\
             Log for individual shader(s):\n",\
             log);
@@ -190,19 +190,19 @@ GLuint internal_ShaderProgram_CompileProgram(ShaderDescriptor* args) {
         // Display the shader path, type, and error log for the shader which failed.
         PrintLog:
         memset(&log, '\0', GL_ERROR_LOG_SIZE);
-        printf("Shader Path:\n%s\n", it->path);
+        Engine_log("Shader Path:\n%s\n", it->path);
 
         switch (it->type) {
-            case GL_VERTEX_SHADER: printf("Failure in Vertex shader:\n%s", log);
-            case GL_TESS_CONTROL_SHADER: printf("Failure in Tessellation shader:\n%s", log);
-            case GL_TESS_EVALUATION_SHADER: printf("Failure in Evaluation shader:\n%s", log);
-            case GL_GEOMETRY_SHADER: printf("Failure in Geometry shader:\n%s", log);
-            case GL_FRAGMENT_SHADER: printf("Failure in Fragment shader:\n%s", log);
-            case GL_COMPUTE_SHADER: printf("Failure in Compute shader:\n%s", log);
-            default: printf("Unknown shader type.\n%s", log);
+            case GL_VERTEX_SHADER: Engine_log("Failure in Vertex shader:\n%s", log);
+            case GL_TESS_CONTROL_SHADER: Engine_log("Failure in Tessellation shader:\n%s", log);
+            case GL_TESS_EVALUATION_SHADER: Engine_log("Failure in Evaluation shader:\n%s", log);
+            case GL_GEOMETRY_SHADER: Engine_log("Failure in Geometry shader:\n%s", log);
+            case GL_FRAGMENT_SHADER: Engine_log("Failure in Fragment shader:\n%s", log);
+            case GL_COMPUTE_SHADER: Engine_log("Failure in Compute shader:\n%s", log);
+            default: Engine_log("Unknown shader type.\n%s", log);
         }
     }
-    printf("\n======================== END OF LOG ========================\n");
+    Engine_log("\n======================== END OF LOG ========================\n");
     return GL_NONE;
 }
 

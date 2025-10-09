@@ -88,7 +88,7 @@ void Object_StaticMesh_Draw(void* object) {
     for (List_iterator(MeshRender, &staticMesh->meshRenders)) {
         //mat4 Transform;
         //Object_get_world_space_transform(object, Transform); 
-        DrawRenderable(it, *(Material**)List_at(&staticMesh->materials, it->materialIndex), staticMesh->Transform);
+        DrawRenderable(it, *List_at(Material*, &staticMesh->materials, it->materialIndex), staticMesh->Transform);
     }
 }
 
@@ -98,7 +98,7 @@ void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, M
         return;
     }
 
-    MeshRender* mesh = (MeshRender*)List_at(&staticMesh->meshRenders, subMesh);
+    MeshRender* mesh = List_at(MeshRender, &staticMesh->meshRenders, subMesh);
 
     if (!mesh) {
         return;

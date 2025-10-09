@@ -10,17 +10,22 @@
 #include "stdint.h"
 #include "stdbool.h"
 typedef uint8_t				i8;
+typedef int16_t				ecode;
+typedef int16_t				i16;
+typedef int32_t				i32;
+typedef int64_t				i64;
 typedef uint16_t			u16;
 typedef uint32_t			u32;
 typedef uint64_t			u64;
 typedef uint8_t				u8;
-typedef int16_t				i16;
-typedef int32_t				i32;
-typedef int64_t				i64;
 #else
+#define bool _Bool
+#define true 1
+#define false 0
 // Windows 32 but or 64 bit:
 #ifdef _WIN32
 typedef signed char			i8;
+typedef short				ecode;
 typedef short				i16;
 typedef long				i32;
 typedef long long			i64;
@@ -31,6 +36,7 @@ typedef unsigned long long	u64;
 #else
 // Linux / Unix / Mac / BSD
 typedef signed char			i8;
+typedef short				ecode;
 typedef short				i16;
 typedef int				    i32;
 typedef long 			    i64;
@@ -39,15 +45,6 @@ typedef unsigned short		u16;
 typedef unsigned int		u32;
 typedef unsigned long 	    u64;
 #endif
-#endif
-
-typedef i16 ecode;
-
-#ifndef _STDBOOL
-#define bool _Bool
-#define true 1
-#define false 0
-#define _STDBOOL
 #endif
 
 typedef struct List List;
@@ -73,6 +70,20 @@ typedef void	(*Function_Void_OneParam)		(void*);
 typedef void	(*Function_Void_TwoParam)		(void*, void*);
 typedef void	(*Function_Void_ThreeParam)		(void*, void*, void*);
 typedef void	(*Function_Void_FourParam)		(void*, void*, void*, void*);
+
+#ifdef USE_MEMCPY
+#define Engine_copy(dst, src, size) memcpy(dst, str, size)
+#else
+#define Engine_copy(dst, src, size) for (u64 enigne_copy_iterator = 0; enigne_copy_iterator < size; ++enigne_copy_iterator) { (u8*)(dst)[enigne_copy_iterator] = (u8*)(src)[enigne_copy_iterator]; } 
+#endif
+
+#ifdef ENGINE_LOG
+#include "stdio.h"
+#define Engine_log(...) printf(__VA_ARGS__)
+#else
+#define Engine_log(...) 
+#endif
+
 
 #ifdef ENGINE_DEBUG
 // Similar to assert(value) function. Forces the engine to exit with an error code. 

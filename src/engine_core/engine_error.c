@@ -13,7 +13,6 @@ void internal_Engine_log_errorcode(ecode errorcode) {
 
 	switch (errorcode) {
 	// Standard Errors:
-
 	case EPERM:					c = "Operation not permitted."; break;
 	case ENOENT:				c = "No such file or directory."; break;
 	case ESRCH:					c = "No such process."; break;
@@ -109,6 +108,6 @@ void internal_Engine_log_errorcode(ecode errorcode) {
 	default: c = " ..."; break;
 	}
 	
-	printf("ERROR: %s\n", c);
+	Engine_log("ERROR: %s\n", c);
 }
 #endif

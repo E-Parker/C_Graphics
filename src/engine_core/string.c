@@ -9,7 +9,7 @@ void String_create_dirty(const String* source, String* destination) {
         return;
     }
 
-#ifdef STRING_USE_CSTR_REDUNDANCY
+#ifdef USE_CSTR_REDUNDANCY
     destination->start = (char*)calloc(String_length(*source) + 1, sizeof(char));
 #else
     destination->start = (char*)malloc(String_length(*source));

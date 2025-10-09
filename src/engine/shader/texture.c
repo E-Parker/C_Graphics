@@ -40,7 +40,7 @@ ecode DereferenceTextures() {
 }
 
 
-void internal_Texture_extend_alias(const char* alias, String* out) {
+void internal_Texture_extend_alias (const char* alias, String* out) {
     String aliasAsString = String_from_ptr(alias);
     u64 aliasLength = String_length(aliasAsString);
     char* extendedAliasBuffer = (char*)calloc(aliasLength + 65, 1);
@@ -101,7 +101,7 @@ void Texture_delete_String(String alias) {
     Texture* texture;
 
     if (!HashTable_find_reference(&TextureTable, alias, &texture)) {
-        printf("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias.start);
+        Engine_log("Error deleting Texture: \"%s\". No Texture with that name found.\n", alias.start);
         return;
     }
 

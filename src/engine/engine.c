@@ -252,43 +252,43 @@ void APIENTRY internal_Engine_debug_callback (GLenum source, GLenum type, unsign
     // ignore non-significant error/warning codes
     if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
 
-    printf("---------------\nDebug message (%u): %s\n", id, message);
+    Engine_log("---------------\nDebug message (%u): %s\n", id, message);
 
     switch (source)
     {
-    case GL_DEBUG_SOURCE_API:             printf("Source: API");
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   printf("Source: Window System");
-    case GL_DEBUG_SOURCE_SHADER_COMPILER: printf("Source: Shader Compiler");
-    case GL_DEBUG_SOURCE_THIRD_PARTY:     printf("Source: Third Party");
-    case GL_DEBUG_SOURCE_APPLICATION:     printf("Source: Application");
-    case GL_DEBUG_SOURCE_OTHER:           printf("Source: Other");
+    case GL_DEBUG_SOURCE_API:             Engine_log("Source: API");
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   Engine_log("Source: Window System");
+    case GL_DEBUG_SOURCE_SHADER_COMPILER: Engine_log("Source: Shader Compiler");
+    case GL_DEBUG_SOURCE_THIRD_PARTY:     Engine_log("Source: Third Party");
+    case GL_DEBUG_SOURCE_APPLICATION:     Engine_log("Source: Application");
+    case GL_DEBUG_SOURCE_OTHER:           Engine_log("Source: Other");
     }
 
-    printf("\n");
+    Engine_log("\n");
 
     switch (type)
     {
-    case GL_DEBUG_TYPE_ERROR:               printf("Type: Error");
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: printf("Type: Deprecated Behaviour");
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  printf("Type: Undefined Behaviour");
-    case GL_DEBUG_TYPE_PORTABILITY:         printf("Type: Portability");
-    case GL_DEBUG_TYPE_PERFORMANCE:         printf("Type: Performance");
-    case GL_DEBUG_TYPE_MARKER:              printf("Type: Marker");
-    case GL_DEBUG_TYPE_PUSH_GROUP:          printf("Type: Push Group");
-    case GL_DEBUG_TYPE_POP_GROUP:           printf("Type: Pop Group");
-    case GL_DEBUG_TYPE_OTHER:               printf("Type: Other");
+    case GL_DEBUG_TYPE_ERROR:               Engine_log("Type: Error");
+    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: Engine_log("Type: Deprecated Behaviour");
+    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  Engine_log("Type: Undefined Behaviour");
+    case GL_DEBUG_TYPE_PORTABILITY:         Engine_log("Type: Portability");
+    case GL_DEBUG_TYPE_PERFORMANCE:         Engine_log("Type: Performance");
+    case GL_DEBUG_TYPE_MARKER:              Engine_log("Type: Marker");
+    case GL_DEBUG_TYPE_PUSH_GROUP:          Engine_log("Type: Push Group");
+    case GL_DEBUG_TYPE_POP_GROUP:           Engine_log("Type: Pop Group");
+    case GL_DEBUG_TYPE_OTHER:               Engine_log("Type: Other");
     }
     
-    printf("\n");
+    Engine_log("\n");
 
     switch (severity)
     {
-    case GL_DEBUG_SEVERITY_HIGH:         printf("Severity: high");
-    case GL_DEBUG_SEVERITY_MEDIUM:       printf("Severity: medium");
-    case GL_DEBUG_SEVERITY_LOW:          printf("Severity: low");
-    case GL_DEBUG_SEVERITY_NOTIFICATION: printf("Severity: notification");
+    case GL_DEBUG_SEVERITY_HIGH:         Engine_log("Severity: high");
+    case GL_DEBUG_SEVERITY_MEDIUM:       Engine_log("Severity: medium");
+    case GL_DEBUG_SEVERITY_LOW:          Engine_log("Severity: low");
+    case GL_DEBUG_SEVERITY_NOTIFICATION: Engine_log("Severity: notification");
     } 
-    printf("\n"); 
+    Engine_log("\n"); 
 }
 #endif
 

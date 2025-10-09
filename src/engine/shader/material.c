@@ -1,16 +1,9 @@
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
-
-#include "string.h"
-#include "stdio.h"
-
 #include "engine_core/engine_types.h"
 #include "engine_core/engine_error.h"
 #include "engine_core/hash_table.h"
 #include "engine_core/engine_shader.h"
 
-
-#define MATERIAL_BUFFER_SIZE 0x100
+#include "engine/shader/material.h"
 
 
 Material* Material_create (const MaterialDescriptor descriptor) {
@@ -50,7 +43,7 @@ Material* Material_create (const MaterialDescriptor descriptor) {
 
 void Material_destroy (Material** material) {
     if (!material || !(*material)) {
-        printf("Error deleting Material: Material is null!");
+        Engine_log("Error deleting Material: Material is null!");
         return;
     }
 
@@ -104,7 +97,7 @@ Shader* Material_bind (const Material* material) {
             glBindTexture(texture->Type, texture->ID);
         }
         else {
-            printf("Missing Texture at index %u\n",i);
+            Engine_log("Missing Texture at index %u\n",i);
         }
     }
     return shader;

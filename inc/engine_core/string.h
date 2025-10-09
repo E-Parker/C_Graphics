@@ -1,11 +1,9 @@
 #pragma once
 
-#include "../engine_core/engine_types.h"
+#include "engine_core/engine_types.h"
 
 #define char_as_lower(c) (c > 0x40 && c < 0x5b) ? c | 0x60 : c
 #define char_as_upper(c) (c > 0x60 && c < 0x7b) ? c & !0x40 : c
-
-// simple string implementation using a buffer start and end method.
 
 typedef struct String {
     char* start;

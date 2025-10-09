@@ -11,9 +11,7 @@
 
 #include "engine_core/engine_types.h"
 
-//#define LIST_USE_MEMCPY
-
-#ifdef LIST_USE_MEMCPY
+#ifdef USE_MEMCPY
 #define internal_list_copy(dst, src, size) memcpy(dst, src, size)
 #else
 #define internal_list_copy(dst, src, size) for (u32 internal_list_copy_iterator = 0; internal_list_copy_iterator < (u32)size; ++internal_list_copy_iterator) { ((u8*)(dst))[internal_list_copy_iterator] = ((u8*)(src))[internal_list_copy_iterator]; }
@@ -33,9 +31,9 @@ typedef struct List {
     u8* data;       // Pointer to the data block of "head" and "tail".
 } List;
 
-    // List Functions:
-    // 
-    //
+// List Functions:
+// 
+//
 
 #define List_create(T, capacity) internal_List_create(sizeof(T), capacity)
 List* internal_List_create(const u32 ItemSize, const u32 Capacity);
@@ -46,11 +44,12 @@ void internal_List_initialize(List* list, const u32 ItemSize, const u32 Capacity
 void List_destroy(List** list);
 void List_deinitialize(List* list);
 
-List* List_create_subset(List* list, u32 start, u32 end);
+// Creates a new list as a subset of another list. Returns NULL if the subset cannot be created.
+List* List_create_subset(const List* list, const u32 start, const u32 end);
 
-    // These macros are for manipulating the head and tail pointers, wrapping around the List's data region.
-    // If getting the next slot would overrun the buffer, instead loop around to the start of the buffer. Otherwise, increment by ItemSize.
-    //
+// These macros are for manipulating the head and tail pointers, wrapping around the List's data region.
+// If getting the next slot would overrun the buffer, instead loop around to the start of the buffer. Otherwise, increment by ItemSize.
+//
 
 #define List_isEmpty(list) ((list)->head == (list)->tail)
 #define internal_List_start(T, list) ((T*)(list)->data)
@@ -61,10 +60,10 @@ List* List_create_subset(List* list, u32 start, u32 end);
 
 // Creates T* variable, it, which is the current item in the loop. This will be a little faster than using List_at().
 // If you are using function pointers, de-reference it before calling.
-#define List_iterator(T, list) T* it = (T*)(list)->tail; (u8*)it != (list)->head; internal_List_getNextPtr(T, list, it)
-#define List_iterator_to(T, list, end) T* it = (T*)(list)->head; (void*)it != List_at(list, (u32)end); internal_List_getNextPtr(T, list, it)
-#define List_iterator_from(T, list, start) T* it = (T*)List_at(list, start); (u8*)it != (list)->tail; internal_List_getNextPtr(T, list, it)
-#define List_iterator_range(T, list, start, end) T* it = (T*)List_at(list, start); (void*)it != List_at(list, (u32)end); internal_List_getNextPtr(T, list, it) 
+#define List_iterator(T, list)                      T* it = (T*)(list)->tail;               it != (T*)(list)->head;             internal_List_getNextPtr(T, list, it)
+#define List_iterator_to(T, list, end)              T* it = (T*)(list)->head;               it != (T*)List_at(list, (u32)end);  internal_List_getNextPtr(T, list, it)
+#define List_iterator_from(T, list, start)          T* it = (T*)List_at(list, (u32)start);  it != (list)->tail;                 internal_List_getNextPtr(T, list, it)
+#define List_iterator_range(T, list, start, end)    T* it = (T*)List_at(list, (u32)start);  it != (T*)List_at(list, (u32)end);  internal_List_getNextPtr(T, list, it) 
 
 #define List_push_front(list, Data) internal_List_push_front((list), (void*)&Data)
 #define List_push_back(list, Data) internal_List_push_back((list), (void*)&Data)
@@ -73,6 +72,7 @@ List* List_create_subset(List* list, u32 start, u32 end);
 #define List_pop_front(list, outVal) internal_List_pop_front((list), (void*)&outVal)
 #define List_pop_back(list, outVal) internal_List_pop_back((list), (void*)&outVal)
 
+// Fill a list with copies of template, up to count. Useful if you want this to function like an array.
 #define List_set(list, template, count) internal_List_set(list, (void*)&template, count)
 
 void internal_List_push_front(List* list, void* data);
@@ -84,22 +84,23 @@ void internal_List_peak_back(List* list, void* outVal);
 
 void internal_List_set(List* list, void* template, const u32 count);
 
-void* List_create_array(List* list);
+void* List_create_array(const List* list);
 
 List* List_create_subset(List* list, const u32 start, const u32 end);
 
 u32 List_count(const List* list);
-u32 List_byte_count(const List* list);
+u32 internal_List_byte_count(const List* list);
 bool List_contains_item(const List* list, void* item, u64* out);
 
 void List_realloc(List* list, u32 Capacity);
 void List_reorder(List* list);
 
 void List_remove_at(List* list, const u64 index);
-void* List_at(const List* list, const u64 index);
+
+#define List_at(T, list, index) (T*)internal_List_at(list, index)
+void* internal_List_at(const List* list, const u64 index);
 
 void List_append(List* dst, List* src);
-
 
 #ifdef LIST_IMPLEMENTATION
 
@@ -111,11 +112,7 @@ List* internal_List_create(const u32 ItemSize, const u32 Capacity) {
 }
 
 
-List* List_create_subset(List* list, const u32 start, const u32 end) {
-    // Creates a new list as a subset of another list.
-    // Returns NULL if the subset cannot be created.
-    //
-
+List* List_create_subset(const List* list, const u32 start, const u32 end) {
     // cannot create subset with start "in-front of" end.
     if (start >= end) return NULL;
 
@@ -212,12 +209,12 @@ void internal_List_set(List* list, void* template, const u32 count) {
 }
 
 
-void* List_create_array(List* list) {
+void* List_create_array(const List* list) {
     // Creates a C-Style pointer array from the list.
     // you must free this list yourself!
     //
 
-    void* array = malloc(List_byte_count(list));
+    void* array = malloc(internal_List_byte_count(list));
 
     // The copy can be simplified since the list is either continuous, or split in two.
     //
@@ -252,7 +249,7 @@ void List_reorder(List* list) {
     // tail = data means the list is already ordered, so do nothing.
     if (list->tail == list->data) return;
 
-    u32 countBytes = List_byte_count(list);
+    u32 countBytes = internal_List_byte_count(list);
 
     // if the list is continuous, and there is enough room at the start of the list's data block to store the whole list:
     if ((list->tail - list->data) >= countBytes && list->head > list->tail) {
@@ -320,7 +317,7 @@ void List_realloc(List* list, u32 Capacity) {
 }
 
 
-u32 List_byte_count(const List* list) {
+u32 internal_List_byte_count(const List* list) {
     //  Returns the number of bytes used.
     //
     //
@@ -374,20 +371,13 @@ bool List_contains_item(const List* list, void* item, u64* out) {
 }
 
 
-void* List_at(const List* list, const u64 index) {
-    // Returns the item at a particular index.
-    //
-    //
-
-    // Return NULL if index is out of range.
+void* internal_List_at(const List* list, const u64 index) {
     if (index > List_count(list)) {
         return NULL;
     }
 
-    // Get the pointer to the tail, Index should count up from the tail towards the head.
+    // Index should count up from the tail towards the head.
     u8* dataPointer = (u8*)list->tail;
-
-    // Add the offset to the data pointer,
     dataPointer += index * list->itemSize;
 
     if (dataPointer < internal_List_end(u8, list)) {
@@ -402,33 +392,27 @@ void* List_at(const List* list, const u64 index) {
 
 
 void List_remove_at(List* list, const u64 index) {
-    // Remove item from a specific index.
-    //
-    //
-
-    // Check that i is valid.
     u64 count = List_count(list);
     if (index > count) {
         return;
     }
 
-    void* currentIndex = List_at(list, index);
+    void* currentIndex = List_at(void, list, index);
     void* nextIndex = NULL;
 
     for (u64 i = index; i < count - 1; i++) {
-        nextIndex = List_at(list, i + 1);                               // Get the address of the next item.
-        internal_list_copy(currentIndex, nextIndex, list->itemSize);    // Using internal_list_copy here since we don't know the type stored, only how many bytes it is. 
+        nextIndex = List_at(void, list, i + 1);
+        internal_list_copy(currentIndex, nextIndex, list->itemSize);
         currentIndex = nextIndex;
     }
 
-    // Decrement the head since we shifted everything back. 
+    // Decrement the head since we shifted everything back.
     internal_List_getPrevPtr(u8, list, list->head);
 }
 
 
 void internal_List_push_back(List* list, void* data) {
-    // Reallocate the array with a doubling factor of 1.5
-    if (List_count(list) >= list->capacity - 1) {
+    if (List_count(list) == list->capacity - 1) {
         List_realloc(list, list->capacity + (list->capacity << 1));
     }
     internal_list_copy(list->head, data, list->itemSize);
@@ -437,8 +421,7 @@ void internal_List_push_back(List* list, void* data) {
 
 
 void internal_List_push_front(List* list, void* data) {
-    // Reallocate the array with a doubling factor of 1.5
-    if (List_count(list) >= list->capacity - 1) {
+    if (List_count(list) == list->capacity - 1) {
         List_realloc(list, list->capacity + (list->capacity << 1));
     }
     internal_list_copy(list->tail, data, list->itemSize);
@@ -447,30 +430,27 @@ void internal_List_push_front(List* list, void* data) {
 
 
 void internal_List_pop_front(List* list, void* outVal) {
-    // Returns next item from the front of the list.
-    // If this is a pointer type, you must now free it.
-    //
-    if (list->head == list->tail) return;   // Leave early if there is no data.
-
+    if (list->head == list->tail) {
+        return;
+    }
     internal_List_getPrevPtr(u8, list, list->head);
     internal_list_copy(outVal, list->head, list->itemSize);
 }
 
 
 void internal_List_pop_back(List* list, void* outVal) {
-    // Returns next item from the back of the list. 
-    // If this is a pointer type, you must now free it.
-    //
-    if (list->head == list->tail) return;   // Leave early if there is no data.
-
+    if (list->head == list->tail) {
+        return;
+    }
     internal_list_copy(outVal, list->tail, list->itemSize);
     internal_List_getNextPtr(u8, list, list->tail);
 }
 
 
 void internal_List_peak_front(List* list, void* outVal) {
-    if (list->head == list->tail) return;   // Leave early if there is no data.
-
+    if (list->head == list->tail) {
+        return;
+    }
     u8* temp = list->head;
     internal_List_getPrevPtr(u8, list, temp);
     internal_list_copy(outVal, temp, list->itemSize);
@@ -478,22 +458,23 @@ void internal_List_peak_front(List* list, void* outVal) {
 
 
 void internal_List_peak_back(List* list, void* outVal) {
-    if (list->head == list->tail) return;   // Leave early if there is no data.
+    if (list->head == list->tail) {
+        return;
+    }
     internal_list_copy(outVal, list->tail, list->itemSize);
 }
 
 
 void List_append(List* dst, List* src) {
-    // Appends one list to another.
-    //
-    //
+    if (!dst || !src) {
+        return;
+    }
 
-    if (!dst || !src) return;
+    if (dst->itemSize != src->itemSize) {
+        return;
+    }
 
-    // leave early if the list contain different data "types".
-    if (dst->itemSize != src->itemSize) return;
-
-    u32 sourceByteCount = List_byte_count(src);
+    u32 sourceByteCount = internal_List_byte_count(src);
     u32 sourceCount = List_count(src);
     u32 combinedCount = List_count(dst) + sourceCount;
     void* srcArray = List_create_array(src);
@@ -506,7 +487,7 @@ void List_append(List* dst, List* src) {
         List_reorder(dst);
     }
 
-    // At this point, the list must be in order since both realloc and reorder cause the array to not be split.
+    // At this point, the list must be aligned to the buffer since both reallocate and reorder cause the array to not be split.
     internal_list_copy(dst->head, srcArray, sourceByteCount);
     dst->head += sourceByteCount;
     free(srcArray);
