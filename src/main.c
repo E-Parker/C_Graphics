@@ -16,9 +16,10 @@
 
 int main(void) {
     // Initialize the window to the starting size and set the header.
-    if (!Engine_initialize(640, 400, "Delta Render"));
+    InitEngine(640, 400, "Delta Render");
     InitShaders();
     InitTextures();
+    InitObjects();
 
     // Add termination functions to be executed at the end of the program.
     //Engine_add_termination_function(DereferenceFonts);
@@ -70,7 +71,7 @@ int main(void) {
 
     // Create shaders:
     Shader_create("DefaultShader",
-        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER},
+        { .path = "./assets/shaders/default.vert", .type = GL_VERTEX_SHADER },
         { .path = "./assets/shaders/default_dithered.frag", .type = GL_FRAGMENT_SHADER }
     );
    

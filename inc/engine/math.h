@@ -73,15 +73,15 @@
 #define vec3_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2] }
 #define vec4_def_multiply(a, b) { a[0] * b[0], a[1] * b[1], a[2] * b[2], a[3] * b[3] }
 
-#define vec2_def_scale(v, scale) { v[0] * scale, v[1] * scale }
-#define vec3_def_scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale }
-#define vec4_def_scale(v, scale) { v[0] * scale, v[1] * scale, v[2] * scale, v[3] * scale }
+#define vec2_def_scale(v, scale) { v[0] * (GLfloat)scale, v[1] * (GLfloat)scale }
+#define vec3_def_scale(v, scale) { v[0] * (GLfloat)scale, v[1] * (GLfloat)scale, v[2] * (GLfloat)scale }
+#define vec4_def_scale(v, scale) { v[0] * (GLfloat)scale, v[1] * (GLfloat)scale, v[2] * (GLfloat)scale, v[3] * (GLfloat)scale }
 
 #define vec3_def_cross(a, b) { a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0] }
 
-#define vec2_scale(v, scale) v[0] *= scale; v[1] *= scale 
-#define vec3_scale(v, scale) v[0] *= scale; v[1] *= scale; v[2] *= scale 
-#define vec4_scale(v, scale) v[0] *= scale; v[1] *= scale; v[2] *= scale; v[3] *= scale 
+#define vec2_scale(v, scale) v[0] *= (GLfloat)scale; v[1] *= (GLfloat)scale 
+#define vec3_scale(v, scale) v[0] *= (GLfloat)scale; v[1] *= (GLfloat)scale; v[2] *= (GLfloat)scale 
+#define vec4_scale(v, scale) v[0] *= (GLfloat)scale; v[1] *= (GLfloat)scale; v[2] *= (GLfloat)scale; v[3] *= (GLfloat)scale 
 
 #define vec2_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]))
 #define vec3_dot(a, b) ((a[0] * b[0]) + (a[1] * b[1]) + (a[2] * b[2]))
@@ -93,9 +93,9 @@
 
 #define quaternion_equal(a, b) vec4_equal(a, b)
 
-#define quaternion_def_from_axis(axis, angle) { axis[0] * sinf(angle), axis[1] * sinf(angle), axis[2] * sinf(angle), cosf(angle) }
+#define quaternion_def_from_axis(axis, angle) { axis[0] * (GLfloat)sin((double)angle), axis[1] * (GLfloat)sin((double)angle), axis[2] * (GLfloat)sin((double)angle), (GLfloat)cos((double)angle) }
 
-// Short-hand casts to float. I figured might as well just use this because all the mathf functions are just float casted doubles anyway.
+// Short-hand casts to float. I figured might as well just use this because all the math functions are just float cast to doubles anyway.
 
 #define vec2_magnitudef(v) (float)vec2_magnitude(v)
 #define vec3_magnitudef(v) (float)vec3_magnitude(v)
@@ -183,9 +183,12 @@ double vec2_magnitude(const vec2 v);
 double vec3_magnitude(const vec3 v);
 double vec4_magnitude(const vec4 v);
 
-void vec2_normalize(vec2 v); // normalize vector in-place.
-void vec3_normalize(vec3 v); // normalize vector in-place.
-void vec4_normalize(vec4 v); // normalize vector in-place.
+// normalize vector in-place.
+void vec2_normalize(vec2 v); 
+// normalize vector in-place.
+void vec3_normalize(vec3 v); 
+// normalize vector in-place.
+void vec4_normalize(vec4 v); 
 
 // Honestly, just use a quaternion instead. it's faster.
 void vec3_rotate_axis(const vec3 v, const vec3 axis, double angle, vec3 out);

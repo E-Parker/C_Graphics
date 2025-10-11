@@ -41,7 +41,7 @@ typedef struct FrameData {
 
 } FrameData;
 
-bool    Engine_initialize(const int width, const int height, const char* tittle);
+bool    InitEngine(const int width, const int height, const char* tittle);
 void    Engine_terminate ();
 void    Engine_add_termination_function (Function_Errorcode_NoParam function);
 

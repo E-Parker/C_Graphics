@@ -51,7 +51,7 @@ void FreeSubMesh(MeshRender* mesh) {
 }
 
 
-void UploadMesh(MeshRender* mesh, const u32* indicesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const u64 indices, const u64 vertecies) {
+void UploadMesh(MeshRender* mesh, const u32* indicesArray, const GLfloat* vertexBufferArray, const GLfloat* normalBufferArray, const GLfloat* tCoordArray, const i32 indices, const u64 vertecies) {
     /* Uploading mesh to GPU. points and normalBuffer must exist for the upload to work.
     tCoord data and face data is optional. */
 
@@ -102,10 +102,10 @@ void UploadMesh(MeshRender* mesh, const u32* indicesArray, const GLfloat* vertex
 
 }
 
-void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray, const u32 indices) {
+void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray, const i32 indices) {
     /* variant of UploadMesh for meshes that share vertices but have a different element buffer. */
 
-    u64 indexBytes = indices * sizeof(u32);
+    u64 indexBytes = indices * sizeof(i32);
     mesh->indices = indices;
 
     if (mesh->VertexAttributeObject == GL_NONE) {

@@ -20,7 +20,7 @@ typedef struct UniformGeneric {
     // Template body for any uniform type
     #define UNIFORM_BODY()\
     String Alias;\
-    GLint Location;\
+    i32 Location;\
     u8 UniformType;\
     
     UNIFORM_BODY()
@@ -29,9 +29,9 @@ typedef struct UniformGeneric {
 
 typedef struct UniformInformation {
     UNIFORM_BODY()
-    GLenum Type;
-    GLint Elements;
-    GLint BlockOffset;  // byte offset of the item in the block. (-1 if not in a block.)
+    u32 Type;
+    i32 Elements;
+    i32 BlockOffset;  // byte offset of the item in the block. (-1 if not in a block.)
  
 } UniformInformation;
 
@@ -65,14 +65,14 @@ void internal_Uniform_set_at(Uniform* uniform, u32 i, void* data);
 typedef struct UniformStruct {
     // similar to Uniform buffers, used to store an openGL struct.
     UNIFORM_BODY()
-    u32 Offset;
-    u32 Elements;
+    i32 Offset;
+    i32 Elements;
     u64 Size;      // total size of the struct.
     HashTable* Members; 
     void* Data;
 } UniformStruct;
 
-UniformStruct* internal_UniformStruct_create(String alias, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared);
+UniformStruct* internal_UniformStruct_create(String alias, const UniformInformation* info, const u16 memberCount, const i32 elements, void* shared);
 
 void UniformStruct_get_member(UniformStruct* uniformStruct, const char* alias, Uniform** outVal);
 void UniformStruct_set_member_at(UniformStruct* uniformStruct, const char* alias, u64 i, void* data);

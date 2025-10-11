@@ -63,7 +63,7 @@ StaticMesh* Object_StaticMesh_create(const char* path, void* parent) {
     u64 fileExtentionPacked = 0;
     String fileExtentionPackedBytes = String_from_chars(fileExtentionPacked);
     String fileExtention = String_from_ptr(ext);
-        
+    
     String_clone_substring(fileExtention, fileExtentionPackedBytes, 0, String_length(fileExtention));
     String_as_lower(fileExtentionPackedBytes);
     
@@ -110,7 +110,7 @@ void Object_StaticMesh_set_Material(StaticMesh* staticMesh, const u32 subMesh, M
         return;
     }
 
-    u64 indexOf;
+    u32 indexOf;
     if (List_contains_item(&staticMesh->materials, material, &indexOf)) {
         mesh->materialIndex = indexOf;
     }

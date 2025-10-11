@@ -72,7 +72,6 @@ void UniformBuffer_deinitialize (UniformBuffer* buffer) {
         return;
     }
 
-    TryDestroyUniforms:
     if (!buffer->Uniforms) {
         goto TryDestroyUniformStructs;
     }
@@ -327,10 +326,10 @@ void internal_Uniform_set_data(Uniform* uniform, void* data) {
 }
 
 
-UniformStruct* internal_UniformStruct_create (String alias, const UniformInformation* info, const u16 memberCount, const u64 elements, void* shared) {
+UniformStruct* internal_UniformStruct_create (String alias, const UniformInformation* info, const u16 memberCount, const i32 elements, void* shared) {
 
     u64 totalSize = 0;
-    u64 stride = 0;
+    u32 stride = 0;
     u32* offsets = (u32*)malloc(sizeof(u32) * memberCount);
     Engine_validate(offsets, ENOMEM);
 

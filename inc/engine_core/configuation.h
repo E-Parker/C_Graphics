@@ -4,13 +4,13 @@
 //
 
 // Enables shader debugging and logging error codes with a description of the error.
-#define ENGINE_DEBUG
+//#define ENGINE_DEBUG
 
 // Allow logging logs, warnings, and errors to the standard output.
-#define ENGINE_LOG
+//#define ENGINE_LOG
 
 // Strings add an extra trailing null character, only needed for logging to be displayed properly. 
-#define USE_CSTR_REDUNDANCY
+//#define USE_CSTR_REDUNDANCY
 
 // Prefer to use stdint.h and stdbool.h over engine's definitions.  
 //#define ENGINE_USE_STDDEF

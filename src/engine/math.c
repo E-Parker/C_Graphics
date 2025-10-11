@@ -255,12 +255,7 @@ void vec3_rotate(const vec3 v, const quaternion q, vec3 out) {
 void quaternion_from_axis(const vec3 axis, const  double angle, quaternion out) {
     vec3 axisNormalized = vec3_def_copy(axis);
     vec3_normalize(axisNormalized);
-
-    float sinAngle = sinf(angle);
-    float cosAngle = cosf(angle);
-    
-    quaternion result = { axisNormalized[0] * sinAngle, axisNormalized[1] * sinAngle, axisNormalized[2] * sinAngle, cosAngle };
-    
+    quaternion result = quaternion_def_from_axis(axisNormalized, angle);    
     quaternion_copy(result, out);
 }
 
@@ -432,7 +427,7 @@ void mat4_inverse(const mat4 m, mat4 out) {
     float b11 = m[10] * m[15] - m[14] * m[11];
 
     // Calculate the invert determinant 
-    float invDet = 1.0f / mat4_determinant(m);
+    float invDet = 1.0f / (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06);
 
     mat4 result = {
         (m[5] * b11 - m[9] * b10 + m[13] * b09) * invDet,
@@ -491,29 +486,29 @@ void mat4_projection_perspective (const double fovy, const double aspect, const 
 }
 
 void mat4_projection_frustum (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {  
-    float RightToLeft = (float)(right - left);
-    float TopToBottom = (float)(top - bottom);
-    float FarToNear = (float)(far - near);
+    double invRightToLeft = 1.0 / (right - left);
+    double invTopToBottom = 1.0 / (top - bottom);
+    double invFarToNear = 1.0 / (far - near);
 
     mat4 result = {
-        ((float)near * 2.0f) / RightToLeft, 0.0f, 0.0f, 0.0f,
-        0.0f, ((float)near * 2.0f) / TopToBottom, 0.0f, 0.0f,
-        ((float)right + (float)left) / RightToLeft, 0.0f, ((float)top + (float)bottom) / TopToBottom - ((float)far + (float)near) / FarToNear, -1.0f,
-        0.0f, 0.0f, -((float)far * (float)near * 2.0f) / FarToNear, 0.0f,
+        (float)(near * 2.0 * invRightToLeft), 0.0f, 0.0f, 0.0f,
+        0.0f, (float)(near * 2.0 * invTopToBottom), 0.0f, 0.0f,
+        (float)((right + left) * invRightToLeft), 0.0f, (float)(((top + bottom) * invTopToBottom) - ((far + near) * invFarToNear)), -1.0f,
+        0.0f, 0.0f, (float)(-far * near * 2.0 * invFarToNear), 0.0f,
     };
 
     mat4_copy(result, out);
 }
 
 void mat4_projection_orthographic (const double left, const double right, const double top, const double bottom, const double near, const double far, mat4 out) {
-    double RightToLeft = right - left;
-    double TopToBottom = top - bottom;
-    double FarToNear = far - near;
+    double invRightToLeft = 1.0 / (right - left);
+    double invTopToBottom = 1.0 / (top - bottom);
+    double invFarToNear = 1.0 / (far - near);
 
     mat4 result = {
-        2.0f / RightToLeft, 0.0f, 0.0f, -(float)((left + right) / RightToLeft),
-        0.0f, 2.0f / TopToBottom, 0.0f, -(float)((top + bottom) / TopToBottom),
-        0.0f, 0.0f, -2.0f / FarToNear,  -(float)((far + near) / FarToNear),
+        (float)(2.0 * invRightToLeft), 0.0f, 0.0f, (float)(-(left + right) * invRightToLeft),
+        0.0f, (float)(2.0 * invTopToBottom), 0.0f, (float)(-(top + bottom) * invTopToBottom),
+        0.0f, 0.0f, (float)(-2.0 * invFarToNear),  (float)(-(far + near) * invFarToNear),
         0.0f, 0.0f, 0.0f, 1.0f
     };
 

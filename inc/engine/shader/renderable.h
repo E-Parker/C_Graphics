@@ -8,7 +8,7 @@
 typedef struct Material Material;
 
 typedef struct MeshRender {
-    u64 indices;
+    i32 indices;
     u32 materialIndex;
     // Define GPU buffer objects:
     GLuint VertexAttributeObject;       // Vertices with attributes that might be in different locations in the VBO. bind this to point to this mesh.
@@ -22,6 +22,6 @@ typedef struct MeshRender {
 void DrawRenderable(const MeshRender* mesh, const Material* material, const mat4 transform);
 void FreeMesh(MeshRender* mesh);
 void FreeSubMesh(MeshRender* mesh);
-void UploadMesh(MeshRender* mesh, const u32* indicesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  u64 indices, const u64 vertecies);
-void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray, const u32 indices);
+void UploadMesh(MeshRender* mesh, const u32* indicesArray, const GLfloat* vertexBufferArray, const  GLfloat* normalBufferArray, const GLfloat* tCoordArray, const  i32 indices, const u64 vertecies);
+void UploadSubMesh(MeshRender* mesh, MeshRender* source, const u32* indicesArray, const i32 indices);
 

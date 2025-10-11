@@ -7,12 +7,14 @@
 // There are internal functions not defined in this header. you may link to them externally.
 // See: fnvHash64, and FindBufferEnd.
 //
+// TODO: There is a better way to handle hash tables. use a second array the same size as the main values array. store collisions in here as linked lists.
+//
 
 #pragma once
 
 #include "engine_core/engine_types.h"
 #include "engine_core/string.h"
-
+ 
 typedef struct HashTable {
     u64 capacity;
     u64 itemSize;
@@ -37,7 +39,7 @@ bool HashTable_remove(HashTable* table, const String key);
 void HashTable_resize(HashTable* table, const u64 capacity);
 
 // Get the value of what's stored in the HashTable by value.
-#define HashTable_find(table, key, out) (internal_HashTable_find(table, key, (void*)(&out)))
+#define HashTable_find(table, key, out) internal_HashTable_find(table, key, (void*)(&out))
 bool internal_HashTable_find(const HashTable* table, const String key, void* out);
 
 // Get the value of what's stored in the HashTable by reference. These values should be only used temporarily, as the pointer will change if the table is reallocated.
@@ -188,7 +190,7 @@ void HashTable_insert (HashTable* table, const String key, void* value) {
 
     // Check for collisions. Insert at the next free location.
     // TODO: come up with something less retarded. Using max 64 bit unsigned int to check for collisions.
-    while (table->keys[hash].start && table->keys[hash].start != ~0) {
+    while (table->keys[hash].start && table->keys[hash].start != (char*)(~0)) {
         // index already exists. Overwrite.
         if (String_equal(key, table->keys[hash])) {
             goto WriteValue;
@@ -237,7 +239,7 @@ ItemNotFound:
     
 ItemFound:
     String_free_dirty(&table->keys[hash]);
-    table->keys[hash].start = ~0;   // TODO: come up with something less retarded. Using max 64 bit unsigned int to check for collisions.
+    table->keys[hash].start = (char*)(~0);   // TODO: come up with something less retarded. Using max 64 bit unsigned int to check for collisions.
 
     u64 i = 0;
     for (; i < table->slotsUsed; i++) {

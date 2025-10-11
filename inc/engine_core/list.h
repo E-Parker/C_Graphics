@@ -1,4 +1,4 @@
-// List implementation by Ethan Parker.
+    // List implementation by Ethan Parker.
 //
 // To use this library, add a source file with these two lines.
 // #define LIST_IMPLEMENTATION
@@ -86,11 +86,11 @@ void internal_List_set(List* list, void* template, const u32 count);
 
 void* List_create_array(const List* list);
 
-List* List_create_subset(List* list, const u32 start, const u32 end);
+List* List_create_subset(const List* list, const u32 start, const u32 end);
 
 u32 List_count(const List* list);
 u32 internal_List_byte_count(const List* list);
-bool List_contains_item(const List* list, void* item, u64* out);
+bool List_contains_item(const List* list, void* item, u32* out);
 
 void List_realloc(List* list, u32 Capacity);
 void List_reorder(List* list);
@@ -110,7 +110,6 @@ List* internal_List_create(const u32 ItemSize, const u32 Capacity) {
     internal_List_initialize(newList, ItemSize, Capacity);
     return newList;
 }
-
 
 List* List_create_subset(const List* list, const u32 start, const u32 end) {
     // cannot create subset with start "in-front of" end.
@@ -352,9 +351,9 @@ u32 List_count(const List* list) {
 }
 
 
-bool List_contains_item(const List* list, void* item, u64* out) {
+bool List_contains_item(const List* list, void* item, u32* out) {
     u8* itemAsBytes = (u8*)item;
-    u64 itemIndex = 0;
+    u32 itemIndex = 0;
     for (List_iterator(u8, list), ++itemIndex) {
         for (u32 i = 0; i < list->itemSize; ++i) {
             if (it[i] != itemAsBytes[i]) {

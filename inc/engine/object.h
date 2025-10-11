@@ -1,7 +1,5 @@
 #pragma once
 
-#include "glad/glad.h"
-
 #include "engine_core/engine_types.h"
 #include "engine_core/list.h"
 #include "engine/math.h"

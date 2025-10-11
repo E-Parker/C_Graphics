@@ -55,9 +55,12 @@ StaticMesh* Object_StaticMesh_create_from_raw_data(const char* path, void* paren
         goto DestroyBuffersAndReturnMesh;
     }
 
+    i32 maxIndicies = (~0);
+    i32 clipedIndexSize = indexSize & maxIndicies;
+
     staticMesh = Object_StaticMesh_create_empty(parent);
     MeshRender mesh = { .materialIndex = 0 };
-    UploadMesh(&mesh, indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, indexSize, vertexSize);
+    UploadMesh(&mesh, indexBuffer, vertexBuffer, normalBuffer, tCoordBuffer, clipedIndexSize, vertexSize);
     List_push_back(&staticMesh->meshRenders, mesh);
 
 DestroyBuffersAndReturnMesh:
